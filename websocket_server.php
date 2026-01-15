@@ -350,7 +350,7 @@ try {
     $server = IoServer::factory(
         new HttpServer(
             new WsServer(
-                new Chat($conn, 'localhost', 'root', '', 'jvb_travel_db')
+                new Chat($conn, $_ENV['DB_HOST'] ?? 'localhost', $_ENV['DB_USER'] ?? 'root', $_ENV['DB_PASS'] ?? '', $_ENV['DB_NAME'] ?? 'jvb_travel_db')
             )
         ),
         8080
