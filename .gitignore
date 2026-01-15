@@ -8,6 +8,7 @@
 *.sql
 !jvb_travel_db.sql
 !jvb_travel_db\ \(Clean\ Slate\).sql
+\!\!--DATABASE BACKUP--\!/
 
 # Dependencies
 vendor/
@@ -53,6 +54,13 @@ desktop.ini
 # Testing & Debug
 test_debug.php
 debug_output.txt
+diagnostic.php
+test_login.php
+test_connection.php
+test_file.php
+test_messages.html
+check_messages.php
+cleanup_messages.php
 
 # Composer Lock (optional - uncomment if working with team)
 # composer.lock
