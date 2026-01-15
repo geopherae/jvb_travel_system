@@ -12,6 +12,8 @@ if (file_exists($cacheFile)) {
   if ($json && (time() - ($json['timestamp'] ?? 0)) < $cacheTTL) {
     extract($json['data']);
     $useCache = true;
+    // Always update current time even when using cached data
+    $currentTime = date('g:i A');
   }
 }
 
