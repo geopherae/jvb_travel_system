@@ -1,0 +1,22 @@
+# Allow static assets (JS, CSS, JSON) - needed for Alpine.js and modals
+<IfModule mod_authz_core.c>
+	# Apache 2.4+
+	<FilesMatch "\.(js|css|json)$">
+		Require all granted
+	</FilesMatch>
+	<FilesMatch "\.php$">
+		Require all denied
+	</FilesMatch>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+	# Apache 2.2
+	<FilesMatch "\.(js|css|json)$">
+		Order allow,deny
+		Allow from all
+	</FilesMatch>
+	<FilesMatch "\.php$">
+		Order deny,allow
+		Deny from all
+	</FilesMatch>
+</IfModule>

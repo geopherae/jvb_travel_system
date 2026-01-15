@@ -1,0 +1,15 @@
+# Allow image files only
+<FilesMatch "\.(jpg|jpeg|png|gif)$">
+    Allow from all
+</FilesMatch>
+
+# Deny all other file types
+<FilesMatch "\.php$">
+    Deny from all
+</FilesMatch>
+
+# Prevent script execution
+php_flag engine off
+
+# Prevent directory listing
+Options -Indexes

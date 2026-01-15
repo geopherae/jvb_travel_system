@@ -1,0 +1,42 @@
+# WebSocket Server Supervisor Configuration Template
+# 
+# For Hostinger VPS deployments
+#
+# Installation:
+# 1. Copy this file to: /etc/supervisor/conf.d/websocket.conf
+# 2. Update the paths to match your actual Hostinger directory structure
+# 3. Replace 'your-user' with your actual Hostinger username
+# 4. Run: sudo supervisorctl reread
+# 5. Run: sudo supervisorctl update
+# 6. Run: sudo supervisorctl status jvb-websocket
+#
+# Notes:
+# - Supervisor automatically restarts the process if it crashes
+# - Logs are written to the specified logfile
+# - Check logs if the process fails to start: tail -f /var/log/websocket.log
+
+[program:jvb-websocket]
+process_name=%(program_name)s_%(process_num)02d
+command=php /home/your-user/public_html/websocket_server.php
+autostart=true
+autorestart=true
+numprocs=1
+user=nobody
+redirect_stderr=true
+stdout_logfile=/var/log/websocket.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+stopasgroup=true
+killasgroup=true
+startsecs=10
+startretries=3
+stopsignal=TERM
+stopwaitsecs=10
+
+# Environment variables (if needed)
+# environment=PATH="/usr/local/bin:/usr/bin:/bin",USER="nobody"
+
+# Eventlistener: restart if memory usage exceeds threshold (optional)
+# [eventlistener:memmon]
+# command=memmon -a 200M
+# events=TICK_60

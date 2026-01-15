@@ -1,0 +1,62 @@
+# Environment Configuration
+.env
+.env.local
+.env.*.local
+
+# Database Backups
+*.sql
+!jvb_travel_db.sql
+!jvb_travel_db\ \(Clean\ Slate\).sql
+
+# Dependencies
+vendor/
+node_modules/
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Build Output
+output.css
+
+# Logs & Cache
+logs/
+*.log
+widget_cache.json
+.cache/
+
+# Uploads (development only - don't track in git)
+uploads/client_profiles/*
+uploads/admin_photo/*
+uploads/trip_photos/*
+!uploads/client_profiles/.gitkeep
+!uploads/admin_photo/.gitkeep
+!uploads/trip_photos/.gitkeep
+
+# OS Files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Temporary Files
+*.tmp
+*.temp
+.tmp/
+
+# Testing & Debug
+test_debug.php
+debug_output.txt
+
+# Composer Lock (optional - uncomment if working with team)
+# composer.lock
+
+# Backup Files
+*.bak
+*.backup
+backup_*/

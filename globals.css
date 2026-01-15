@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Poppins', sans-serif;
+}
+
+
+@layer base {
+  @font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400 600;
+    src: url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+  }
+
+  body {
+    @apply font-poppins bg-[var(--color-theme)] text-[var(--color-black)];
+  }
+}
+
+
+
+/* Design tokens */
+@theme {
+  --color-black:   #18181C;
+  --color-theme:   #FAFAFA;
+  --color-primary: #007AFF;
+  --color-success: #D1FAE5;
+  --color-warning: #FEF3C7;
+  --color-danger:  #FDE2E4;
+  --color-muted:   #F3F4F6;
+}
+
+/* Status badges */
+@layer components {
+  .badge {
+    @apply text-xs font-medium rounded-full px-3 py-1 inline-block;
+  }
+
+  .badge-approved  { background-color: var(--color-success); color: #065F46; }
+  .badge-pending   { background-color: var(--color-warning); color: #92400E; }
+  .badge-rejected  { background-color: var(--color-danger);  color: #991B1B; }
+  .badge-default   { background-color: var(--color-muted);   color: #4B5563; }
+}

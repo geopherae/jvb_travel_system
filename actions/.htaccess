@@ -1,0 +1,12 @@
+# Allow PHP execution in actions/ for AJAX calls and form submissions
+# This folder handles server-side logic and must remain accessible
+<IfModule mod_authz_core.c>
+	# Apache 2.4+
+	Require all granted
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+	# Apache 2.2
+	Order allow,deny
+	Allow from all
+</IfModule>

@@ -1,0 +1,34 @@
+/* status-badges.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .badge {
+    @apply text-xs font-medium px-3 py-1 rounded-full inline-block align-middle;
+  }
+
+  .badge-confirmed {
+    @apply bg-[#27AE60]/20 text-[#27AE60];
+  }
+
+  .badge-trip-ongoing {
+    @apply bg-[#2D9CDB]/20 text-[#2D9CDB];
+  }
+
+  .badge-awaiting-docs {
+    @apply bg-[#F2994A]/20 text-[#F2994A];
+  }
+
+  .badge-submitted {
+    @apply bg-[#F2994A]/20 text-[#F2994A];
+  }
+
+  .badge-under-review {
+    @apply bg-[#2D9CDB]/20 text-[#2D9CDB];
+  }
+
+  .badge-cancelled {
+    @apply bg-[#EB5757]/20 text-[#EB5757];
+  }
+}

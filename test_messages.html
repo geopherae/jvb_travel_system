@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Messages System</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .test-section { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        #results { background: #f5f5f5; padding: 10px; margin: 10px 0; min-height: 100px; }
+        pre { background: #eee; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Messages System Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Check WebSocket Server</h2>
+        <button onclick="testWebSocket()">Test WebSocket Connection</button>
+        <div id="ws-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Check Database Connection</h2>
+        <button onclick="testDatabase()">Test Database</button>
+        <div id="db-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Fetch Messages</h2>
+        <input type="number" id="userId" placeholder="User ID" value="2">
+        <select id="userType">
+            <option value="admin">Admin</option>
+            <option value="client">Client</option>
+        </select>
+        <input type="number" id="recipientId" placeholder="Recipient ID" value="3">
+        <select id="recipientType">
+            <option value="client">Client</option>
+            <option value="admin">Admin</option>
+        </select>
+        <button onclick="testFetchMessages()">Fetch Messages</button>
+        <div id="fetch-result"></div>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        let ws = null;
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const p = document.createElement('p');
+            p.className = type;
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(p);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function testWebSocket() {
+            const resultDiv = document.getElementById('ws-result');
+            resultDiv.innerHTML = '<p class="info">Connecting to WebSocket...</p>';
+            
+            try {
+                ws = new WebSocket('ws://localhost:8080');
+                
+                ws.onopen = () => {
+                    resultDiv.innerHTML = '<p class="success">✓ WebSocket connected successfully!</p>';
+                    log('WebSocket connection established', 'success');
+                };
+                
+                ws.onerror = (error) => {
+                    resultDiv.innerHTML = '<p class="error">✗ WebSocket connection failed!</p>';
+                    log('WebSocket error: ' + error.message, 'error');
+                };
+                
+                ws.onclose = () => {
+                    resultDiv.innerHTML += '<p class="info">WebSocket closed</p>';
+                    log('WebSocket connection closed', 'info');
+                };
+
+                ws.onmessage = (event) => {
+                    log('WS Message: ' + event.data, 'success');
+                };
+                
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">✗ Error: ' + error.message + '</p>';
+                log('Exception: ' + error.message, 'error');
+            }
+        }
+
+        async function testDatabase() {
+            const resultDiv = document.getElementById('db-result');
+            resultDiv.innerHTML = '<p class="info">Checking database...</p>';
+            
+            try {
+                const response = await fetch('../actions/db.php');
+                if (response.status === 403) {
+                    resultDiv.innerHTML = '<p class="success">✓ Database file is protected (expected)</p>';
+                    log('Database file protection working', 'success');
+                } else {
+                    resultDiv.innerHTML = '<p class="info">Database response: ' + response.status + '</p>';
+                    log('Database status: ' + response.status, 'info');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">✗ Error: ' + error.message + '</p>';
+                log('Database check error: ' + error.message, 'error');
+            }
+        }
+
+        async function testFetchMessages() {
+            const resultDiv = document.getElementById('fetch-result');
+            const userId = document.getElementById('userId').value;
+            const userType = document.getElementById('userType').value;
+            const recipientId = document.getElementById('recipientId').value;
+            const recipientType = document.getElementById('recipientType').value;
+            
+            resultDiv.innerHTML = '<p class="info">Fetching messages...</p>';
+            
+            try {
+                const params = new URLSearchParams({
+                    user_id: userId,
+                    user_type: userType,
+                    recipient_id: recipientId,
+                    recipient_type: recipientType
+                });
+                
+                const response = await fetch(`../api/messages/fetch.php?${params}`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <p class="success">✓ Fetch successful! Found ${data.length} messages</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                log(`Fetched ${data.length} messages`, 'success');
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">✗ Error: ' + error.message + '</p>';
+                log('Fetch error: ' + error.message, 'error');
+            }
+        }
+
+        // Auto-check on load
+        window.onload = () => {
+            log('Test page loaded', 'info');
+        };
+    </script>
+</body>
+</html>

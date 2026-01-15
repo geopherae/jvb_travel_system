@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Capstone Metrics Overview</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    tr:hover {
+      background-color: #fefefe;
+    }
+  </style>
+</head>
+<body>
+
+<h1>📊 Capstone Metrics Overview</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>How It’s Calculated</th>
+      <th>Why It Matters</th>
+      <th>How It Supports Our Goal</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Total Active Bookings</td>
+      <td>Clients with status = 'Awaiting Docs' or 'Confirmed'</td>
+      <td>Shows current workload and booking engagement</td>
+      <td>Indicates how many clients are actively in the booking pipeline</td>
+    </tr>
+    <tr>
+      <td>Pending Documents to Approve</td>
+      <td>Uploaded files with document_status = 'Pending'</td>
+      <td>Tracks admin responsiveness and bottlenecks</td>
+      <td>Helps identify delays in document verification</td>
+    </tr>
+    <tr>
+      <td>Unread Feedback</td>
+      <td>Client reviews where is_read = false</td>
+      <td>Measures how well client feedback is being acknowledged</td>
+      <td>Improves service quality and client trust</td>
+    </tr>
+    <tr>
+      <td>Number of Active Clients</td>
+      <td>Clients with status ≠ 'Archived'</td>
+      <td>Reflects system adoption and client retention</td>
+      <td>Shows how many clients are currently engaged</td>
+    </tr>
+    <tr>
+      <td>Completed Bookings</td>
+      <td>Clients with status = 'Completed'</td>
+      <td>Indicates successful tour delivery</td>
+      <td>Demonstrates booking success rate</td>
+    </tr>
+    <tr>
+      <td>Average Booking Completion Time</td>
+      <td>Time between booking_date and status = 'Completed'</td>
+      <td>Measures booking efficiency and process speed</td>
+      <td>Helps optimize workflow and reduce delays</td>
+    </tr>
+    <tr>
+      <td>Most Frequently Assigned Packages</td>
+      <td>Clients grouped by assigned_package_id</td>
+      <td>Reveals popular tours and client preferences</td>
+      <td>Informs marketing and resource planning</td>
+    </tr>
+    <tr>
+      <td>Admin Action Volume</td>
+      <td>Audit logs grouped by actor_id (role = 'admin')</td>
+      <td>Identifies top performers and workload distribution</td>
+      <td>Supports performance reviews and training</td>
+    </tr>
+    <tr>
+      <td>Error Rate by Module</td>
+      <td>Logs with severity = 'error' grouped by module</td>
+      <td>Highlights system weaknesses or user confusion</td>
+      <td>Guides UI improvements and backend stability</td>
+    </tr>
+    <tr>
+      <td>Client Drop-off Rate</td>
+      <td>Clients assigned a package but never confirmed</td>
+      <td>Diagnoses friction in the booking flow</td>
+      <td>Helps refine onboarding and follow-up processes</td>
+    </tr>
+    <tr>
+      <td>Audit Coverage Ratio</td>
+      <td>% of critical actions that are logged</td>
+      <td>Validates traceability and accountability</td>
+      <td>Ensures compliance and builds trust</td>
+    </tr>
+    <tr>
+      <td>Action Volume Over Time</td>
+      <td>Logs grouped by DATE(timestamp)</td>
+      <td>Shows system usage trends and seasonal patterns</td>
+      <td>Helps forecast staffing and system load</td>
+    </tr>
+    <tr>
+      <td>Technology Acceptance Feedback (TAM)</td>
+      <td>Survey responses on usefulness, ease of use, intention</td>
+      <td>Measures user satisfaction and adoption likelihood</td>
+      <td>Validates system design and supports future improvements</td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>
