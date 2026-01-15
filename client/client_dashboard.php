@@ -173,6 +173,7 @@ if ($agent_result) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Client Dashboard</title>
+  <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <meta name="robots" content="noindex, nofollow" />
   <meta name="description" content="Your travel dashboard with uploaded documents and assigned package." />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">

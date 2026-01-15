@@ -32,6 +32,7 @@ if ($imgCount > 0) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JV-B Travel & Tours | Your Journey Begins Here</title>
+  <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* Pop-in / pop-out + floating animation */

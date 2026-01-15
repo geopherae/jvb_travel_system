@@ -96,6 +96,7 @@ $top3 = array_slice(
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tour Packages</title>
+  <?php include __DIR__ . '/../components/favicon_links.php'; ?>
 
   <!-- 🧩 Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>

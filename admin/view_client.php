@@ -134,6 +134,7 @@ $todayDay  = getTodayItineraryDay($start, $end);
 <head>
   <meta charset="UTF-8">
   <title>View Client</title>
+  <?php include __DIR__ . '/../components/favicon_links.php'; ?>
 
 <script>
   document.addEventListener('alpine:init', () => {

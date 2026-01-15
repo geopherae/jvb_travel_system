@@ -82,6 +82,7 @@ $itineraryPages = array_chunk($parsedItinerary, $itemsPerPage);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Client Details - <?= htmlspecialchars($client['full_name']) ?></title>
+  <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {

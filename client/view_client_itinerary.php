@@ -75,6 +75,7 @@ $todayDay = getTodayItineraryDay($start, $end);
 <head>
   <meta charset="UTF-8" />
   <title>My Travel Itinerary</title>
+  <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="description" content="View your travel itinerary and trip photos." />

@@ -52,6 +52,7 @@ $hasModules = !empty($modules);
 <head>
   <meta charset="UTF-8">
   <title>Audit Dashboard</title>
+  <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs" defer></script>
