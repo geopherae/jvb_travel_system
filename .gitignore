@@ -57,6 +57,10 @@ test_file.php
 test_messages.html
 check_messages.php
 cleanup_messages.php
+COMMIT_SUMMARY.md
+MOBILE_LAYOUT_VISUAL_GUIDE.md
+MOBILE_OPTIMIZATION_SUMMARY.md
+MOBILE_RESPONSIVE_PATTERNS.md
 
 # Composer Lock (optional - uncomment if working with team)
 # composer.lock
