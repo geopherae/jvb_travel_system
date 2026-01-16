@@ -254,6 +254,84 @@ Check for errors:
 
 ---
 
+## Realtime Without VPS (Shared Hosting)
+
+Hostinger Starter (shared) cannot run a persistent PHP process like `websocket_server.php`. Use one of these approaches:
+
+### Option A — Polling (Built-in, simplest)
+- **What:** Periodically fetch new messages/notifications via AJAX.
+- **Status:** Already implemented via [includes/messages_poller.js](includes/messages_poller.js).
+- **Action:** Ensure your frontend initializes the poller when WebSocket init fails; disable any forced WebSocket attempts.
+- **Tip:** If you maintain an environment flag, set `REALTIME_MODE=polling` in `.env` and branch your JS accordingly.
+
+### Option B — Managed Realtime Service (Pusher/Ably)
+- **What:** Offload WebSocket infra to a hosted provider; PHP triggers events, browser subscribes.
+- **Pros:** Reliable, TLS `wss` by default, no server maintenance.
+- **Cons:** External dependency, monthly limits/costs apply.
+
+#### Pusher Channels (example)
+1. Create a Pusher app; get `app_id`, `key`, `secret`, `cluster`.
+2. Add to `.env`:
+   ```
+   PUSHER_APP_ID=xxx
+   PUSHER_KEY=xxx
+   PUSHER_SECRET=xxx
+   PUSHER_CLUSTER=ap1
+   REALTIME_MODE=pusher
+   ```
+3. Install server SDK on Hostinger:
+   ```bash
+   composer require pusher/pusher-php-server
+   ```
+4. In your message/notification action (e.g., [actions/send_message.php](actions/send_message.php)), after saving to DB, publish:
+   ```php
+   // ...existing code saving message...
+   $pusher = new Pusher\Pusher($_ENV['PUSHER_KEY'], $_ENV['PUSHER_SECRET'], $_ENV['PUSHER_APP_ID'], [
+       'cluster' => $_ENV['PUSHER_CLUSTER'], 'useTLS' => true
+   ]);
+   $pusher->trigger('client-'.$clientId, 'new-message', [ 'message' => $messageRow ]);
+   ```
+5. In the browser, subscribe:
+   ```html
+   <script src="https://js.pusher.com/8.2/pusher.min.js"></script>
+   <script>
+     const pusher = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER });
+     const channel = pusher.subscribe('client-'+clientId);
+     channel.bind('new-message', data => renderIncomingMessage(data.message));
+   </script>
+   ```
+
+#### Ably (alternative)
+- Server: `composer require ably/ably-php` then publish via REST using `ABLY_API_KEY`.
+- Client: Use Ably JS SDK; subscribe to `channels.get('client-'+clientId).subscribe('new-message', ...)`.
+
+### Option C — External WebSocket Microservice
+- **What:** Run a dedicated WebSocket server on a platform like Render, Railway, Fly.io, Deno Deploy, or Cloudflare Workers.
+- **How:** Point clients to `wss://your-realtime.example/ws`; from PHP, call the service via HTTP/REST to broadcast events.
+- **Note:** If using Cloudflare Workers/Durable Objects, implementation is in JS; you’ll bridge PHP → Worker via authenticated fetch.
+
+### Option D — Server-Sent Events (SSE)
+- **What:** Unidirectional streaming over HTTP.
+- **Caveat:** Shared hosting often limits long-running PHP requests; SSE may be terminated by timeout. Prefer options A/B unless you can confirm generous timeouts.
+
+### Option E — Cron + Fast Polling
+- **What:** For low-frequency notifications, combine 30–60s polling with cron tasks for housekeeping.
+- **Caveat:** Not real-time; acceptable for light workloads only.
+
+---
+
+## Choosing an Option
+- **Chat + notifications, production-ready:** Use Pusher or Ably.
+- **Budget, simplest:** Use built-in polling; tune interval to balance UX vs load.
+- **Custom control, willing to manage infra:** Host an external WebSocket service and integrate.
+
+## Minimal Changes Checklist
+- Add a `REALTIME_MODE` toggle in `.env` and branch frontend init logic.
+- If using Pusher/Ably, install the PHP SDK via Composer and publish events in your existing `actions/*` after DB writes.
+- Ensure TLS: use `wss://` endpoints; on shared hosting all pages should serve over HTTPS.
+
+---
+
 ## Important Notes
 
 ⚠️ **Keep your .env file safe!** It contains production credentials.

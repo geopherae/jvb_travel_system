@@ -86,7 +86,7 @@ error_log("DEBUG: clients-table.php - Total clients: $totalClients, Paginated cl
       <button @click="showAddClientModal = true; step = 1"
               class="backdrop-blur-sm bg-sky-500 text-white px-3 md:px-4 py-2 rounded hover:bg-sky-400 transition text-xs md:text-sm font-medium whitespace-nowrap"
               aria-label="Add New Client">
-        + Add
+        + Add Client
       </button>
     <?php endif; ?>
   </div>

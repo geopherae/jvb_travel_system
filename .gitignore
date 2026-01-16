@@ -34,12 +34,8 @@ widget_cache.json
 .cache/
 
 # Uploads (development only - don't track in git)
-uploads/client_profiles/*
-uploads/admin_photo/*
-uploads/trip_photos/*
-!uploads/client_profiles/.gitkeep
-!uploads/admin_photo/.gitkeep
-!uploads/trip_photos/.gitkeep
+uploads/*
+!uploads/.gitkeep
 
 # OS Files
 Thumbs.db

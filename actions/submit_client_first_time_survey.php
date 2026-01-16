@@ -63,11 +63,36 @@ try {
         }
 
         if ($updateQuery->affected_rows === 0) {
-            throw new Exception('No survey found to defer');
+            logSurveyDebug('No survey row found to defer; creating one for tomorrow');
+
+            $insertQuery = $conn->prepare("
+                INSERT INTO user_survey_status (user_id, user_role, survey_type, is_completed, created_at, completed_at, response_payload)
+                VALUES (?, ?, ?, 0, ?, NULL, ?)
+            ");
+
+            if (!$insertQuery) {
+                throw new Exception('Insert preparation failed: ' . $conn->error);
+            }
+
+            $insertQuery->bind_param(
+                "issss",
+                $clientId,
+                $userRole,
+                $surveyType,
+                $deferUntil,
+                $jsonPayload
+            );
+
+            if (!$insertQuery->execute()) {
+                throw new Exception('Failed to create deferred survey row: ' . $insertQuery->error);
+            }
+
+            logSurveyDebug('Deferred survey row inserted');
+        } else {
+            logSurveyDebug("✅ Survey deferred until {$deferUntil}");
         }
 
         $conn->commit();
-        logSurveyDebug("✅ Survey deferred until {$deferUntil}");
 
         unset($_SESSION['show_client_survey_modal']);
         $_SESSION['modal_status'] = 'survey_skipped';
@@ -192,5 +217,8 @@ try {
 } finally {
     if (isset($updateQuery)) {
         $updateQuery->close();
+    }
+    if (isset($insertQuery)) {
+        $insertQuery->close();
     }
 }

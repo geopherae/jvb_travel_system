@@ -58,7 +58,6 @@ $stmt->close();
       <input type="hidden" name="survey_type" value="first_login">
       <input type="hidden" name="client_id" value="<?= htmlspecialchars($_SESSION['client_id'] ?? '') ?>">
       <input type="hidden" name="template_id" value="<?= htmlspecialchars($_SESSION['template_id'] ?? '') ?>">
-      <input type="hidden" name="skip_survey" id="clientSkipSurveyFlag" value="0">
 
       <!-- Step 1: Perceived Usefulness -->
       <div x-show="step === 1" x-transition>
@@ -134,9 +133,15 @@ $stmt->close();
       <div class="flex justify-between items-center pt-4">
         <button type="button" x-show="step > 1" @click="prev" class="text-sm text-gray-500 hover:underline">← Back</button>
 
-        <button type="button" onclick="document.getElementById('clientSkipSurveyFlag').value = '1'; document.getElementById('clientSurveyForm').submit();" class="text-xs text-gray-400 hover:text-gray-600">
-          Skip survey
-        </button>
+        <form action="../actions/submit_client_first_time_survey.php" method="POST" style="margin: 0;">
+          <input type="hidden" name="survey_type" value="first_login">
+          <input type="hidden" name="client_id" value="<?= htmlspecialchars($_SESSION['client_id'] ?? '') ?>">
+          <input type="hidden" name="template_id" value="<?= htmlspecialchars($_SESSION['template_id'] ?? '') ?>">
+          <input type="hidden" name="skip_survey" value="1">
+          <button type="submit" class="text-xs text-gray-400 hover:text-gray-600">
+            Skip survey
+          </button>
+        </form>
 
         <template x-if="step < totalSteps">
           <button type="button" @click="next" class="bg-sky-600 text-white px-4 py-2 rounded hover:bg-sky-700 transition">

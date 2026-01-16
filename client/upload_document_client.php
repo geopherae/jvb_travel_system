@@ -28,7 +28,7 @@ if (!$clientId) {
 
 // ✅ Validate document type
 $docType = $_POST['document_type'] ?? '';
-$allowedTypes = ['Passport', 'Boarding Pass', 'Travel Insurance', 'Visa', 'Other'];
+$allowedTypes = ['Passport', 'Valid ID', 'Visa', 'Service Voucher', 'Airline Ticket', 'PH Travel Tax', 'Acknowledgement Receipt', 'Other'];
 if (!in_array($docType, $allowedTypes)) {
   setStatusAndRedirect('upload_failed', 400, "Invalid document type.");
 }

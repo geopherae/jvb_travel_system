@@ -81,14 +81,19 @@ try {
         $stmt->close();
     }
 
-    // Fetch messages
+    // Fetch messages (delta via since timestamp or since_id)
     $since = trim($_GET['since'] ?? '');
+    $sinceId = (int)($_GET['since_id'] ?? 0);
     $sinceCondition = '';
     $params = 'i';
     $paramValues = [$threadId];
     
-    // If 'since' is provided, only fetch new messages
-    if (!empty($since)) {
+    // Prefer id-based delta when provided; else use timestamp
+    if ($sinceId > 0) {
+        $sinceCondition = 'AND m.id > ?';
+        $params .= 'i';
+        $paramValues[] = $sinceId;
+    } elseif (!empty($since)) {
         $sinceCondition = 'AND m.created_at > ?';
         $params .= 's';
         $paramValues[] = $since;

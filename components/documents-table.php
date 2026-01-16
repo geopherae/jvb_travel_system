@@ -67,7 +67,7 @@ if ($client_id) {
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M14 2v6h6" />
       </svg>
-      Documents to Review
+      Client Documents
     </h3>
     <button @click="modals.upload = true"
             class="bg-sky-500 text-white px-4 py-2 rounded hover:bg-sky-700 transition">
@@ -247,9 +247,11 @@ if ($client_id) {
                   class="w-full text-sm border rounded px-2 py-1 <?= $isClient ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '' ?>">
             <option>Passport</option>
             <option>Valid ID</option>
-            <option>Boarding Pass</option>
-            <option>Travel Insurance</option>
             <option>Visa</option>
+            <option>Service Voucher</option>
+            <option>Airline Ticket</option>
+            <option>PH Travel Tax</option>
+            <option>Acknowledgement Receipt</option>
             <option>Other</option>
           </select>
         </div>
@@ -502,13 +504,15 @@ if ($client_id) {
       <div>
         <label for="document_type" class="block text-sm font-medium text-slate-700 mb-1">Document Type</label>
         <select id="document_type" name="document_type" required
-                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-slate-700 bg-white transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-slate-700 bg-white transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
           <option value="" disabled>Select type</option>
           <option value="Passport">Passport</option>
           <option value="Valid ID">Valid ID</option>
-          <option value="Boarding Pass">Boarding Pass</option>
-          <option value="Travel Insurance">Travel Insurance</option>
           <option value="Visa">Visa</option>
+          <option value="Service Voucher">Service Voucher</option>
+          <option value="Airline Ticket">Airline Ticket</option>
+          <option value="PH Travel Tax">PH Travel Tax</option>
+          <option value="Acknowledgement Receipt">Acknowledgement Receipt</option>
           <option value="Other">Other</option>
         </select>
       </div>

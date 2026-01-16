@@ -33,6 +33,7 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
       fullName: '',
       email: '',
       phone: '',
+      address: '',
       accessCode: '',
       copied: false,
       tripStart: '',
@@ -71,7 +72,7 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
         return new Date(this.tripStart) >= today;
       },
       canProceedStep1() {
-        return this.fullName.trim() !== '' && this.isValidEmail() && this.isValidPhone();
+        return this.fullName.trim() !== '' && this.isValidEmail() && this.isValidPhone() && this.address.trim() !== '';
       },
       canProceedStep2() {
         return !this.showDateWarning();
@@ -102,31 +103,31 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
 </script>
 
 <form method="POST" action="../actions/process_add_client.php" enctype="multipart/form-data"
-      class="space-y-6 font-sans"
+      class="space-y-4 sm:space-y-6 font-sans"
       x-data="clientForm()" 
       @submit="$el.classList.add('submitting')">
 
   <!-- STEP 1: Basic Info -->
-  <div x-show="step === 1" class="space-y-6">
+  <div x-show="step === 1" class="space-y-4 sm:space-y-6">
 
     <!-- Progress Header -->
-    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-      <div>
-        <h3 class="text-base font-semibold text-gray-900">Basic Information</h3>
-        <p class="text-sm text-gray-500 mt-1">Step 1 of 3</p>
+    <div class="flex items-start sm:items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200 gap-3">
+      <div class="min-w-0">
+        <h3 class="text-sm sm:text-base font-semibold text-gray-900">Basic Information</h3>
+        <p class="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Step 1 of 3</p>
       </div>
-      <div class="flex gap-2">
-        <div class="w-2.5 h-2.5 rounded-full bg-sky-500"></div>
-        <div class="w-2.5 h-2.5 rounded-full bg-gray-300"></div>
-        <div class="w-2.5 h-2.5 rounded-full bg-gray-300"></div>
+      <div class="flex gap-1.5 sm:gap-2 flex-shrink-0">
+        <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-sky-500"></div>
+        <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-gray-300"></div>
+        <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-gray-300"></div>
       </div>
     </div>
 
-    <!-- Two-Column Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Two-Column Layout (Responsive) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
 
       <!-- LEFT COLUMN: Profile Photo + Email + Phone Number -->
-      <div class="space-y-5">
+      <div class="space-y-4 sm:space-y-5">
 
 <!-- Profile Photo - Modern -->
 <div x-data="{
@@ -146,24 +147,24 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
   }
 }"
 @dragover.prevent @drop.prevent="handleFile($event)"
-class="relative flex flex-col items-center gap-3 border-2 border-dashed border-sky-200 rounded-2xl py-5 px-4 bg-gradient-to-br from-sky-50 to-transparent hover:border-sky-400 hover:from-sky-100 transition-all cursor-pointer group">
+class="relative flex flex-col items-center gap-2 sm:gap-3 border-2 border-dashed border-sky-200 rounded-xl sm:rounded-2xl py-4 sm:py-5 px-3 sm:px-4 bg-gradient-to-br from-sky-50 to-transparent hover:border-sky-400 hover:from-sky-100 transition-all cursor-pointer group">
 
   <!-- Decorative corner accent -->
-  <div class="absolute top-0 right-0 w-12 h-12 bg-sky-500 opacity-5 rounded-bl-2xl"></div>
+  <div class="absolute top-0 right-0 w-8 sm:w-12 h-8 sm:h-12 bg-sky-500 opacity-5 rounded-bl-xl sm:rounded-bl-2xl"></div>
 
   <!-- Image with better styling -->
   <img :src="previewUrl" alt="Profile Preview"
-       class="w-20 h-20 rounded-xl object-cover border-2 border-sky-100 shadow-sm group-hover:shadow-md transition-shadow" loading="lazy" />
+       class="w-16 sm:w-20 h-16 sm:h-20 rounded-lg sm:rounded-xl object-cover border-2 border-sky-100 shadow-sm group-hover:shadow-md transition-shadow" loading="lazy" />
 
   <!-- Upload label with icon -->
   <label for="add-client-photo" class="text-center cursor-pointer">
-    <div class="flex items-center justify-center mb-2">
-      <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="flex items-center justify-center mb-1.5 sm:mb-2">
+      <svg class="w-4 sm:w-5 h-4 sm:h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
       </svg>
     </div>
-    <p class="text-sm font-semibold text-sky-600 group-hover:text-sky-700">Upload Photo</p>
-    <p class="text-xs text-gray-500 mt-1">JPG, PNG • Max 2MB</p>
+    <p class="text-xs sm:text-sm font-semibold text-sky-600 group-hover:text-sky-700">Upload Photo</p>
+    <p class="text-xs text-gray-500 mt-0.5 sm:mt-1">JPG, PNG • Max 2MB</p>
     <input id="add-client-photo" name="client_profile_photo" type="file"
            accept=".jpg,.jpeg,.png" class="hidden" @change="handleFile">
   </label>
@@ -172,34 +173,34 @@ class="relative flex flex-col items-center gap-3 border-2 border-dashed border-s
 
         <!-- Email -->
         <div>
-          <label for="email" class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label for="email" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+            <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
             </svg>
             Email <span class="text-red-500">*</span>
           </label>
           <input id="email" type="email" name="email" x-model="email" required placeholder="maria@example.com"
-                 class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                 class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                  :class="{ 'border-red-500 ring-red-500': email && !isValidEmail(), 'border-green-500 ring-green-500': isValidEmail() }" />
-          <p x-show="email && !isValidEmail()" class="text-xs text-red-500 mt-2 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+          <p x-show="email && !isValidEmail()" class="text-xs text-red-500 mt-1.5 sm:mt-2 flex items-center gap-1">
+            <svg class="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
             Invalid email format.
           </p>
         </div>
 
         <!-- Phone Number -->
         <div>
-          <label for="phone_number" class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label for="phone_number" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+            <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
             </svg>
             Phone <span class="text-red-500">*</span>
           </label>
           <input id="phone_number" type="tel" name="phone_number" x-model="phone" required maxlength="11" placeholder="09171234567"
-                 class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                 class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                  :class="{ 'border-red-500 ring-red-500': phone && !isValidPhone(), 'border-green-500 ring-green-500': isValidPhone() }" />
-          <p x-show="phone && !isValidPhone()" class="text-xs text-red-500 mt-2 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+          <p x-show="phone && !isValidPhone()" class="text-xs text-red-500 mt-1.5 sm:mt-2 flex items-center gap-1">
+            <svg class="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
             Must be 11 digits (09xxxxxxxxx).
           </p>
         </div>
@@ -207,12 +208,12 @@ class="relative flex flex-col items-center gap-3 border-2 border-dashed border-s
       </div>
 
       <!-- RIGHT COLUMN: Full Name + Access Code + Address -->
-      <div class="space-y-5">
+      <div class="space-y-4 sm:space-y-5">
 
         <!-- Full Name -->
         <div>
-          <label for="full_name" class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label for="full_name" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+            <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             Full Name <span class="text-red-500">*</span>
@@ -220,18 +221,18 @@ class="relative flex flex-col items-center gap-3 border-2 border-dashed border-s
           <input id="full_name" type="text" name="full_name" x-model="fullName" required
                  placeholder="Maria Reyes"
                  @input.debounce.500="generateAccessCode()"
-                 class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
-          <p x-show="fullName.trim() === ''" class="text-xs text-red-500 mt-2 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                 class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
+          <p x-show="fullName.trim() === ''" class="text-xs text-red-500 mt-1.5 sm:mt-2 flex items-center gap-1">
+            <svg class="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
             This field is required.
           </p>
         </div>
 
         <!-- Access Code -->
         <div>
-          <div class="flex items-center gap-2 mb-2">
-            <label for="access_code" class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+            <label for="access_code" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700">
+              <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
               </svg>
               Access Code
@@ -240,35 +241,39 @@ class="relative flex flex-col items-center gap-3 border-2 border-dashed border-s
           </div>
           <div class="relative">
             <input id="access_code" type="text" name="access_code" x-model="accessCode" readonly
-                   class="w-full border-2 border-sky-200 rounded-lg px-4 py-3 font-mono text-sm font-bold text-sky-700 bg-sky-50 pr-12 transition hover:border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
+                   class="w-full border-2 border-sky-200 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 font-mono text-xs sm:text-sm font-bold text-sky-700 bg-sky-50 pr-10 sm:pr-12 transition hover:border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
             <button type="button"
                     @click="navigator.clipboard.writeText(accessCode); copied = true; setTimeout(() => copied = false, 1500)"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-sky-600 transition hover:scale-125"
+                    class="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-sky-600 transition hover:scale-125 p-1"
                     aria-label="Copy access code">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 sm:w-5 h-4 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
               </svg>
             </button>
             <span x-show="copied" x-transition x-cloak
-                  class="absolute -top-8 right-0 text-xs text-white font-medium bg-sky-600 px-2.5 py-1.5 rounded shadow whitespace-nowrap flex items-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                  class="absolute -top-8 right-0 text-xs text-white font-medium bg-sky-600 px-2.5 py-1 rounded shadow whitespace-nowrap flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
               Copied!
             </span>
           </div>
-          <p class="text-sm text-gray-500 mt-2">Share this code with the client for quick access.</p>
+          <p class="text-xs text-gray-500 mt-1.5 sm:mt-2">Share this code with the client for quick access.</p>
         </div>
 
         <!-- Address -->
         <div>
-          <label for="address" class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label for="address" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+            <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
             Address <span class="text-red-500">*</span>
           </label>
-          <textarea id="address" name="address" required rows="3" placeholder="123 Rizal St, Barangay Mabini..."
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm resize-none placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"></textarea>
+          <textarea id="address" name="address" x-model="address" required rows="3" placeholder="123 Rizal St, Barangay Mabini..."
+                    class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm resize-none placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"></textarea>
+          <p x-show="address.trim() === ''" class="text-xs text-red-500 mt-1.5 sm:mt-2 flex items-center gap-1">
+            <svg class="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            This field is required.
+          </p>
         </div>
 
       </div>
@@ -276,32 +281,32 @@ class="relative flex flex-col items-center gap-3 border-2 border-dashed border-s
   </div>
 
   <!-- STEP 2: Travel & Booking -->
-  <div x-show="step === 2" class="space-y-6">
+  <div x-show="step === 2" class="space-y-4 sm:space-y-6">
 
     <!-- Progress Header -->
-    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-      <div>
-        <h3 class="text-base font-semibold text-gray-900">Travel & Booking</h3>
-        <p class="text-sm text-gray-500 mt-1">Step 2 of 3</p>
+    <div class="flex items-start sm:items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200 gap-3">
+      <div class="min-w-0">
+        <h3 class="text-sm sm:text-base font-semibold text-gray-900">Travel & Booking</h3>
+        <p class="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Step 2 of 3</p>
       </div>
-      <div class="flex gap-2">
-        <div class="w-2.5 h-2.5 rounded-full bg-sky-500"></div>
-        <div class="w-2.5 h-2.5 rounded-full bg-sky-500"></div>
-        <div class="w-2.5 h-2.5 rounded-full bg-gray-300"></div>
+      <div class="flex gap-1.5 sm:gap-2 flex-shrink-0">
+        <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-sky-500"></div>
+        <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-sky-500"></div>
+        <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-gray-300"></div>
       </div>
     </div>
 
     <!-- Booking Information -->
-    <div class="space-y-5">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div class="space-y-4 sm:space-y-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         <div>
-          <label for="assigned_package" class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label for="assigned_package" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+            <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
             Travel Package
           </label>
-          <select id="assigned_package" name="assigned_package_id" x-model="assignedPackage" @change="updatePackageDetails()" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+          <select id="assigned_package" name="assigned_package_id" x-model="assignedPackage" @change="updatePackageDetails()" class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm bg-white transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
             <option value="" selected>Select a package...</option>
             <?php while ($pkg = $packages->fetch_assoc()): ?>
               <?php if ((int)$pkg['is_deleted'] !== 1): ?>
@@ -312,76 +317,76 @@ class="relative flex flex-col items-center gap-3 border-2 border-dashed border-s
         </div>
 
         <div>
-          <label for="booking_number" class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label for="booking_number" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+            <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
             Booking Number
           </label>
           <input id="booking_number" type="text" name="booking_number" x-model="bookingNumber" placeholder="JVB-00001"
-                 class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
+                 class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
         </div>
       </div>
 
-      <!-- 🎉 Package Preview Card - WOW Factor -->
+      <!-- 🎉 Package Preview Card - WOW Factor (Responsive) -->
       <template x-if="selectedPackageDetails.package_name">
-        <div class="relative overflow-hidden rounded-2xl p-6 shadow-lg transform transition-all duration-300 hover:shadow-2xl hover:scale-105" 
+        <div class="relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg transform transition-all duration-300 hover:shadow-2xl hover:scale-105" 
              :style="`background-image: url('${getPackageBannerUrl()}'); background-size: cover; background-position: center; filter: blur(0px);`"
              x-transition>
           <!-- Background overlay with semi-transparent dark gradient -->
           <div class="absolute inset-0 bg-gradient-to-br from-sky-900/85 via-sky-800/80 to-blue-900/85 backdrop-blur-sm"></div>
           
           <!-- Decorative elements -->
-          <div class="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12"></div>
-          <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
+          <div class="absolute top-0 right-0 w-16 sm:w-24 h-16 sm:h-24 bg-white/5 rounded-full -mr-8 sm:-mr-12 -mt-8 sm:-mt-12"></div>
+          <div class="absolute bottom-0 left-0 w-20 sm:w-32 h-20 sm:h-32 bg-white/5 rounded-full -ml-10 sm:-ml-16 -mb-10 sm:-mb-16"></div>
 
           <!-- Content -->
-          <div class="relative z-10 space-y-4">
+          <div class="relative z-10 space-y-3 sm:space-y-4">
             <!-- Package Name & Booking Number -->
-            <div class="flex items-start justify-between">
-              <div>
+            <div class="flex items-start sm:items-center justify-between gap-2 sm:gap-4">
+              <div class="min-w-0">
                 <p class="text-xs font-semibold text-sky-100 uppercase tracking-wider">Selected Package</p>
-                <h3 class="text-2xl font-bold text-white mt-1" x-text="selectedPackageDetails.package_name"></h3>
+                <h3 class="text-lg sm:text-2xl font-bold text-white mt-0.5 sm:mt-1 break-words" x-text="selectedPackageDetails.package_name"></h3>
               </div>
-              <div class="text-right">
-                <p class="text-xs font-medium text-white/80 mb-1">Booking #</p>
-                <p class="text-lg font-bold text-white font-mono" x-text="bookingNumber || '—'"></p>
+              <div class="text-right flex-shrink-0">
+                <p class="text-xs font-medium text-white/80 mb-0.5 sm:mb-1">Booking #</p>
+                <p class="text-base sm:text-lg font-bold text-white font-mono" x-text="bookingNumber || '—'"></p>
               </div>
             </div>
 
-            <!-- Duration, Price & Travel Dates Grid (3 columns) -->
-            <div class="grid grid-cols-3 gap-4 pt-4 border-t border-white/30">
+            <!-- Duration, Price & Travel Dates Grid (Responsive) -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4 pt-3 sm:pt-4 border-t border-white/30">
               <!-- Duration -->
-              <div class="space-y-2">
-                <div class="flex items-center gap-2 text-white/80">
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <div class="space-y-1 sm:space-y-2">
+                <div class="flex items-center gap-1.5 text-white/80">
+                  <svg class="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v2h16V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
                   </svg>
                   <span class="text-xs font-medium">Duration</span>
                 </div>
-                <p class="text-xl font-bold text-white" x-text="`${selectedPackageDetails.day_duration}D / ${selectedPackageDetails.night_duration}N`"></p>
+                <p class="text-base sm:text-xl font-bold text-white" x-text="`${selectedPackageDetails.day_duration}D / ${selectedPackageDetails.night_duration}N`"></p>
               </div>
 
               <!-- Price -->
-              <div class="space-y-2">
-                <div class="flex items-center gap-2 text-white/80">
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <div class="space-y-1 sm:space-y-2">
+                <div class="flex items-center gap-1.5 text-white/80">
+                  <svg class="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
                   </svg>
                   <span class="text-xs font-medium">Price</span>
                 </div>
-                <p class="text-xl font-bold text-white" x-text="`₱${Number(selectedPackageDetails.price).toLocaleString('en-US', {minimumFractionDigits: 2})}`"></p>
+                <p class="text-base sm:text-xl font-bold text-white" x-text="`₱${Number(selectedPackageDetails.price).toLocaleString('en-US', {minimumFractionDigits: 2})}`"></p>
               </div>
 
                 <!-- Travel Dates -->
-                <div class="space-y-2">
-                <div class="flex items-center gap-2 text-white/80">
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <div class="space-y-1 sm:space-y-2">
+                <div class="flex items-center gap-1.5 text-white/80">
+                  <svg class="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v2h16V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
                   </svg>
                   <span class="text-xs font-medium">Travel Dates</span>
                 </div>
-                <p class="text-xl font-bold text-white" x-text="tripStart && tripEnd ? new Date(tripStart).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) + ' to ' + new Date(tripEnd).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) : 'Not set'"></p>
+                <p class="text-base sm:text-xl font-bold text-white" x-text="tripStart && tripEnd ? new Date(tripStart).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) + ' to ' + new Date(tripEnd).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) : 'Not set'"></p>
               </div>
             </div>
           </div>
@@ -390,38 +395,38 @@ class="relative flex flex-col items-center gap-3 border-2 border-dashed border-s
 
       <!-- Travel Dates -->
       <div>
-        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <h4 class="text-xs sm:text-sm font-semibold text-gray-700 mb-2.5 sm:mb-3 flex items-center gap-1.5 sm:gap-2">
+          <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
           </svg>
           Travel Dates
         </h4>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
           <div>
-            <label for="trip_start" class="text-sm text-gray-700 mb-2 block font-medium">Departure Date</label>
+            <label for="trip_start" class="text-xs sm:text-sm text-gray-700 mb-1.5 sm:mb-2 block font-medium">Departure Date</label>
             <input id="trip_start" type="date" name="trip_date_start" x-model="tripStart"
-                   class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
+                   class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
           </div>
           <div>
-            <label for="trip_end" class="text-sm text-gray-700 mb-2 block font-medium">Return Date</label>
+            <label for="trip_end" class="text-xs sm:text-sm text-gray-700 mb-1.5 sm:mb-2 block font-medium">Return Date</label>
             <input id="trip_end" type="date" name="trip_date_end" x-model="tripEnd"
-                   class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
+                   class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
           </div>
           <div>
-            <label for="booking_date" class="text-sm text-gray-700 mb-2 block font-medium">Booking Date</label>
+            <label for="booking_date" class="text-xs sm:text-sm text-gray-700 mb-1.5 sm:mb-2 block font-medium">Booking Date</label>
             <input id="booking_date" type="date" name="booking_date" x-model="bookingDate"
-                   class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
+                   class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
           </div>
         </div>
       </div>
     </div>
 
     <!-- Date Warnings -->
-    <div x-show="showDateWarning()" x-transition class="text-sm text-amber-700 bg-amber-50 px-4 py-3 rounded-lg border border-amber-200 flex gap-3">
-      <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+    <div x-show="showDateWarning()" x-transition class="text-xs sm:text-sm text-amber-700 bg-amber-50 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-amber-200 flex gap-2 sm:gap-3">
+      <svg class="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
         <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
       </svg>
-      <div>
+      <div class="min-w-0">
         <p x-show="!isValidDates()">Return date must be on or after departure date.</p>
         <p x-show="!datesInFuture()">Departure date cannot be in the past.</p>
       </div>
@@ -429,54 +434,54 @@ class="relative flex flex-col items-center gap-3 border-2 border-dashed border-s
   </div>
 
   <!-- STEP 3: Passport & Agent -->
-  <div x-show="step === 3" class="space-y-6">
+  <div x-show="step === 3" class="space-y-4 sm:space-y-6">
 
     <!-- Progress Header -->
-    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-      <div>
-        <h3 class="text-base font-semibold text-gray-900">Passport & Travel Agent</h3>
-        <p class="text-sm text-gray-500 mt-1">Step 3 of 3</p>
+    <div class="flex items-start sm:items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200 gap-3">
+      <div class="min-w-0">
+        <h3 class="text-sm sm:text-base font-semibold text-gray-900">Passport & Travel Agent</h3>
+        <p class="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Step 3 of 3</p>
       </div>
-      <div class="flex gap-2">
-        <div class="w-2.5 h-2.5 rounded-full bg-sky-500"></div>
-        <div class="w-2.5 h-2.5 rounded-full bg-sky-500"></div>
-        <div class="w-2.5 h-2.5 rounded-full bg-sky-500"></div>
+      <div class="flex gap-1.5 sm:gap-2 flex-shrink-0">
+        <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-sky-500"></div>
+        <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-sky-500"></div>
+        <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-sky-500"></div>
       </div>
     </div>
 
     <!-- Passport Information -->
-    <div class="space-y-5">
+    <div class="space-y-4 sm:space-y-5">
       <div>
-        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <h4 class="text-xs sm:text-sm font-semibold text-gray-700 mb-2.5 sm:mb-3 flex items-center gap-1.5 sm:gap-2">
+          <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v10a2 2 0 002 2h5m0 0h5a2 2 0 002-2v-10a2 2 0 00-2-2h-5m0 0V5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
           </svg>
           Passport Details (Optional)
         </h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           <div>
-            <label for="passport_number" class="text-sm text-gray-700 mb-2 block font-medium">Passport Number</label>
+            <label for="passport_number" class="text-xs sm:text-sm text-gray-700 mb-1.5 sm:mb-2 block font-medium">Passport Number</label>
             <input id="passport_number" type="text" name="passport_number" x-model="passportNumber" placeholder="P1234567A"
-                   class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
+                   class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
           </div>
 
           <div>
-            <label for="passport_expiry" class="text-sm text-gray-700 mb-2 block font-medium">Expiry Date</label>
+            <label for="passport_expiry" class="text-xs sm:text-sm text-gray-700 mb-1.5 sm:mb-2 block font-medium">Expiry Date</label>
             <input id="passport_expiry" type="date" name="passport_expiry" x-model="passportExpiry"
-                   class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
+                   class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
           </div>
         </div>
       </div>
 
       <!-- Travel Agent -->
       <div>
-        <label for="assigned_admin" class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <label for="assigned_admin" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+          <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
           </svg>
           Travel Agent (Optional)
         </label>
-        <select id="assigned_admin" name="assigned_admin_id" x-model="assignedAdmin" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+        <select id="assigned_admin" name="assigned_admin_id" x-model="assignedAdmin" class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm bg-white transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
           <option value="" selected>Select an agent...</option>
           <?php while ($admin = $admins->fetch_assoc()): ?>
             <option value="<?= $admin['id'] ?>" <?= ($admin['id'] == ($_SESSION['admin']['id'] ?? '')) ? 'selected' : '' ?>>
@@ -488,23 +493,23 @@ class="relative flex flex-col items-center gap-3 border-2 border-dashed border-s
     </div>
 
     <!-- Summary Section -->
-    <div class="bg-sky-50 border border-sky-100 rounded-lg p-4">
-      <p class="text-sm text-gray-600">
+    <div class="bg-sky-50 border border-sky-100 rounded-lg p-3 sm:p-4">
+      <p class="text-xs sm:text-sm text-gray-600">
         <span class="font-semibold text-gray-900">Ready to create?</span> Make sure all information is accurate. You can edit it later if needed.
       </p>
     </div>
   </div>
 
   <!-- Navigation Buttons -->
-  <div class="flex justify-between items-center pt-4 border-t border-gray-200 gap-3 sticky bottom-0 bg-white">
+  <div class="flex justify-between items-center pt-3 sm:pt-4 border-t border-gray-200 gap-2 sm:gap-3 sticky bottom-0 bg-white z-10">
     <template x-if="step === 1">
-      <div class="flex w-full justify-between gap-3">
+      <div class="flex w-full justify-between gap-2 sm:gap-3">
         <button type="button" @click="$dispatch('close-modal')"
-                class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 text-sm font-medium transition">
+                class="px-3 sm:px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 text-xs sm:text-sm font-medium transition">
           Cancel
         </button>
         <button type="button" @click="step++" :disabled="!canProceedStep1()"
-                class="px-5 py-2 rounded-lg text-white font-medium transition text-sm
+                class="px-4 sm:px-5 py-2 rounded-lg text-white font-medium transition text-xs sm:text-sm
                        disabled:bg-gray-400 disabled:cursor-not-allowed
                        bg-sky-600 hover:bg-sky-700 shadow-sm hover:shadow-md">
           Next
@@ -513,13 +518,13 @@ class="relative flex flex-col items-center gap-3 border-2 border-dashed border-s
     </template>
 
     <template x-if="step === 2">
-      <div class="flex w-full justify-between gap-3">
+      <div class="flex w-full justify-between gap-2 sm:gap-3">
         <button type="button" @click="step--"
-                class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition font-medium text-sm">
+                class="px-3 sm:px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition font-medium text-xs sm:text-sm">
           Back
         </button>
         <button type="button" @click="step++" :disabled="!canProceedStep2()"
-                class="px-5 py-2 rounded-lg text-white font-medium transition text-sm
+                class="px-4 sm:px-5 py-2 rounded-lg text-white font-medium transition text-xs sm:text-sm
                        disabled:bg-gray-400 disabled:cursor-not-allowed
                        bg-sky-600 hover:bg-sky-700 shadow-sm hover:shadow-md">
           Next
@@ -528,318 +533,15 @@ class="relative flex flex-col items-center gap-3 border-2 border-dashed border-s
     </template>
 
     <template x-if="step === 3">
-      <div class="flex w-full justify-between gap-3">
+      <div class="flex w-full justify-between gap-2 sm:gap-3">
         <button type="button" @click="step--"
-                class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition font-medium text-sm">
+                class="px-3 sm:px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition font-medium text-xs sm:text-sm">
           Back
         </button>
         <button type="submit" :disabled="$el.closest('form').classList.contains('submitting')"
-                class="px-5 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition font-medium text-sm shadow-sm hover:shadow-md disabled:opacity-75">
+                class="px-4 sm:px-5 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition font-medium text-xs sm:text-sm shadow-sm hover:shadow-md disabled:opacity-75">
           <span x-show="!$el.closest('form').classList.contains('submitting')">Create Client</span>
           <span x-show="$el.closest('form').classList.contains('submitting')">Creating...</span>
-        </button>
-  </div>
-</form>
-<div x-data="{
-  fileName: '',
-  previewUrl: '../images/default_client_profile.png',
-  handleFile(e) {
-    let file = e.target.files ? e.target.files[0] : e.dataTransfer?.files[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      alert('File must be under 2MB');
-      return;
-    }
-    this.fileName = file.name;
-    const reader = new FileReader();
-    reader.onload = ev => this.previewUrl = ev.target.result;
-    reader.readAsDataURL(file);
-  }
-}"
-@dragover.prevent @drop.prevent="handleFile($event)"
-class="relative flex flex-col items-center gap-2 border-2 border-dashed border-sky-200 rounded-2xl py-3 px-4 bg-gradient-to-br from-sky-50 to-transparent hover:border-sky-400 hover:from-sky-100 transition-all cursor-pointer group">
-
-  <!-- Decorative corner accent -->
-  <div class="absolute top-0 right-0 w-12 h-12 bg-sky-500 opacity-5 rounded-bl-2xl"></div>
-
-  <!-- Image with better styling -->
-  <img :src="previewUrl" alt="Profile Preview"
-       class="w-16 h-16 rounded-xl object-cover border-2 border-sky-100 shadow-sm group-hover:shadow-md transition-shadow" loading="lazy" />
-
-  <!-- Upload label with icon -->
-  <label for="add-client-photo" class="text-center cursor-pointer">
-    <div class="flex items-center justify-center mb-1">
-      <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-      </svg>
-    </div>
-    <p class="text-xs font-semibold text-sky-600 group-hover:text-sky-700">Upload Photo</p>
-    <p class="text-xs text-gray-500">JPG, PNG • Max 2MB</p>
-    <input id="add-client-photo" name="client_profile_photo" type="file"
-           accept=".jpg,.jpeg,.png" class="hidden" @change="handleFile">
-  </label>
-
-</div>
-
-        <!-- Email - Icon + Input -->
-        <div>
-          <label for="email" class="flex items-center gap-1.5 text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
-            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-            </svg>
-            Email <span class="text-red-500">*</span>
-          </label>
-          <input id="email" type="email" name="email" x-model="email" required placeholder="maria@example.com"
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                 :class="{ 'border-red-500 ring-red-500': email && !isValidEmail(), 'border-green-500 ring-green-500': isValidEmail() }" />
-          <p x-show="email && !isValidEmail()" class="text-xs text-red-500 mt-1 flex items-center gap-1">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            Invalid email format.
-          </p>
-        </div>
-
-        <!-- Phone Number - Icon + Input -->
-        <div>
-          <label for="phone_number" class="flex items-center gap-1.5 text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
-            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-            </svg>
-            Phone <span class="text-red-500">*</span>
-          </label>
-          <input id="phone_number" type="tel" name="phone_number" x-model="phone" required maxlength="11" placeholder="09171234567"
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                 :class="{ 'border-red-500 ring-red-500': phone && !isValidPhone(), 'border-green-500 ring-green-500': isValidPhone() }" />
-          <p x-show="phone && !isValidPhone()" class="text-xs text-red-500 mt-1 flex items-center gap-1">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            Must be 11 digits (09xxxxxxxxx).
-          </p>
-        </div>
-
-      </div>
-
-      <!-- RIGHT COLUMN: Full Name + Access Code + Address -->
-      <div class="space-y-3">
-
-        <!-- Full Name - Icon + Input -->
-        <div>
-          <label for="full_name" class="flex items-center gap-1.5 text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
-            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            Full Name <span class="text-red-500">*</span>
-          </label>
-          <input id="full_name" type="text" name="full_name" x-model="fullName" required
-                 placeholder="Maria Reyes"
-                 @input.debounce.500="generateAccessCode()"
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
-          <p x-show="fullName.trim() === ''" class="text-xs text-red-500 mt-1 flex items-center gap-1">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            This field is required.
-          </p>
-        </div>
-
-        <!-- Access Code - Modern Badge Style -->
-        <div>
-          <div class="flex items-center gap-1.5 mb-1.5">
-            <label for="access_code" class="flex items-center gap-1.5 text-xs font-bold text-gray-700 uppercase tracking-wider">
-              <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-              </svg>
-              Access Code
-            </label>
-            <?= renderTooltipIcon('access_code', $tooltips) ?>
-          </div>
-          <div class="relative">
-            <input id="access_code" type="text" name="access_code" x-model="accessCode" readonly
-                   class="w-full border-2 border-sky-200 rounded-lg px-3 py-2.5 font-mono text-sm font-bold text-sky-700 bg-sky-50 pr-10 transition hover:border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
-            <button type="button"
-                    @click="navigator.clipboard.writeText(accessCode); copied = true; setTimeout(() => copied = false, 1500)"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-sky-600 transition hover:scale-125"
-                    aria-label="Copy access code">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-              </svg>
-            </button>
-            <span x-show="copied" x-transition x-cloak
-                  class="absolute -top-7 right-0 text-xs text-white font-medium bg-sky-600 px-2 py-1 rounded shadow whitespace-nowrap flex items-center gap-1">
-              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-              Copied!
-            </span>
-          </div>
-          <p class="text-xs text-gray-500 mt-1">💡 Share this code with the client for quick access.</p>
-        </div>
-
-        <!-- Address - Icon + Input -->
-        <div>
-          <label for="address" class="flex items-center gap-1.5 text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
-            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-            Address <span class="text-red-500">*</span>
-          </label>
-          <textarea id="address" name="address" required rows="3" placeholder="123 Rizal St, Barangay Mabini..."
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm resize-none placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"></textarea>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 2: Travel Details -->
-  <div x-show="step === 2" class="space-y-4">
-
-    <!-- Progress Header for Step 2 -->
-    <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-200">
-      <div>
-        <h3 class="text-sm font-bold text-gray-900">Travel Information</h3>
-        <p class="text-xs text-gray-500 mt-0.5">Step 2 of 2 • Optional fields</p>
-      </div>
-      <div class="flex gap-1">
-        <div class="w-2 h-2 rounded-full bg-sky-500"></div>
-        <div class="w-2 h-2 rounded-full bg-sky-500"></div>
-      </div>
-    </div>
-
-    <!-- Compact Sections with Icons -->
-    <div class="space-y-3">
-      <!-- Package & Booking -->
-      <div class="bg-gradient-to-br from-sky-50 to-transparent rounded-xl p-3 border border-sky-100">
-        <h4 class="text-xs font-bold text-sky-700 mb-2.5 flex items-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-          </svg>
-          Booking Info
-        </h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          <div>
-            <label for="assigned_package" class="text-xs font-semibold text-gray-700 mb-1 block">Package</label>
-            <select id="assigned_package" name="assigned_package_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-              <option value="" selected>Select package...</option>
-              <?php while ($pkg = $packages->fetch_assoc()): ?>
-                <?php if ((int)$pkg['is_deleted'] !== 1): ?>
-                  <option value="<?= $pkg['id'] ?>"><?= htmlspecialchars($pkg['package_name']) ?></option>
-                <?php endif; ?>
-              <?php endwhile; ?>
-            </select>
-          </div>
-
-          <div>
-            <label for="booking_number" class="text-xs font-semibold text-gray-700 mb-1 block">Booking #</label>
-            <input id="booking_number" type="text" name="booking_number" placeholder="JVB-00001"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Passport Details -->
-      <div class="bg-gradient-to-br from-amber-50 to-transparent rounded-xl p-3 border border-amber-100">
-        <h4 class="text-xs font-bold text-amber-700 mb-2.5 flex items-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v10a2 2 0 002 2h5m0 0h5a2 2 0 002-2v-10a2 2 0 00-2-2h-5m0 0V5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-          </svg>
-          Passport
-        </h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          <div>
-            <label for="passport_number" class="text-xs font-semibold text-gray-700 mb-1 block">Passport #</label>
-            <input id="passport_number" type="text" name="passport_number" x-model="passportNumber" placeholder="P1234567A"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
-          </div>
-
-          <div>
-            <label for="passport_expiry" class="text-xs font-semibold text-gray-700 mb-1 block">Expiry Date</label>
-            <input id="passport_expiry" type="date" name="passport_expiry" x-model="passportExpiry"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Travel Dates -->
-      <div class="bg-gradient-to-br from-green-50 to-transparent rounded-xl p-3 border border-green-100">
-        <h4 class="text-xs font-bold text-green-700 mb-2.5 flex items-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-          </svg>
-          Travel Dates
-        </h4>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-          <div>
-            <label for="trip_start" class="text-xs font-semibold text-gray-700 mb-1 block">Departure</label>
-            <input id="trip_start" type="date" name="trip_date_start" x-model="tripStart"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
-          </div>
-          <div>
-            <label for="trip_end" class="text-xs font-semibold text-gray-700 mb-1 block">Return</label>
-            <input id="trip_end" type="date" name="trip_date_end" x-model="tripEnd"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
-          </div>
-          <div>
-            <label for="booking_date" class="text-xs font-semibold text-gray-700 mb-1 block">Booking Date</label>
-            <input id="booking_date" type="date" name="booking_date" x-model="bookingDate"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Travel Agent -->
-      <div class="bg-gradient-to-br from-purple-50 to-transparent rounded-xl p-3 border border-purple-100">
-        <h4 class="text-xs font-bold text-purple-700 mb-2.5 flex items-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-          </svg>
-          Travel Agent
-        </h4>
-        <select id="assigned_admin" name="assigned_admin_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-          <option value="" selected>Select an agent...</option>
-          <?php while ($admin = $admins->fetch_assoc()): ?>
-            <option value="<?= $admin['id'] ?>" <?= ($admin['id'] == ($_SESSION['admin']['id'] ?? '')) ? 'selected' : '' ?>>
-              <?= htmlspecialchars($admin['first_name'] . ' ' . $admin['last_name']) ?>
-            </option>
-          <?php endwhile; ?>
-        </select>
-      </div>
-    </div>
-
-    <!-- Date Warnings - Enhanced -->
-    <div x-show="showDateWarning()" x-transition class="text-sm text-amber-700 bg-amber-50 px-3 py-2.5 rounded-lg border border-amber-200 flex gap-2">
-      <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-      </svg>
-      <div>
-        <p x-show="!isValidDates()">Return date must be on or after departure date.</p>
-        <p x-show="!datesInFuture()">Departure date cannot be in the past.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Navigation Buttons - Modern & Compact -->
-  <div class="flex justify-between items-center pt-3 border-t border-gray-200 gap-3 sticky bottom-0 bg-white">
-    <template x-if="step === 1">
-      <div class="flex w-full justify-between gap-3">
-        <button type="button" @click="$dispatch('close-modal')"
-                class="px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 text-sm font-medium transition">
-          ✕ Cancel
-        </button>
-        <button type="button" @click="step++" :disabled="!canProceed()"
-                class="px-4 py-2 rounded-lg text-white font-medium transition text-sm flex items-center gap-1.5
-                       disabled:bg-gray-400 disabled:cursor-not-allowed
-                       bg-sky-600 hover:bg-sky-700 shadow-sm hover:shadow-md">
-          Next <span>→</span>
-        </button>
-      </div>
-    </template>
-
-    <template x-if="step === 2">
-      <div class="flex w-full justify-between gap-3">
-        <button type="button" @click="step--"
-                class="px-3 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition font-medium text-sm flex items-center gap-1.5">
-          <span>←</span> Back
-        </button>
-        <button type="submit" :disabled="$el.closest('form').classList.contains('submitting')"
-                class="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition font-medium text-sm flex items-center gap-1.5 shadow-sm hover:shadow-md disabled:opacity-75">
-          <span x-show="!$el.closest('form').classList.contains('submitting')">✓ Create Client</span>
-          <span x-show="$el.closest('form').classList.contains('submitting')">⏳ Creating...</span>
         </button>
       </div>
     </template>

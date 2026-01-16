@@ -6,6 +6,7 @@ require_once __DIR__ . '/../actions/db.php';
 
 // Fetch the most recent review with joined client name and package name
 $review = null;
+$isFromDatabase = false;
 
 if (isset($conn) && $conn instanceof mysqli && !$conn->connect_error) {
     $query = "
@@ -28,6 +29,27 @@ if (isset($conn) && $conn instanceof mysqli && !$conn->connect_error) {
 
     if ($result && $result->num_rows > 0) {
         $review = $result->fetch_assoc();
+        $isFromDatabase = true;
+    }
+}
+
+// If no review from database, pull from reviews.php
+if (!$review) {
+    $reviewsFile = __DIR__ . '/../client/reviews.php';
+    if (file_exists($reviewsFile)) {
+        include $reviewsFile;
+        if (!empty($reviews) && is_array($reviews)) {
+            // Get a random review from the fallback array
+            $randomReview = $reviews[array_rand($reviews)];
+            $review = [
+                'rating' => $randomReview['stars'] ?? 5,
+                'review' => $randomReview['review'],
+                'client_name' => $randomReview['name'],
+                'package_name' => 'JVB Travel Package',
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+            $isFromDatabase = false;
+        }
     }
 }
 ?>
@@ -47,19 +69,23 @@ if (isset($conn) && $conn instanceof mysqli && !$conn->connect_error) {
     </div>
 
     <!-- Review text -->
-    <blockquote class="text-gray-100 italic mb-6">
+    <blockquote class="line-clamp-3 text-gray-100 italic mb-6">
       "<?= htmlspecialchars($review['review']) ?>"
     </blockquote>
 
     <!-- Client info -->
-    <div class="flex items-center justify-between text-sm">
+    <div class="flex items-center <?= $isFromDatabase ? 'justify-between' : 'justify-center' ?> text-sm">
       <div>
         <p class="font-semibold text-white"><?= htmlspecialchars($review['client_name']) ?></p>
-        <p class="text-gray-300"><?= htmlspecialchars($review['package_name']) ?></p>
+        <?php if ($isFromDatabase): ?>
+          <p class="text-gray-300"><?= htmlspecialchars($review['package_name']) ?></p>
+        <?php endif; ?>
       </div>
-      <p class="text-gray-300">
-        <?= date('F j, Y', strtotime($review['created_at'])) ?>
-      </p>
+      <?php if ($isFromDatabase): ?>
+        <p class="text-gray-300">
+          <?= date('F j, Y', strtotime($review['created_at'])) ?>
+        </p>
+      <?php endif; ?>
     </div>
 
   <?php else: ?>

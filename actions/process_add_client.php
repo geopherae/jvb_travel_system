@@ -42,6 +42,7 @@ $errors = [];
 if ($fullName === '') $errors[] = 'Full name is required.';
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Invalid email address.';
 if (!preg_match('/^09\d{9}$/', $phone)) $errors[] = 'Phone must start with 09 and have 11 digits.';
+if ($address === '') $errors[] = 'Address is required.';
 
 // Handle profile photo
 $photoFile = $_FILES['client_profile_photo'] ?? null;

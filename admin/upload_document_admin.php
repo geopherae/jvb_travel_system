@@ -25,7 +25,7 @@ if (!$clientId) {
 
 // ✅ Validate document type
 $docType = $_POST['document_type'] ?? '';
-$allowedTypes = ['Passport', 'Valid ID', 'Boarding Pass', 'Travel Insurance', 'Visa', 'Other'];
+$allowedTypes = ['Passport', 'Valid ID', 'Visa', 'Service Voucher', 'Airline Ticket', 'PH Travel Tax', 'Acknowledgement Receipt', 'Other'];
 if (!in_array($docType, $allowedTypes)) {
   setStatusAndRedirect('upload_failed', 400, "Invalid document type.");
 }
@@ -59,16 +59,16 @@ if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
   setStatusAndRedirect('upload_failed', 500, "Failed to store uploaded file.");
 }
 
-// ✅ Insert into database
+// ✅ Insert into database (Auto-approved for admin uploads)
+$adminId = $_SESSION['admin']['id'] ?? 0;
 $stmt = $conn->prepare("INSERT INTO uploaded_files 
-  (client_id, file_name, file_path, document_type, mime_type, document_status, uploaded_at) 
-  VALUES (?, ?, ?, ?, ?, 'Pending', NOW())");
+  (client_id, file_name, file_path, document_type, mime_type, document_status, uploaded_at, approved_at) 
+  VALUES (?, ?, ?, ?, ?, 'Approved', NOW(), NOW())");
 $stmt->bind_param("issss", $clientId, $uniqueName, $relativePath, $docType, $mimeType);
 $executed = $stmt->execute();
 
 if ($executed) {
   // ✅ Audit log
-  $adminId = $_SESSION['admin']['id'] ?? 0;
   logAdminDocumentUpload($conn, [
     'admin_id'      => $adminId,
     'client_id'     => $clientId,

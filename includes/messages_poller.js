@@ -1,5 +1,9 @@
 // Message polling setup
 
+let currentController = null;
+let pollingInterval = null;
+let pollingIntervalMs = 2000;
+
 async function pollMessages() {
     const maxRetries = 10;
     let retries = 0;
@@ -26,9 +30,18 @@ async function pollMessages() {
         return;
     }
 
+    // Prevent overlapping requests
+    if (currentController) {
+        try { currentController.abort(); } catch (e) {}
+    }
+    currentController = new AbortController();
     messageApp.isFetching = true;
     try {
-        const formattedSince = messageApp.lastFetched
+        const lastMsg = Array.isArray(messageApp.messages) && messageApp.messages.length > 0
+            ? messageApp.messages[messageApp.messages.length - 1]
+            : null;
+        const sinceId = lastMsg && typeof lastMsg.id === 'number' ? String(lastMsg.id) : '';
+        const formattedSince = !sinceId && messageApp.lastFetched
             ? new Date(messageApp.lastFetched).toISOString().slice(0, 19).replace('T', ' ')
             : '';
         const params = new URLSearchParams({
@@ -37,11 +50,14 @@ async function pollMessages() {
             recipient_id: messageApp.recipientId,
             recipient_type: messageApp.recipientType,
             thread_id: messageApp.threadId || '',
-            since: formattedSince
+            since: formattedSince,
+            since_id: sinceId
         });
 
-        console.log('Polling fetch with params:', params.toString());
-        const res = await fetch(`/jvb_travel_system/api/messages/fetch.php?${params}`);
+        const res = await fetch(`/jvb_travel_system/api/messages/fetch.php?${params}`, {
+            cache: 'no-store',
+            signal: currentController.signal
+        });
         if (!res.ok) {
             const errorText = await res.text();
             console.error('Polling failed:', res.status, errorText);
@@ -57,6 +73,11 @@ async function pollMessages() {
                 messageApp.messages = [...(messageApp.messages || []), ...validMessages];
                 validMessages.forEach(msg => messageApp.seenMessageIds.add(msg.id));
                 messageApp.lastFetched = validMessages[validMessages.length - 1].created_at;
+                // Reset interval on activity when visible
+                if (!document.hidden) {
+                    pollingIntervalMs = 2000;
+                    restartPollingInterval();
+                }
                 
                 // Refresh message previews for sidebar
                 if (typeof messageApp.fetchMessagePreviews === 'function') {
@@ -84,24 +105,32 @@ async function pollMessages() {
             recipientType: messageApp.recipientType,
             lastFetched: messageApp.lastFetched
         });
+        // Exponential backoff with jitter on errors
+        const jitter = Math.floor(Math.random() * 500);
+        pollingIntervalMs = Math.min(pollingIntervalMs * 2, 30000) + jitter;
+        restartPollingInterval();
     } finally {
         messageApp.isLoading = false;
         messageApp.isFetching = false;
+        currentController = null;
     }
 }
 
-// Global polling reference
-let pollingInterval = null;
-
-function startPolling() {
-    // Stop any existing polling
+function restartPollingInterval() {
     if (pollingInterval) {
         clearInterval(pollingInterval);
     }
-    
-    // Poll every 2 seconds for faster real-time experience
-    pollingInterval = setInterval(pollMessages, 2000);
-    console.log('Message polling started (interval: 2s)');
+    pollingInterval = setInterval(pollMessages, pollingIntervalMs);
+}
+
+function startPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+    pollingIntervalMs = 2000;
+    pollMessages();
+    restartPollingInterval();
+    console.log('Message polling started');
 }
 
 function stopPolling() {
@@ -115,12 +144,10 @@ function stopPolling() {
 // Handle page visibility to pause/resume polling
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        console.log('Page hidden, pausing message polling');
         stopPolling();
-        // Resume polling at slower rate (5s) when hidden
-        pollingInterval = setInterval(pollMessages, 5000);
+        pollingIntervalMs = 5000;
+        restartPollingInterval();
     } else {
-        console.log('Page visible, resuming message polling');
         stopPolling();
         startPolling();
     }
@@ -143,4 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Clean up on page unload
 window.addEventListener('beforeunload', () => {
     stopPolling();
+    if (currentController) {
+        try { currentController.abort(); } catch (e) {}
+        currentController = null;
+    }
 });
