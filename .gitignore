@@ -1,3 +1,6 @@
+# Ignore all Markdown documentation files
+*.md
+**/*.md
 # Environment Configuration
 .env
 .env.hostinger
