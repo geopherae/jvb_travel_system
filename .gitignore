@@ -1,6 +1,9 @@
 # Ignore all Markdown documentation files
 *.md
 **/*.md
+
+# Allow only the root README.md
+!/README.md
 # Environment Configuration
 .env
 .env.hostinger
