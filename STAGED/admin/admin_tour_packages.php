@@ -110,7 +110,7 @@ $top3 = array_slice(
   <!-- ⚙️ Alpine.js v3 -->
   <script src="https://unpkg.com/alpinejs" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script src="../includes/tour_packages_global_scope.js?v=20260118-1"></script>
+<script src="../includes/tour_packages_global_scope.js"></script>
   <script>
     window.tourFormData = function () {
   return {
@@ -220,6 +220,7 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
       <div class="bg-white rounded-lg p-6 space-y-4" x-data="tourFilterData()">
         <!-- Page Header -->
         <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-slate-700">Available Packages</h2>
           <button id="openAddModal"
                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-sky-500 rounded hover:bg-sky-600 transition">
             + Add Tour Package
@@ -272,12 +273,12 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
 
   <?php if (empty($top3)): ?>
     <div class="flex flex-col items-center justify-center py-12 text-gray-500">
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#0883bc" class="mb-2 bi bi-star-fill" viewBox="0 0 16 16">
-      <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-    </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
+      </svg>
       <h3 class="text-md italic font-semibold text-sky-700 mb-1">No Favorites Yet</h3>
       <p class="text-md text-sky-700 italic text-center max-w-lg">
-        This section will highlight your <strong>top 3 favorite</strong> tour packages.</br>Mark packages as favorites to easily access them from here.
+        This section will highlight your <strong>top 3 favorite</strong> tour packages.</br>Mark packages as favorites to feature them here and help clients discover your best offerings.
       </p>
     </div>
   <?php else: ?>
@@ -324,6 +325,9 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
                 </div>
               </template>
             </template>
+          </div>
+          <div x-show="getFilteredTours().filter(t => !t.is_favorite).length === 0" class="flex flex-col items-center justify-center py-8 text-gray-500">
+            <p class="text-sm text-slate-500 italic">No other packages match your filters.</p>
           </div>
         </div>
 

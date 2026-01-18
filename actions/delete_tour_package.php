@@ -109,7 +109,7 @@ try {
 
 // Close connection and redirect
 $conn->close();
-eheader("Location: ../admin/admin_tour_packages.php");
+header("Location: ../admin/admin_tour_packages.php");
 echo "Debug: Script completed, modal_status=" . ($_SESSION['modal_status'] ?? 'not set') . ", error_message=" . ($_SESSION['error_message'] ?? 'none');
 exit;
 ?>
