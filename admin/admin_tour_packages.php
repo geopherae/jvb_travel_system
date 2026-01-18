@@ -26,7 +26,7 @@ $sql = "
   SELECT 
     tp.id, tp.tour_cover_image, tp.package_name, tp.package_description, 
     tp.price, tp.day_duration, tp.night_duration, tp.is_favorite, tp.requires_visa,
-    tp.inclusions_json,
+    tp.inclusions_json, tp.exclusions_json,
     tp.origin, tp.destination,
     tp.is_deleted,
     ti.itinerary_json AS package_itinerary_json
@@ -61,6 +61,12 @@ $allToursForJS = array_map(function($tour) {
     if (is_array($decoded)) $inclusions = $decoded;
   }
 
+  $exclusions = [];
+  if (!empty($tour['exclusions_json'])) {
+    $decoded = json_decode($tour['exclusions_json'], true);
+    if (is_array($decoded)) $exclusions = $decoded;
+  }
+
   return [
     'id'          => (int) $tour['id'],
     'package_id'  => (int) $tour['id'],
@@ -75,6 +81,7 @@ $allToursForJS = array_map(function($tour) {
     'requires_visa' => !empty($tour['requires_visa']) ? (bool) $tour['requires_visa'] : false,
     'itinerary'   => $itinerary,
     'inclusions'  => $inclusions,
+    'exclusions'  => $exclusions,
     'is_favorite' => !empty($tour['is_favorite']) ? (bool) $tour['is_favorite'] : false
   ];
 }, $tourPackages);
@@ -120,8 +127,10 @@ $top3 = array_slice(
     filename: '',
     previewUrl: '../images/default_trip_cover.jpg',
     inclusions: [],
+    exclusions: [],
     itinerary: [],
     tab: 'details',
+    max: 10,
 
     handleCoverUpload(event) {
       const file = event.target.files[0];
@@ -143,6 +152,28 @@ $top3 = array_slice(
              this.days > 0 &&
              this.nights >= 0 &&
              this.nights <= this.days;
+    },
+
+    add() {
+      if (this.inclusions.length >= this.max) return;
+      this.inclusions.push({ icon: '', title: '', desc: '' });
+    },
+
+    remove(index) {
+      if (index >= 0 && index < this.inclusions.length) {
+        this.inclusions.splice(index, 1);
+      }
+    },
+
+    addExclusion() {
+      if (this.exclusions.length >= this.max) return;
+      this.exclusions.push({ icon: '', title: '', desc: '' });
+    },
+
+    removeExclusion(index) {
+      if (index >= 0 && index < this.exclusions.length) {
+        this.exclusions.splice(index, 1);
+      }
     }
   };
 };

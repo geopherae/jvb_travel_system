@@ -53,6 +53,29 @@ if ($result) {
     $result->free();
 }
 
+// Load other admins (excluding current admin)
+$admins = [];
+$sql = "SELECT id, first_name, last_name, admin_photo, role FROM admin_accounts WHERE id != ? AND is_active = 1 ORDER BY first_name ASC";
+$stmt = $conn->prepare($sql);
+if ($stmt) {
+    $stmt->bind_param('i', $adminId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    while ($row = $result->fetch_assoc()) {
+        $admins[] = [
+            'id' => (int)$row['id'],
+            'first_name' => $row['first_name'] ?: 'Admin',
+            'last_name' => $row['last_name'] ?: '',
+            'admin_photo' => $row['admin_photo'] ?? null,
+            'role' => $row['role'] ?? 'admin',
+            'full_name' => trim(($row['first_name'] ?: '') . ' ' . ($row['last_name'] ?: ''))
+        ];
+    }
+    $result->free();
+    $stmt->close();
+}
+
 // Default to first client
 $selectedRecipientId = $clients[0]['id'] ?? null;
 $selectedThreadId = null;
@@ -97,7 +120,7 @@ $alpineData = [
     'initialRecipientId' => $selectedRecipientId,
     'initialThreadId' => $selectedThreadId,
     'clients' => $clients,
-    'admins' => []
+    'admins' => $admins
 ];
 ?>
 
@@ -126,6 +149,7 @@ $alpineData = [
     <main class="flex-1 flex flex-col md:ml-64 md:mr-80 pt-16 md:pt-6 md:px-6 md:pb-6 overflow-hidden"
           x-data="messageApp()"
           x-init="
+              sidebarOpen = false;
               recipientId = <?= json_encode($selectedRecipientId) ?>;
               threadId = <?= json_encode($selectedThreadId) ?>;
               messages = [];
@@ -134,7 +158,6 @@ $alpineData = [
               $nextTick(() => {
                   if (recipientId) {
                       debounceFetchInitialMessages();
-                      connectWebSocket();
                   }
               });
           ">
@@ -144,12 +167,12 @@ $alpineData = [
             <aside class="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col hidden md:flex"
                    :class="{'!flex': sidebarOpen, 'hidden': !sidebarOpen}">
                 <div class="p-4 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-3">Clients</h2>
+                    <h2 class="text-xl font-semibold text-gray-800 mb-3">Messages</h2>
                     <!-- Search Input -->
                     <div class="relative">
                         <input type="text"
                                x-model="searchQuery"
-                               placeholder="Search clients..."
+                               placeholder="Search agents & clients..."
                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
                         <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -158,7 +181,57 @@ $alpineData = [
                 </div>
                 <div class="flex-1 overflow-y-auto">
                     <ul class="divide-y divide-gray-100">
-                        <template x-for="(client, index) in filteredClients" :key="client.id">
+                        <!-- Admins Section -->
+                        <template x-if="filteredAdmins.length > 0">
+                            <li>
+                                <div class="px-4 py-2 bg-amber-50 border-y border-amber-200">
+                                    <p class="text-xs text-amber-600 uppercase tracking-wide font-semibold">JV-B Admins</p>
+                                </div>
+                            </li>
+                        </template>
+                        
+                        <template x-for="admin in filteredAdmins" :key="`admin_${admin.id}`">
+                            <li>
+                                <button @click="
+                                    recipientId = admin.id;
+                                    recipientType = 'admin';
+                                    sidebarOpen = false;
+                                    $nextTick(() => {
+                                        threadId = null;
+                                        messages = [];
+                                        seenMessageIds.clear();
+                                        lastFetched = null;
+                                        debounceFetchInitialMessages();
+                                    });
+                                "
+                                        :class="recipientId === admin.id && recipientType === 'admin' ? 'bg-amber-50 border-r-4 border-amber-500' : 'hover:bg-gray-50'"
+                                        class="w-full text-left px-4 py-4 transition-colors flex items-center gap-4">
+                                    <img :src="getRecipientDetails(admin.id, 'admin')?.avatar || '../images/default_client_profile.png'"
+                                         alt="Avatar"
+                                         class="w-12 h-12 rounded-full object-cover flex-shrink-0">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <p class="font-medium text-gray-900 truncate" x-text="admin.full_name"></p>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
+                                                  x-text="admin.role"></span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 truncate" x-text="getLastMessagePreview(admin.id, 'admin') || 'No messages yet'"></p>
+                                    </div>
+                                    <p class="text-xs text-gray-400" x-text="admin.last_message_time || ''"></p>
+                                </button>
+                            </li>
+                        </template>
+
+                        <!-- Clients Section -->
+                        <template x-if="filteredClients.length > 0">
+                            <li>
+                                <div class="px-4 py-2 bg-sky-50 border-y border-sky-200">
+                                    <p class="text-xs text-sky-600 uppercase tracking-wide font-semibold">Clients</p>
+                                </div>
+                            </li>
+                        </template>
+                        
+                        <template x-for="(client, index) in filteredClients" :key="`client_${client.id}`">
                             <li>
                                 <!-- Separator after assigned clients -->
                                 <div x-show="index === myAssignedClientsCount && myAssignedClientsCount > 0" 
@@ -168,17 +241,17 @@ $alpineData = [
                                 
                                 <button @click="
                                     recipientId = client.id;
+                                    recipientType = 'client';
                                     sidebarOpen = false;
                                     $nextTick(() => {
                                         threadId = null;
                                         messages = [];
                                         seenMessageIds.clear();
                                         lastFetched = null;
-                                        connectWebSocket();
                                         debounceFetchInitialMessages();
                                     });
                                 "
-                                        :class="recipientId === client.id ? 'bg-sky-50 border-r-4 border-sky-600' : 'hover:bg-gray-50'"
+                                        :class="recipientId === client.id && recipientType === 'client' ? 'bg-sky-50 border-r-4 border-sky-600' : 'hover:bg-gray-50'"
                                         class="w-full text-left px-4 py-4 transition-colors flex items-center gap-4">
                                     <img :src="getRecipientDetails(client.id, 'client')?.avatar || '../images/default_client_profile.png'"
                                          alt="Avatar"
@@ -191,22 +264,22 @@ $alpineData = [
                                                 Assigned
                                             </span>
                                         </div>
-                                        <p class="text-sm text-gray-500 truncate" x-text="getLastMessagePreview(client.id) || 'No messages yet'"></p>
+                                        <p class="text-sm text-gray-500 truncate" x-text="getLastMessagePreview(client.id, 'client') || 'No messages yet'"></p>
                                     </div>
                                     <p class="text-xs text-gray-400" x-text="client.last_message_time || ''"></p>
                                 </button>
                             </li>
                         </template>
-                        <template x-if="filteredClients.length === 0 && searchQuery.trim()">
+                        <template x-if="filteredClients.length === 0 && filteredAdmins.length === 0 && searchQuery.trim()">
                             <li class="px-6 py-8 text-center text-gray-500">
                                 <svg class="w-12 h-12 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
-                                No clients match your search.
+                                No contacts match your search.
                             </li>
                         </template>
-                        <template x-if="clients.length === 0">
-                            <li class="px-6 py-8 text-center text-gray-500">No clients found.</li>
+                        <template x-if="clients.length === 0 && admins.length === 0">
+                            <li class="px-6 py-8 text-center text-gray-500">No contacts found.</li>
                         </template>
                     </ul>
                 </div>
@@ -228,11 +301,11 @@ $alpineData = [
                     </template>
                     <template x-for="msg in messages" :key="msg.id">
                         <div class="flex items-end gap-3 max-w-lg"
-                             :class="msg.sender_type === 'admin' ? 'ml-auto flex-row-reverse' : 'mr-auto flex-row'">
+                             :class="msg.sender_id === userId ? 'ml-auto flex-row-reverse' : 'mr-auto flex-row'">
                             <img :src="msg.sender_photo || '../images/default_client_profile.png'"
                                  alt="Avatar"
                                  class="w-8 h-8 rounded-full object-cover flex-shrink-0">
-                            <div :class="msg.sender_type === 'admin'
+                            <div :class="msg.sender_id === userId
                                 ? 'bg-sky-600 text-white rounded-3xl rounded-br-md'
                                 : 'bg-white text-gray-800 rounded-3xl rounded-bl-md shadow-md'"
                                  class="px-4 py-2.5 max-w-full">

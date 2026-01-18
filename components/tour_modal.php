@@ -110,6 +110,14 @@ document.addEventListener('alpine:init', () => {
           >
             Inclusions
           </button>
+          <button
+            type="button"
+            :class="$store.tourModal.tab === 'exclusions' ? 'text-sky-600 border-b-2 border-sky-600' : 'text-slate-600'"
+            @click="$store.tourModal.tab = 'exclusions'"
+            class="px-3 py-2 text-sm font-medium focus:outline-none hover:text-sky-600"
+          >
+            Exclusions
+          </button>
         </div>
 
 <!-- Itinerary Viewer (Read-Only - Collapsible Accordion) -->
@@ -204,7 +212,7 @@ document.addEventListener('alpine:init', () => {
         <div x-show="$store.tourModal.tab === 'inclusions'" class="flex-1 pr-1 max-h-[500px] overflow-y-auto space-y-5 text-left">
           <template x-if="$store.tourModal.activeTour.inclusions && $store.tourModal.activeTour.inclusions.length">
             <ul class="space-y-3">
-              <template x-for="item in $store.tourModal.activeTour.inclusions" :key="item.title">
+              <template x-for="(item, index) in $store.tourModal.activeTour.inclusions" :key="'inclusion-' + index">
                 <li class="flex items-start gap-2">
                   <span class="text-lg" x-text="item.icon || '🔹'"></span>
                   <div>
@@ -217,6 +225,26 @@ document.addEventListener('alpine:init', () => {
           </template>
           <template x-if="!$store.tourModal.activeTour.inclusions || !$store.tourModal.activeTour.inclusions.length">
             <p class="text-sm text-slate-500 italic">No inclusions listed for this package.<br>Create one in the Inclusions tab to get started!</p>
+          </template>
+        </div>
+
+        <!-- Exclusions -->
+        <div x-show="$store.tourModal.tab === 'exclusions'" class="flex-1 pr-1 max-h-[500px] overflow-y-auto space-y-5 text-left">
+          <template x-if="$store.tourModal.activeTour.exclusions && $store.tourModal.activeTour.exclusions.length">
+            <ul class="space-y-3">
+              <template x-for="(item, index) in $store.tourModal.activeTour.exclusions" :key="'exclusion-' + index">
+                <li class="flex items-start gap-2">
+                  <span class="text-lg" x-text="item.icon || '❌'"></span>
+                  <div>
+                    <p class="text-red-500 font-semibold" x-text="item.title || '—'"></p>
+                    <p class="italic text-slate-600 text-sm" x-show="item.desc" x-text="item.desc"></p>
+                  </div>
+                </li>
+              </template>
+            </ul>
+          </template>
+          <template x-if="!$store.tourModal.activeTour.exclusions || !$store.tourModal.activeTour.exclusions.length">
+            <p class="text-sm text-slate-500 italic">No exclusions listed for this package.<br>Create one in the Exclusions tab to get started!</p>
           </template>
         </div>
       </div>

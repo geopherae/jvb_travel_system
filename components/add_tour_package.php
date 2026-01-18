@@ -128,6 +128,14 @@
                       : 'px-4 py-2 text-sm font-medium text-slate-600 hover:text-sky-600'">
               Inclusions
             </button>
+
+            <button type="button"
+                    @click="tab = 'exclusions'"
+                    :class="tab === 'exclusions'
+                      ? 'px-4 py-2 text-sm font-medium text-sky-600 border-b-2 border-sky-600'
+                      : 'px-4 py-2 text-sm font-medium text-slate-600 hover:text-sky-600'">
+              Exclusions
+            </button>
           </div>
 
           <!-- Tab Content -->
@@ -142,6 +150,10 @@
           <div x-show="tab === 'inclusions'" x-cloak>
            <?php include '../components/tabs/inclusions-builder.php'; ?>
           </div>
+
+          <div x-show="tab === 'exclusions'" x-cloak>
+           <?php include '../components/tabs/exclusions-builder.php'; ?>
+          </div>
         </div>
       </div>
 
@@ -155,6 +167,7 @@
       <input type="hidden" name="destination" :value="destination">
       <input type="hidden" name="checklist_template_id" :value="checklistTemplateId">
       <input type="hidden" name="inclusions_json" :value="JSON.stringify(inclusions)">
+      <input type="hidden" name="exclusions_json" :value="JSON.stringify(exclusions)">
       <input type="hidden" name="itinerary_json" :value="JSON.stringify(itinerary)">
       <input type="hidden" name="is_favorite" :value="isFavorite ? 1 : 0">
       <input type="hidden" name="requires_visa" :value="requiresVisa ? 1 : 0">

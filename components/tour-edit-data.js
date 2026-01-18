@@ -53,7 +53,7 @@ function tourEditData(tour) {
     tab: 'itinerary',
 
     inclusions,
-    max: 6,
+    max: 10,
 
     // 🧳 Travel Inclusions Logic
     add() {

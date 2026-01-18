@@ -7,7 +7,7 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
 require_once __DIR__ . '/../includes/empty_state_map.php';
 
 // 🧠 Determine access
-$isAdmin   = $_SESSION['is_admin'] ?? false;
+$isAdmin   = isset($_SESSION['admin']['id']);
 $isClient  = !$isAdmin && isset($_SESSION['client_id']);
 $client_id = $isAdmin
   ? ($_GET['client_id'] ?? $_SESSION['client_id'] ?? null)
@@ -161,21 +161,24 @@ if ($client_id) {
                     </svg>
                   </button>
 
-                  <?php if ($isAdmin && !in_array($doc['document_status'], ['Approved', 'Rejected'])): ?>
-                  <button @click="confirmAction = { visible: true, type: 'approve', documentId: <?= $doc['id'] ?> }"
-                          class="text-emerald-500 hover:underline font-medium inline-flex items-center gap-1">
+                  <!-- Download Button -->
+                  <a href="<?= htmlspecialchars("../" . implode('/', array_map('rawurlencode', explode('/', $doc['file_path'])))) ?>"
+                     download="<?= htmlspecialchars($doc['file_name']) ?>"
+                     class="text-emerald-500 hover:underline font-medium inline-flex items-center gap-1"
+                     title="Download">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                  </button>
+                  </a>
 
-                  <button @click="confirmAction = { visible: true, type: 'reject', documentId: <?= $doc['id'] ?> }"
-                          class="text-red-400 hover:underline font-medium inline-flex items-center gap-1">
+                  <!-- Print Button -->
+                  <button @click="printDocument('<?= htmlspecialchars("../" . implode('/', array_map('rawurlencode', explode('/', $doc['file_path'])))) ?>')"
+                          class="text-blue-500 hover:underline font-medium inline-flex items-center gap-1"
+                          title="Print">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                     </svg>
                   </button>
-                  <?php endif; ?>
                 </td>
               </tr>
               <?php endforeach; ?>
@@ -772,7 +775,19 @@ deleteFileConfirmed(documentId) {
   .finally(() => {
     this.deleteFileLoading = false;
   });
-}
+},
+
+        // Print document
+        printDocument(filePath) {
+            const printWindow = window.open(filePath, '_blank');
+            if (printWindow) {
+                printWindow.addEventListener('load', () => {
+                    printWindow.print();
+                });
+            } else {
+                alert('Please allow pop-ups to print documents.');
+            }
+        }
     }
 }
 </script>

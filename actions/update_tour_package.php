@@ -97,6 +97,7 @@ function normalizeItineraryJson(string $rawJson): string {
 }
 
 $inclusionsJson = json_encode(safeJson($_POST['inclusions_json'] ?? '[]'));
+$exclusionsJson = json_encode(safeJson($_POST['exclusions_json'] ?? '[]'));
 $itineraryJson = normalizeItineraryJson($_POST['itinerary_json'] ?? '[]');
 
 // Image Upload Handler
@@ -186,6 +187,7 @@ try {
             package_name = ?,
             package_description = ?,
             inclusions_json = ?,
+            exclusions_json = ?,
             price = ?,
             day_duration = ?,
             night_duration = ?,
@@ -197,8 +199,8 @@ try {
         WHERE id = ?
     ");
     $updateStmt->bind_param(
-        "sssdiissiisi",
-        $name, $description, $inclusionsJson, $price,
+        "ssssdiissiisi",
+        $name, $description, $inclusionsJson, $exclusionsJson, $price,
         $days, $nights, $origin, $destination,
         $isFavorite, $requiresVisa, $imageFileName, $packageId
     );

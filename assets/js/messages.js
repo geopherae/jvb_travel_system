@@ -8,7 +8,7 @@ document.addEventListener('alpine:init', () => {
             isClient: initData.isClient ?? false,
             userId: initData.userId ?? null,
             userType: initData.userType ?? '',
-            recipientType: initData.recipientType ?? '',
+            recipientType: initData.recipientType ?? 'client', // default to client
             recipientId: initData.initialRecipientId ?? null,
             threadId: initData.initialThreadId ?? null,
             clients: initData.clients || [],
@@ -24,11 +24,6 @@ document.addEventListener('alpine:init', () => {
             isFetching: false,
             seenMessageIds: new Set(),
             fetchTimeout: null,
-            ws: null,
-            wsUrl: 'ws://localhost:8080', // Update for production host/port
-            enableWebSocket: true,
-            wsRetryCount: 0,
-            maxWsRetries: 3,
 
             init() {
                 // Load last selected recipient from localStorage
@@ -65,145 +60,8 @@ document.addEventListener('alpine:init', () => {
                     }
                 });
 
-                // Load previews and connect if recipient already selected
+                // Load previews and start polling
                 this.fetchMessagePreviews();
-
-                if (this.recipientId && this.enableWebSocket) {
-                    this.connectWebSocket();
-                }
-
-                // Clean up WebSocket on page unload
-                window.addEventListener('beforeunload', () => {
-                    if (this.ws) this.ws.close();
-                });
-            },
-
-            connectWebSocket() {
-                if (!this.enableWebSocket) {
-                    console.debug('[messageApp] WebSocket disabled, using polling only');
-                    return;
-                }
-
-                // Validate required data
-                if (!this.userId || !this.userType || !this.recipientId || !this.recipientType) {
-                    console.warn('[messageApp] Cannot connect WebSocket: missing required data');
-                    return;
-                }
-
-                // Stop retrying if we've exceeded limits
-                if (this.wsRetryCount >= this.maxWsRetries) {
-                    console.warn('[messageApp] WebSocket retries exceeded; falling back to polling');
-                    this.enableWebSocket = false;
-                    return;
-                }
-
-                // Reuse open connection
-                if (this.ws?.readyState === WebSocket.OPEN) {
-                    this.subscribeToRecipient();
-                    this.debounceFetchInitialMessages();
-                    return;
-                }
-
-                // Avoid duplicate connections
-                if (this.ws?.readyState === WebSocket.CONNECTING) {
-                    console.debug('[messageApp] WebSocket already connecting...');
-                    return;
-                }
-
-                this.isLoading = true;
-                this.wsRetryCount++;
-
-                const wsUrl = this.wsUrl;
-                console.debug(`[messageApp] Connecting to WebSocket: ${wsUrl}`);
-
-                this.ws = new WebSocket(wsUrl);
-
-                this.ws.onopen = () => {
-                    console.debug('[messageApp] WebSocket connected');
-                    this.wsRetryCount = 0;
-                    this.subscribeToRecipient();
-                    this.debounceFetchInitialMessages();
-                };
-
-                this.ws.onmessage = (event) => {
-                    try {
-                        const data = JSON.parse(event.data);
-                        console.debug('[messageApp] WS Message:', data);
-
-                        if (data.error) {
-                            console.error('[messageApp] WS Server Error:', data.error);
-                            return;
-                        }
-
-                        if (data.action === 'new_message' && data.message) {
-                            const msg = data.message;
-
-                            if (!msg.id || this.seenMessageIds.has(msg.id)) return;
-
-                            // Enrich message with avatar
-                            msg.sender_photo = msg.sender_photo || this.getAvatarUrl(msg);
-
-                            this.messages.push(msg);
-                            this.seenMessageIds.add(msg.id);
-                            this.threadId = msg.thread_id;
-                            this.lastFetched = msg.created_at;
-
-                            // Update preview for sidebar
-                            this.messagePreviews[msg.recipient_id] = {
-                                thread_id: msg.thread_id,
-                                recipient_id: msg.recipient_id,
-                                recipient_type: msg.recipient_type,
-                                message_text: msg.message_text,
-                                created_at: msg.created_at,
-                                recipient_name: msg.sender_name || 'Unknown'
-                            };
-
-                            this.scrollToBottom();
-                        }
-                    } catch (err) {
-                        console.error('[messageApp] Failed to parse WS message:', err);
-                    }
-                };
-
-                this.ws.onclose = (event) => {
-                    console.debug('[messageApp] WebSocket closed', event.code, event.reason);
-                    this.ws = null;
-                    this.isLoading = false;
-
-                    if (this.wsRetryCount < this.maxWsRetries) {
-                        const delay = Math.min(1000 * Math.pow(2, this.wsRetryCount), 30000);
-                        console.debug(`[messageApp] Reconnecting in ${delay}ms... (attempt ${this.wsRetryCount + 1})`);
-                        setTimeout(() => this.connectWebSocket(), delay);
-                    } else {
-                        console.warn('[messageApp] Max WebSocket retries reached; using polling only');
-                        this.enableWebSocket = false;
-                    }
-                };
-
-                this.ws.onerror = (error) => {
-                    console.error('[messageApp] WebSocket error:', error);
-                };
-            },
-
-            subscribeToRecipient() {
-                if (!this.ws || this.ws.readyState !== WebSocket.OPEN || !this.recipientId) {
-                    if (this.recipientId) {
-                        setTimeout(() => this.subscribeToRecipient(), 500);
-                    }
-                    return;
-                }
-
-                const payload = {
-                    action: 'subscribe',
-                    user_id: this.userId,
-                    user_type: this.userType,
-                    recipient_id: this.recipientId,
-                    recipient_type: this.recipientType,
-                    thread_id: this.threadId || ''
-                };
-
-                this.ws.send(JSON.stringify(payload));
-                console.debug('[messageApp] Subscribed to thread:', payload);
             },
 
             debounceFetchInitialMessages() {
@@ -226,7 +84,7 @@ document.addEventListener('alpine:init', () => {
                         thread_id: this.threadId || ''
                     });
 
-                    const response = await fetch(`/jvb_travel_system/api/messages/fetch.php?${params}`);
+                    const response = await fetch(`../api/messages/fetch.php?${params}`);
                     const text = await response.text();
 
                     if (!response.ok) {
@@ -282,7 +140,7 @@ document.addEventListener('alpine:init', () => {
                         thread_id: this.threadId || null
                     };
 
-                    const response = await fetch('/jvb_travel_system/api/messages/send.php', {
+                    const response = await fetch('../api/messages/send.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -348,17 +206,28 @@ document.addEventListener('alpine:init', () => {
                 });
             },
 
-            isAssignedToMe(clientId) {
-                const client = this.clients.find(c => c.id === clientId);
-                return client?.assigned_admin_id === this.userId;
+            get filteredAdmins() {
+                const query = this.searchQuery.trim().toLowerCase();
+                return query ? this.admins.filter(admin => {
+                    const name = (admin.full_name || '').toLowerCase();
+                    return name.includes(query);
+                }) : this.admins;
+            },
+
+            get allRecipients() {
+                // Combine clients and admins with type indicator for the UI
+                const clientsWithType = this.filteredClients.map(c => ({ ...c, recipientType: 'client' }));
+                const adminsWithType = this.filteredAdmins.map(a => ({ ...a, recipientType: 'admin' }));
+                return [...clientsWithType, ...adminsWithType];
             },
 
             get myAssignedClientsCount() {
                 return this.filteredClients.filter(c => c.assigned_admin_id === this.userId).length;
             },
 
-            getLastMessagePreview(clientId) {
-                const preview = this.messagePreviews[clientId];
+            getLastMessagePreview(recipientId, recipientType) {
+                const key = `${recipientType}_${recipientId}`;
+                const preview = this.messagePreviews[recipientId];
                 if (!preview?.message_text) return 'No messages yet';
 
                 const prefix = preview.sent_by_me ? 'You: ' : '';
@@ -371,6 +240,11 @@ document.addEventListener('alpine:init', () => {
                     : fullText;
             },
 
+            isAssignedToMe(clientId) {
+                const client = this.clients.find(c => c.id === clientId);
+                return client?.assigned_admin_id === this.userId;
+            },
+
             async fetchMessagePreviews() {
                 if (!this.userId || !this.userType) return;
 
@@ -380,7 +254,7 @@ document.addEventListener('alpine:init', () => {
                         user_type: this.userType
                     });
 
-                    const response = await fetch(`/jvb_travel_system/api/messages/preview.php?${params}`);
+                    const response = await fetch(`../api/messages/preview.php?${params}`);
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                     const data = await response.json();
@@ -412,13 +286,13 @@ document.addEventListener('alpine:init', () => {
                 if (msg.sender_type === 'admin') {
                     const admin = this.admins.find(a => a.id === msg.sender_id);
                     return admin?.admin_photo
-                        ? `../Uploads/admin_photo/${encodeURIComponent(admin.admin_photo)}`
+                        ? `../uploads/admin_photo/${encodeURIComponent(admin.admin_photo)}`
                         : '../images/default_client_profile.png';
                 }
 
                 const client = this.clients.find(c => c.id === msg.sender_id);
                 return client?.client_profile_photo
-                    ? `../Uploads/client_profiles/${encodeURIComponent(client.client_profile_photo)}`
+                    ? `../uploads/client_profiles/${encodeURIComponent(client.client_profile_photo)}`
                     : '../images/default_client_profile.png';
             },
 
@@ -432,7 +306,7 @@ document.addEventListener('alpine:init', () => {
                     return {
                         name: client.full_name || 'Unknown Client',
                         avatar: client.client_profile_photo
-                            ? `../Uploads/client_profiles/${encodeURIComponent(client.client_profile_photo)}`
+                            ? `../uploads/client_profiles/${encodeURIComponent(client.client_profile_photo)}`
                             : '../images/default_client_profile.png',
                         status: client.status || ''
                     };
@@ -447,7 +321,7 @@ document.addEventListener('alpine:init', () => {
                     return {
                         name: `${admin.first_name || ''} ${admin.last_name || ''}`.trim() || 'Travel Agent',
                         avatar: admin.admin_photo
-                            ? `../Uploads/admin_photo/${encodeURIComponent(admin.admin_photo)}`
+                            ? `../uploads/admin_photo/${encodeURIComponent(admin.admin_photo)}`
                             : '../images/default_client_profile.png',
                         status: ''
                     };

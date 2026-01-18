@@ -156,7 +156,6 @@ $alpineData = [
               $nextTick(() => {
                   if (recipientId) {
                       debounceFetchInitialMessages();
-                      connectWebSocket();
                   }
               });
           ">

@@ -179,7 +179,6 @@ if ($imgCount > 0) {
                 Enter your Access Code
               </label>
               <input 
-                type="password" 
                 id="access_code" 
                 name="access_code" 
                 required

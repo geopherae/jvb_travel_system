@@ -122,7 +122,7 @@ Alpine.data('tourFormData', (tour = {}) => ({
   // Configuration
   checklistTemplateId: tour.checklistTemplateId || 0,
   tab: 'details',
-  max: 6,
+  max: 10,
 
   isFormValid() {
   return (
@@ -138,6 +138,7 @@ Alpine.data('tourFormData', (tour = {}) => ({
   
   // Complex Data
   inclusions: tour.inclusions ? JSON.parse(JSON.stringify(tour.inclusions)) : [],
+  exclusions: tour.exclusions ? JSON.parse(JSON.stringify(tour.exclusions)) : [],
   itinerary: tour.itinerary ? JSON.parse(JSON.stringify(tour.itinerary)) : [{ day_title: '', activities: [] }],
   
   // Airport Related
@@ -290,6 +291,18 @@ handleCoverUpload(event) {
   remove(index) {
     if (index >= 0 && index < this.inclusions.length) {
       this.inclusions.splice(index, 1);
+    }
+  },
+
+  // Exclusion Methods
+  addExclusion() {
+    if (this.exclusions.length >= this.max) return;
+    this.exclusions.push({ icon: '', title: '', desc: '' });
+  },
+  
+  removeExclusion(index) {
+    if (index >= 0 && index < this.exclusions.length) {
+      this.exclusions.splice(index, 1);
     }
   },
 

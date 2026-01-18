@@ -54,7 +54,7 @@ async function pollMessages() {
             since_id: sinceId
         });
 
-        const res = await fetch(`/jvb_travel_system/api/messages/fetch.php?${params}`, {
+        const res = await fetch(`../api/messages/fetch.php?${params}`, {
             cache: 'no-store',
             signal: currentController.signal
         });

@@ -245,7 +245,7 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
 
     <!-- Modal Header -->
     <div class="bacspace-y-1 mb-4 border-b border-gray-100 pb-2">
-      <h2 class="text-xl font-semibold text-gray-800">Add New Client</h2>
+      <h2 class="text-xl font-semibold text-gray-800">Add New Guest</h2>
     </div>
 
     <!-- Add Client Form -->

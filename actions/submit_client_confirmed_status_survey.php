@@ -5,6 +5,13 @@ require_once __DIR__ . '/../includes/auth.php';
 
 use function Auth\guard;
 
+// Logging helper
+function logSurveyDebug($message) {
+  $logFile = __DIR__ . '/../logs/survey_debug.log';
+  $timestamp = date('Y-m-d H:i:s');
+  file_put_contents($logFile, "[{$timestamp}] {$message}\n", FILE_APPEND);
+}
+
 // Detect if this is an AJAX request
 $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
@@ -45,29 +52,82 @@ if ($survey_type !== 'status_confirmed') {
 }
 
 try {
-  // If skipped, mark as completed without saving responses
+  // Handle skip: defer survey for a day
   if ($skip_survey === 1) {
-    $stmt = $conn->prepare("
-      UPDATE user_survey_status 
-      SET is_completed = 1, updated_at = NOW() 
-      WHERE user_id = ? 
-      AND user_role = 'client' 
-      AND survey_type = 'status_confirmed'
-      LIMIT 1
-    ");
-    $stmt->bind_param("i", $client_id);
-    
-    if (!$stmt->execute()) {
-      throw new Exception("Database error: " . $stmt->error);
+    $deferUntil = date('Y-m-d 00:00:00', strtotime('tomorrow'));
+    $responsePayload = [
+      'survey_type' => $survey_type,
+      'skipped' => true,
+      'skip_until' => $deferUntil,
+      'reason' => 'Client deferred survey for a day'
+    ];
+
+    $jsonPayload = json_encode($responsePayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if (json_last_error() !== JSON_ERROR_NONE || empty($jsonPayload)) {
+      throw new Exception('Failed to encode survey skip payload: ' . json_last_error_msg());
     }
-    
-    $stmt->close();
-    
-    // Clear session flag
+
+    $conn->begin_transaction();
+    logSurveyDebug("🔒 Transaction started (skip)");
+
+    $updateQuery = $conn->prepare("
+      UPDATE user_survey_status
+      SET is_completed = 0, completed_at = NULL, response_payload = ?, created_at = ?
+      WHERE user_id = ? AND user_role = 'client' AND survey_type = ? AND is_completed = 0
+    ");
+
+    if (!$updateQuery) {
+      throw new Exception('Database error: ' . $conn->error);
+    }
+
+    $updateQuery->bind_param(
+      "ssis",
+      $jsonPayload,
+      $deferUntil,
+      $client_id,
+      $survey_type
+    );
+
+    if (!$updateQuery->execute()) {
+      throw new Exception('Failed to defer survey: ' . $updateQuery->error);
+    }
+
+    if ($updateQuery->affected_rows === 0) {
+      logSurveyDebug('No survey row found to defer; creating one for tomorrow');
+
+      $insertQuery = $conn->prepare("
+        INSERT INTO user_survey_status (user_id, user_role, survey_type, is_completed, created_at, completed_at, response_payload)
+        VALUES (?, 'client', ?, 0, ?, NULL, ?)
+      ");
+
+      if (!$insertQuery) {
+        throw new Exception('Insert preparation failed: ' . $conn->error);
+      }
+
+      $insertQuery->bind_param(
+        "isss",
+        $client_id,
+        $survey_type,
+        $deferUntil,
+        $jsonPayload
+      );
+
+      if (!$insertQuery->execute()) {
+        throw new Exception('Failed to create deferred survey row: ' . $insertQuery->error);
+      }
+
+      logSurveyDebug('Deferred survey row inserted');
+    } else {
+      logSurveyDebug("✅ Survey deferred until {$deferUntil}");
+    }
+
+    $updateQuery->close();
+    $conn->commit();
+
     unset($_SESSION['show_confirmed_status_survey_modal']);
     
     if ($isAjax) {
-      echo json_encode(['success' => true, 'message' => 'Survey skipped']);
+      echo json_encode(['success' => true, 'message' => 'Survey deferred until tomorrow']);
     } else {
       $_SESSION['modal_status'] = 'survey_skipped';
       header("Location: ../client/client_dashboard.php");

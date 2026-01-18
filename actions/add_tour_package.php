@@ -107,6 +107,7 @@ function normalizeItineraryJson(string $rawJson): string {
 }
 
 $inclusionsJson = json_encode(safeJson($_POST['inclusions_json'] ?? '[]'));
+$exclusionsJson = json_encode(safeJson($_POST['exclusions_json'] ?? '[]'));
 $itineraryJson = normalizeItineraryJson($_POST['itinerary_json'] ?? '[]');
 
 // 🖼 Image Upload Handler (unchanged)
@@ -213,17 +214,17 @@ try {
     // 📝 Insert or Update Tour Package — NOW WITH requires_visa
     if ($packageId) {
         $stmt = $conn->prepare("UPDATE tour_packages SET
-            package_name = ?, package_description = ?, inclusions_json = ?, price = ?, day_duration = ?, night_duration = ?,
+            package_name = ?, package_description = ?, inclusions_json = ?, exclusions_json = ?, price = ?, day_duration = ?, night_duration = ?,
             origin = ?, destination = ?, is_favorite = ?, requires_visa = ?, tour_cover_image = ?
             WHERE id = ?");
         // NOTE: Image filename must be bound as string to preserve the path/filename
-        $stmt->bind_param("sssdiissiisi", $name, $description, $inclusionsJson, $price, $days, $nights, $origin, $destination, $isFavorite, $requiresVisa, $imageFileName, $packageId);
+        $stmt->bind_param("ssssdiissiisi", $name, $description, $inclusionsJson, $exclusionsJson, $price, $days, $nights, $origin, $destination, $isFavorite, $requiresVisa, $imageFileName, $packageId);
     } else {
         $stmt = $conn->prepare("INSERT INTO tour_packages
-            (package_name, package_description, inclusions_json, price, day_duration, night_duration, origin, destination, is_favorite, requires_visa, tour_cover_image)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            (package_name, package_description, inclusions_json, exclusions_json, price, day_duration, night_duration, origin, destination, is_favorite, requires_visa, tour_cover_image)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         // NOTE: Image filename must be bound as string to preserve the path/filename
-        $stmt->bind_param("sssdiissiis", $name, $description, $inclusionsJson, $price, $days, $nights, $origin, $destination, $isFavorite, $requiresVisa, $imageFileName);
+        $stmt->bind_param("ssssdiissiis", $name, $description, $inclusionsJson, $exclusionsJson, $price, $days, $nights, $origin, $destination, $isFavorite, $requiresVisa, $imageFileName);
     }
 
     if (!$stmt->execute()) throw new Exception("Failed to save package: " . $stmt->error);

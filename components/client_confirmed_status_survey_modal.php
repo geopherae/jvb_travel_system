@@ -139,7 +139,7 @@ $stmt->close();
       <div class="flex justify-between items-center pt-4">
         <button type="button" x-show="step > 1" @click="prev" class="text-sm text-gray-500 hover:underline">← Back</button>
 
-        <button type="button" onclick="document.getElementById('confirmedStatusSkipSurveyFlag').value = '1'; document.getElementById('confirmedStatusSurveyForm').submit();" class="text-xs text-gray-400 hover:text-gray-600">
+        <button type="button" onclick="skipConfirmedStatusSurvey()" class="text-xs text-gray-400 hover:text-gray-600">
           Skip survey
         </button>
 
@@ -172,5 +172,42 @@ $stmt->close();
       // Fail-open: if enabling fails, allow native submit
       console.error('Survey enable error:', e);
     }
+  }
+
+  function skipConfirmedStatusSurvey() {
+    // Set the skip flag and close the modal via AJAX
+    var form = document.getElementById('confirmedStatusSurveyForm');
+    var formData = new FormData(form);
+    formData.set('skip_survey', '1');
+    
+    fetch('../actions/submit_client_confirmed_status_survey.php', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('HTTP error ' + response.status);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Skip survey response:', data);
+      if (data.success) {
+        // Close the modal
+        var modal = document.getElementById('confirmedStatusSurveyModal');
+        if (modal) {
+          modal.remove();
+        }
+      } else {
+        alert('Error: ' + (data.message || 'Unable to skip survey'));
+      }
+    })
+    .catch(error => {
+      console.error('Error skipping survey:', error);
+      alert('An error occurred while skipping the survey. Check browser console for details.');
+    });
   }
 </script>

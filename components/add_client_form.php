@@ -216,7 +216,7 @@ class="relative flex flex-col items-center gap-2 sm:gap-3 border-2 border-dashed
             <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Full Name <span class="text-red-500">*</span>
+            Lead Guest Full Name <span class="text-red-500">*</span>
           </label>
           <input id="full_name" type="text" name="full_name" x-model="fullName" required
                  placeholder="Maria Reyes"
