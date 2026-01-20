@@ -29,6 +29,7 @@ $client_stmt = $conn->prepare("
     t.night_duration,
     t.tour_cover_image,
     t.inclusions_json,
+    t.exclusions_json,
     t.checklist_template_id,
     t.is_deleted
   FROM clients c
@@ -60,6 +61,7 @@ if (!empty($client['assigned_package_id'])) {
     'duration_days'   => $client['day_duration'] ?? 0,
     'duration_nights' => $client['night_duration'] ?? 0,
     'inclusions'      => json_decode($client['inclusions_json'] ?? '[]', true) ?? [],
+    'exclusions'      => json_decode($client['exclusions_json'] ?? '[]', true) ?? [],
     'is_deleted'      => (int)($client['is_deleted'] ?? 0)
   ];
 }
@@ -156,39 +158,45 @@ $todayDay  = getTodayItineraryDay($start, $end);
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 
-<body class="text-gray-800 font-sans" x-data="clientViewScope()" x-init="initClientView()">
+<body class="text-gray-800 font-sans overflow-hidden" x-data="{ sidebarOpen: false, ...clientViewScope() }" x-init="initClientView()">
 
 <!-- Includes -->
 <?php $isAdmin = true; include '../components/admin_sidebar.php'; ?>
 <?php $isAdmin = true; include '../components/right-panel.php'; ?>
 <?php include '../components/status_alert.php'; ?>
 
+<!-- Mobile Toggle -->
+<button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-30 bg-primary text-white rounded">
+  ☰
+</button>
 
-<main class="ml-0 md:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-8">
+<main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-4 sm:p-6 space-y-8 relative z-0">
 
   <!-- 🧭 Page Title -->
   <h2 class="text-xl font-bold">Client Overview</h2>
 
-  <div class="max-w-7xl mx-auto space-y-10">
+<div class="max-w-7xl mx-auto space-y-10">
 
-    <div x-data="{ tab: 'info' }" class="space-y-6">
+  <div x-data="{ tab: 'info' }" class="space-y-6">
 
-      <!-- 🧭 Tab Navigation -->
-      <div class="flex gap-6 border-b pb-2 text-sm font-semibold text-gray-600">
-        <div class="flex gap-6 flex-1">
+    <!-- 🧭 Tab Navigation -->
+    <div class="border-b pb-2">
+      <div class="flex items-center justify-between gap-4">
+        <!-- Tabs -->
+        <div class="flex gap-4 sm:gap-6 overflow-x-auto text-sm font-semibold text-gray-600 min-w-0">
           <button @click="tab = 'info'"
                   :class="tab === 'info' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
-                  class="pb-1 transition">
+                  class="pb-1 transition whitespace-nowrap shrink-0">
             Client & Tour Info
           </button>
           <button @click="tab = 'itinerary'"
                   :class="tab === 'itinerary' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
-                  class="pb-1 transition">
+                  class="pb-1 transition whitespace-nowrap shrink-0">
             Itinerary
           </button>
           <button @click="tab = 'tripPhotos'"
                   :class="tab === 'tripPhotos' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
-                  class="pb-1 transition">
+                  class="pb-1 transition whitespace-nowrap shrink-0">
             Client Trip Photos
           </button>
         </div>
@@ -197,21 +205,28 @@ $todayDay  = getTodayItineraryDay($start, $end);
         <a 
           href="./print_client_details.php?client_id=<?= $client['id'] ?>"
           target="_blank"
-          class="px-4 py-3 bg-sky-500 hover:bg-sky-700 text-white text-sm font-semibold rounded-lg transition shadow-sm flex items-center gap-2"
+          class="px-4 py-2 bg-sky-500 hover:bg-sky-700 text-white text-sm font-semibold rounded-lg transition shadow-sm flex items-center gap-2 whitespace-nowrap shrink-0"
         >
-          Print Client Details
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+          </svg>
+          <span class="hidden sm:inline">Print Client Details</span>
+          <span class="sm:hidden">Print</span>
         </a>
       </div>
+    </div>
 
       <!-- 📋 Tab 1: Client Info + Tour Package -->
       <div x-show="tab === 'info'" x-transition>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
+        <div class="flex flex-col sm: flex-row lg:flex-row gap-4 lg:gap-6 min-w-0">
           <!-- Client Contact Details Card -->
-          <?php include '../components/client-contact-details.php'; ?>
-
+          <div class="min-w-0 flex-1">
+            <?php include '../components/client-contact-details.php'; ?>
+          </div>
           <!-- 🧳 Tour Package Card -->
-          <?php include '../components/tour-package-card.php'; ?>
+          <div class="min-w-0 flex-1">
+            <?php include '../components/tour-package-card.php'; ?>
+          </div>
         </div>
       </div>
 
@@ -234,15 +249,18 @@ $todayDay  = getTodayItineraryDay($start, $end);
 
   </div>
 
+
+
+</main>
   <!-- ✨ Edit Client Modal -->
   <div x-show="$store.modals.editClient" x-cloak
-       class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center backdrop-blur-sm"
+       class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end sm:items-center justify-center backdrop-blur-sm px-3 sm:px-4"
        x-transition
        role="dialog" aria-modal="true"
        @keydown.escape.window="$store.modals.editClient = false"
        @click.outside="$store.modals.editClient = false">
 
-    <div class="max-w-xl w-full bg-white p-6 rounded shadow-xl max-h-[90vh] overflow-y-auto relative"
+    <div class="max-w-xl w-full bg-white p-4 sm:p-6 rounded-t-2xl sm:rounded-lg shadow-xl max-h-[90vh] overflow-y-auto relative"
          tabindex="-1"
          x-init="$el.focus()"
          x-transition:enter="transition ease-out duration-200"
@@ -262,9 +280,6 @@ $todayDay  = getTodayItineraryDay($start, $end);
       ?>
     </div>
   </div>
-
-</main>
-
 <script src="https://unpkg.com/alpinejs" defer></script>
 <?php include '../components/status_alert.php'; ?>
 <?php include '../components/update_client_booking_modal.php'; ?>
