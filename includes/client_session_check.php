@@ -2,6 +2,7 @@
 // client_session_check.php
 declare(strict_types=1);
 session_start();
+date_default_timezone_set('Asia/Manila');
 
 require_once __DIR__ . '/../actions/db.php'; // your DB connection
 

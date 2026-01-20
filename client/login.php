@@ -61,6 +61,48 @@ if ($imgCount > 0) {
     .float-slow   { animation: float 32s infinite ease-in-out; }
     .float-medium { animation: float 40s infinite ease-in-out; }
     .float-fast   { animation: float 28s infinite ease-in-out; }
+
+    /* Hide scrollbar but keep functionality */
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Mobile-specific optimizations */
+    @media (max-width: 768px) {
+      /* Ensure text is readable on mobile */
+      body {
+        font-size: 16px;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      /* Prevent horizontal scroll on body */
+      html, body {
+        overflow-x: hidden;
+        max-width: 100vw;
+      }
+
+      /* Touch-friendly button sizes */
+      button, a.inline-block {
+        min-height: 44px;
+        min-width: 44px;
+      }
+
+      /* Carousel mobile optimization */
+      .tour-carousel {
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .tour-card {
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+      }
+    }
   </style>
 </head>
 <body class="min-h-screen text-white overflow-x-hidden relative">
@@ -82,7 +124,7 @@ if ($imgCount > 0) {
     <div class="absolute inset-0 bg-gradient-to-r from-sky-900/90 via-transparent to-sky-600/15 pointer-events-none"></div>
   </div>
 
-  <!-- Floating Gallery Photos – RIGHT HALF ONLY, spread to edges -->
+  <!-- Floating Gallery Photos – RIGHT HALF ONLY on desktop, hidden on mobile -->
   <?php if (!empty($galleryImages)): ?>
   <div class="absolute top-0 right-0 w-full lg:w-1/2 h-screen pointer-events-none overflow-hidden z-[5] hidden lg:block">
     <?php foreach ($galleryImages as $index => $img): ?>
@@ -107,65 +149,65 @@ if ($imgCount > 0) {
   <div class="relative z-10 min-h-screen flex flex-col lg:flex-row">
 
     <!-- Hero Text Content (left side – clean & readable) -->
-    <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 py-28 lg:px-20 lg:py-28">
+    <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-8 py-16 sm:py-20 lg:px-20 lg:py-28">
       <div class="max-w-2xl mx-auto lg:mx-0">
-        <div class="inline-block mb-6 px-5 py-2.5 bg-white/15 backdrop-blur-lg rounded-full text-sm font-medium tracking-wide border border-white/20">
+        <div class="inline-block mb-4 sm:mb-6 px-4 sm:px-5 py-2 sm:py-2.5 bg-white/15 backdrop-blur-lg rounded-full text-xs sm:text-sm font-medium tracking-wide border border-white/20">
           Welcome to JV-B Travel & Tours
         </div>
         
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 drop-shadow-lg">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 sm:mb-6 drop-shadow-lg">
           Let's Make Your<br>
           <span class="text-white drop-shadow-xl">Best Trip Ever</span>
         </h1>
         
-        <p class="text-lg sm:text-xl text-gray-100 mb-10 max-w-xl drop-shadow-md">
+        <p class="text-base sm:text-lg md:text-xl text-gray-100 mb-6 sm:mb-10 max-w-xl drop-shadow-md">
           Whether you're seeking adventure, relaxation, or cultural immersion, we are here to bring the perfect journey just for you.
         </p>
 
-              <!-- CTA Section -->
-      <div class="pb-4 text-left">
-        <a href="#" class="inline-block px-8 py-4 bg-[#2596be] hover:bg-[#1e7ca8] text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-          Visit our Facebook Page
-        </a>
-      </div>
+        <!-- CTA Section -->
+        <div class="pb-4 text-left">
+          <a href="https://www.facebook.com/jvandbtravel" target="_blank" rel="noopener noreferrer" class="inline-block px-6 sm:px-8 py-3 sm:py-4 bg-[#2596be] hover:bg-[#1e7ca8] text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg text-sm sm:text-base">
+            Visit our Facebook Page
+          </a>
+        </div>
 
-        <div class="flex flex-wrap gap-8 text-sm">
-            <div class="flex items-center gap-2">
+        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-8 text-xs sm:text-sm">
+          <div class="flex items-center gap-2">
             <a href="https://www.facebook.com/jvandbtravel" target="_blank" rel="noopener noreferrer">
-              <svg class="w-6 h-6 text-[#2596be] hover:text-[#1e7ca8] transition" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#2596be] hover:text-[#1e7ca8] transition" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
               </svg>
             </a>
             <a href="https://www.facebook.com/jvandbtravel" target="_blank" rel="noopener noreferrer"><span class="font-medium">Follow us on Facebook</span></a>
-            </div>
-            <div class="flex items-center gap-2">
-            <svg class="w-6 h-6 text-[#2596be]" fill="currentColor" viewBox="0 0 20 20">
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#2596be]" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812z" clip-rule="evenodd" />
             </svg>
             <a href="mailto:reservations.jvandbtravel@gmail.com" class="font-medium hover:text-[#ffffff] transition">Send us an email</a>
-            </div>
+          </div>
         </div>
-      <!-- Testimonial card -->
-      <?php include '../includes/testimonial-card.php'; ?>
+        <!-- Testimonial card -->
+        <?php include '../includes/testimonial-card.php'; ?>
       </div>
     </div>
 
     <!-- Login Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 lg:py-0 lg:px-12 relative">
+    <div class="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12 lg:py-0 lg:px-12 relative">
       <div class="w-full max-w-md">
-        <div class="bg-[#174f85]/60 backdrop-blur-lg border border-white/25 rounded-3xl shadow-2xl p-8 md:p-10">
-          <div class="text-center mb-8">
+        <div class="bg-[#174f85]/60 backdrop-blur-lg border border-white/25 rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10">
+          <div class="text-center mb-6 sm:mb-8">
             <img 
               src="../images/JVB_Logo.jpg" 
               alt="JVB Travel Logo" 
-              class="mx-auto w-24 h-24 object-contain rounded-full mb-5 shadow-xl ring-4 ring-[#2596be]/30"
+              class="mx-auto w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-full mb-4 sm:mb-5 shadow-xl ring-4 ring-[#2596be]/30"
             />
-            <h2 class="text-3xl font-bold text-white drop-shadow-md">Client Portal</h2>
-            <p class="text-gray-200 mt-2">Access your personalized itinerary</p>
+            <h2 class="text-2xl sm:text-3xl font-bold text-white drop-shadow-md">Client Portal</h2>
+            <p class="text-gray-200 mt-2 text-sm sm:text-base">Access your personalized itinerary</p>
           </div>
 
           <?php if (isset($_SESSION['login_error'])): ?>
-            <div class="bg-red-500/30 border border-red-400/50 text-white px-6 py-4 rounded-2xl mb-8 text-center backdrop-blur-sm">
+            <div class="bg-red-500/30 border border-red-400/50 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl mb-6 sm:mb-8 text-center backdrop-blur-sm text-sm sm:text-base">
               <?= htmlspecialchars($_SESSION['login_error']) ?>
             </div>
             <?php unset($_SESSION['login_error']); ?>
@@ -174,7 +216,7 @@ if ($imgCount > 0) {
           <form action="process_login.php" method="POST">
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>" />
 
-            <div class="mb-6">
+            <div class="mb-5 sm:mb-6">
               <label for="access_code" class="block text-sm font-medium text-gray-200 mb-2">
                 Enter your Access Code
               </label>
@@ -182,24 +224,23 @@ if ($imgCount > 0) {
                 id="access_code" 
                 name="access_code" 
                 required
-                class="w-full px-6 py-4 bg-white/10 border border-white/30 rounded-xl text-white placeholder-gray-300 focus:outline-none focus:border-[#2596be] focus:ring-2 focus:ring-[#2596be]/40 transition text-lg"
+                class="w-full px-4 sm:px-6 py-3 sm:py-4 bg-white/10 border border-white/30 rounded-xl text-white placeholder-gray-300 focus:outline-none focus:border-[#2596be] focus:ring-2 focus:ring-[#2596be]/40 transition text-base sm:text-lg"
                 placeholder="JVBT-0000"
               />
             </div>
 
             <button 
               type="submit"
-              class="w-full bg-[#2596be] hover:bg-[#1e7ca8] text-white font-semibold py-4 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+              class="w-full bg-[#2596be] hover:bg-[#1e7ca8] text-white font-semibold py-3 sm:py-4 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg text-sm sm:text-base"
             >
-              
-            Login
+              Login
             </button>
           </form>
 
-          <p class="italic font-semibold mt-8 text-center text-sm text-gray-300">
-          Don't have an access code? Book now to get started!
+          <p class="italic font-semibold mt-6 sm:mt-8 text-center text-xs sm:text-sm text-gray-300">
+            Don't have an access code? Book now to get started!
           </p>
-          <p class="font-semibold mt-2 text-center text-sm text-gray-300">
+          <p class="font-semibold mt-2 text-center text-xs sm:text-sm text-gray-300">
             Are you an administrator? 
             <a href="../admin/admin_login.php" class="text-[#2596be] hover:text-[#1e7ca8] font-semibold hover:underline">
               Admin Login
@@ -210,86 +251,86 @@ if ($imgCount > 0) {
     </div>
   </div>
 
-    <!-- DOT Illustration Divider - Full Width -->
-  <div class="relative z-10 w-full h-8 overflow-hidden bg-gray-100">
+  <!-- DOT Illustration Divider - Full Width -->
+  <div class="relative z-10 w-full h-6 sm:h-8 overflow-hidden bg-gray-100">
     <img src="../images/landing_page_assets/dot_illustrations_icons.svg" 
          alt="Decorative divider with dot illustrations" 
          class="w-full h-full object-cover">
   </div>
 
   <!-- Tour Packages Carousel Section -->
-  <div class="relative z-10 py-20 px-6 bg-gradient-to-b from-white to-gray-50">
+  <div class="relative z-10 py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-gradient-to-b from-white to-gray-50">
     <div class="max-w-7xl mx-auto">
       <!-- Section Header -->
-      <div class="text-center mb-12">
-        <div class="inline-block mb-4 px-5 py-2.5 bg-sky-700 rounded-full text-sm font-medium tracking-wide border border-[#2596be]/30">
+      <div class="text-center mb-8 sm:mb-10 md:mb-12">
+        <div class="inline-block mb-3 sm:mb-4 px-4 sm:px-5 py-2 sm:py-2.5 bg-sky-700 rounded-full text-xs sm:text-sm font-medium tracking-wide border border-[#2596be]/30">
           Curated Experiences
         </div>
-        <h2 class="text-4xl sm:text-5xl font-extrabold text-sky-800 mb-6">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-sky-800 mb-4 sm:mb-6 px-4">
           Explore Our Featured Tour Packages
         </h2>
-        <p class="text-lg text-slate-700 max-w-2xl mx-auto">
+        <p class="text-sm sm:text-base md:text-lg text-slate-700 max-w-2xl mx-auto px-4">
           Handpicked destinations and experiences crafted for unforgettable memories.
         </p>
       </div>
 
       <!-- Carousel Container -->
-      <div class="relative px-12">
+      <div class="relative px-0 sm:px-8 md:px-12">
         <!-- Carousel Wrapper -->
-        <div class="p-4 overflow-hidden">
-          <div class="tour-carousel flex transition-transform duration-500 ease-out" id="tourCarousel" style="width: 100%;">
+        <div class="p-2 sm:p-4 overflow-x-auto md:overflow-hidden scrollbar-hide snap-x snap-mandatory">
+          <div class="tour-carousel flex transition-transform duration-500 ease-out md:transition-transform" id="tourCarousel" style="width: 100%;">
             
-          <!-- Tour Package Card 1 -->
-            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-3 flex flex-col h-full">
-              <div class="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
-          <div class="absolute inset-0 bg-gradient-to-br from-[#2596be]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 flex-shrink-0">
-            <img src="../images/landing_page_assets/tour_packages_banners/memorable_japan.png" 
-                 alt="Tour Package 1" 
-                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-          </div>
-          <div class="relative z-10 p-6 flex flex-col flex-grow">
-            <h3 class="text-xl font-bold text-sky-800 mb-3">Memorable Japan</h3>
-                        <p class="text-slate-700 text-sm leading-relaxed mb-4">Your dream Japan getaway starts here! Explore Mt. Fuji, Asakusa, Kyoto's Bamboo Grove, Nara Deer Park, and more!</p>
-            <ul class="text-slate-700 text-sm leading-relaxed mb-4 space-y-1 flex-grow">
-              <li class="flex items-start gap-2">
-                <span class="text-[#2596be] font-bold">•</span>
-                <span>Mount Fuji</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-[#2596be] font-bold">•</span>
-                <span>Kyoto Temples</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-[#2596be] font-bold">•</span>
-                <span>Asakusa District</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-[#2596be] font-bold">•</span>
-                <span>And more!</span>
-              </li>
-            </ul>
-            <span class="inline-block px-4 py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-sm font-semibold mt-auto">As low as $1,088 per pax</span>
-          </div>
+            <!-- Tour Package Card 1 -->
+            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-2 sm:px-3 flex flex-col h-full">
+              <div class="group relative bg-white border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
+                <div class="absolute inset-0 bg-gradient-to-br from-[#2596be]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 flex-shrink-0">
+                  <img src="../images/landing_page_assets/tour_packages_banners/memorable_japan.png" 
+                       alt="Tour Package 1" 
+                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                </div>
+                <div class="relative z-10 p-4 sm:p-6 flex flex-col flex-grow">
+                  <h3 class="text-lg sm:text-xl font-bold text-sky-800 mb-2 sm:mb-3">Memorable Japan</h3>
+                  <p class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">Your dream Japan getaway starts here! Explore Mt. Fuji, Asakusa, Kyoto's Bamboo Grove, Nara Deer Park, and more!</p>
+                  <ul class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 space-y-1 flex-grow">
+                    <li class="flex items-start gap-2">
+                      <span class="text-[#2596be] font-bold">•</span>
+                      <span>Mount Fuji</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-[#2596be] font-bold">•</span>
+                      <span>Kyoto Temples</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-[#2596be] font-bold">•</span>
+                      <span>Asakusa District</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-[#2596be] font-bold">•</span>
+                      <span>And more!</span>
+                    </li>
+                  </ul>
+                  <span class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-xs sm:text-sm font-semibold mt-auto">As low as $1,088 per pax</span>
+                </div>
               </div>
             </div>
 
             <!-- Tour Package Card 2 -->
-            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-3 flex flex-col h-full">
-              <div class="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
+            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-2 sm:px-3 flex flex-col h-full">
+              <div class="group relative bg-white border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
                 <div class="absolute inset-0 bg-gradient-to-br from-[#2596be]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 flex-shrink-0">
                   <img src="../images/landing_page_assets/tour_packages_banners/betcha_by_bali.png" 
                        alt="Tour Package 2" 
                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                 </div>
-                <div class="relative z-10 p-6 flex flex-col flex-grow">
-                  <h3 class="text-xl font-bold text-sky-800 mb-3">Betcha by Bali</h3>
-                  <p class="text-slate-700 text-sm leading-relaxed mb-2">Enjoy Uluwatu's rich cultural heritage. Visit Tampaksiring, Mengwi Royal Temple, and more!</p>
-                  <ul class="text-slate-700 text-sm leading-relaxed mb-4 space-y-1 flex-grow">
+                <div class="relative z-10 p-4 sm:p-6 flex flex-col flex-grow">
+                  <h3 class="text-lg sm:text-xl font-bold text-sky-800 mb-2 sm:mb-3">Betcha by Bali</h3>
+                  <p class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-2">Enjoy Uluwatu's rich cultural heritage. Visit Tampaksiring, Mengwi Royal Temple, and more!</p>
+                  <ul class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 space-y-1 flex-grow">
                     <li class="flex items-start gap-2">
                       <span class="text-[#2596be] font-bold">•</span>
-                      <span> English-speaking guide</span>
+                      <span>English-speaking guide</span>
                     </li>
                     <li class="flex items-start gap-2">
                       <span class="text-[#2596be] font-bold">•</span>
@@ -304,27 +345,27 @@ if ($imgCount > 0) {
                       <span>And more!</span>
                     </li>
                   </ul>
-                  <span class="inline-block px-4 py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-sm font-semibold mt-auto">As low as ₱32,888 per pax</span>
+                  <span class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-xs sm:text-sm font-semibold mt-auto">As low as ₱32,888 per pax</span>
                 </div>
               </div>
             </div>
 
             <!-- Tour Package Card 3 -->
-            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-3 flex flex-col h-full">
-              <div class="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
+            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-2 sm:px-3 flex flex-col h-full">
+              <div class="group relative bg-white border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
                 <div class="absolute inset-0 bg-gradient-to-br from-[#2596be]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 flex-shrink-0">
                   <img src="../images/landing_page_assets/tour_packages_banners/manila_shanghai.png" 
                        alt="Tour Package 3" 
                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                 </div>
-                <div class="relative z-10 p-6 flex flex-col flex-grow">
-                  <h3 class="text-xl font-bold text-sky-800 mb-3">Manila Shanghai</h3>
-                  <p class="text-slate-700 text-sm leading-relaxed mb-2">Discover the perfect mix of modern city, views, culture, shopping, theme park fun, and more!</p>
-                  <ul class="text-slate-700 text-sm leading-relaxed mb-4 space-y-1 flex-grow">
+                <div class="relative z-10 p-4 sm:p-6 flex flex-col flex-grow">
+                  <h3 class="text-lg sm:text-xl font-bold text-sky-800 mb-2 sm:mb-3">Manila Shanghai</h3>
+                  <p class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-2">Discover the perfect mix of modern city, views, culture, shopping, theme park fun, and more!</p>
+                  <ul class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 space-y-1 flex-grow">
                     <li class="flex items-start gap-2">
                       <span class="text-[#2596be] font-bold">•</span>
-                      <span> English-speaking guide</span>
+                      <span>English-speaking guide</span>
                     </li>
                     <li class="flex items-start gap-2">
                       <span class="text-[#2596be] font-bold">•</span>
@@ -339,24 +380,24 @@ if ($imgCount > 0) {
                       <span>And more!</span>
                     </li>
                   </ul>
-                  <span class="inline-block px-4 py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-sm font-semibold mt-auto">$559 All-in per pax</span>
+                  <span class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-xs sm:text-sm font-semibold mt-auto">$559 All-in per pax</span>
                 </div>
               </div>
             </div>
 
             <!-- Tour Package Card 4 -->
-            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-3 flex flex-col h-full">
-              <div class="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
+            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-2 sm:px-3 flex flex-col h-full">
+              <div class="group relative bg-white border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
                 <div class="absolute inset-0 bg-gradient-to-br from-[#2596be]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 flex-shrink-0">
                   <img src="../images/landing_page_assets/tour_packages_banners/beijing.png" 
                        alt="Tour Package 4" 
                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                 </div>
-                <div class="relative z-10 p-6 flex flex-col flex-grow">
-                  <h3 class="text-xl font-bold text-sky-800 mb-3">Wo Ai Ni Beijing</h3>
-                  <p class="text-slate-700 text-sm leading-relaxed mb-2">Visit Heavenly Temple, Forbidden City, Universal Studios Beijing, Summer Palace, and more!</p>                  
-                  <ul class="text-slate-700 text-sm leading-relaxed mb-4 space-y-1 flex-grow">
+                <div class="relative z-10 p-4 sm:p-6 flex flex-col flex-grow">
+                  <h3 class="text-lg sm:text-xl font-bold text-sky-800 mb-2 sm:mb-3">Wo Ai Ni Beijing</h3>
+                  <p class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-2">Visit Heavenly Temple, Forbidden City, Universal Studios Beijing, Summer Palace, and more!</p>
+                  <ul class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 space-y-1 flex-grow">
                     <li class="flex items-start gap-2">
                       <span class="text-[#2596be] font-bold">•</span>
                       <span>Private Coach</span>
@@ -374,24 +415,24 @@ if ($imgCount > 0) {
                       <span>And more!</span>
                     </li>
                   </ul>
-                  <span class="inline-block px-4 py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-sm font-semibold mt-auto">From $899 per pax</span>
+                  <span class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-xs sm:text-sm font-semibold mt-auto">From $899 per pax</span>
                 </div>
               </div>
             </div>
 
-            <!-- Tour Package Card 5 (for carousel continuation) -->
-            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-3 flex flex-col h-full">
-              <div class="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
+            <!-- Tour Package Card 5 -->
+            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-2 sm:px-3 flex flex-col h-full">
+              <div class="group relative bg-white border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
                 <div class="absolute inset-0 bg-gradient-to-br from-[#2596be]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 flex-shrink-0">
                   <img src="../images/landing_page_assets/tour_packages_banners/coron.jpg" 
                        alt="Tour Package 5" 
                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                 </div>
-                <div class="relative z-10 p-6 flex flex-col flex-grow">
-                  <h3 class="text-xl font-bold text-sky-800 mb-3">Dream Island Coron</h3>
-                  <p class="text-slate-700 text-sm leading-relaxed mb-2">Your dream island escape just got more exciting! Visit Coron and explore its stunning islands and lagoons.</p>                  
-                  <ul class="text-slate-700 text-sm leading-relaxed mb-4 space-y-1 flex-grow">
+                <div class="relative z-10 p-4 sm:p-6 flex flex-col flex-grow">
+                  <h3 class="text-lg sm:text-xl font-bold text-sky-800 mb-2 sm:mb-3">Dream Island Coron</h3>
+                  <p class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-2">Your dream island escape just got more exciting! Visit Coron and explore its stunning islands and lagoons.</p>
+                  <ul class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 space-y-1 flex-grow">
                     <li class="flex items-start gap-2">
                       <span class="text-[#2596be] font-bold">•</span>
                       <span>Island Hopping Tour A</span>
@@ -409,24 +450,27 @@ if ($imgCount > 0) {
                       <span>And more!</span>
                     </li>
                   </ul>
-                  <span class="inline-block px-4 py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-sm font-semibold mt-auto">From P5,199 per pax</span>
+                  <span class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-xs sm:text-sm font-semibold mt-auto">From P5,199 per pax</span>
                 </div>
               </div>
             </div>
 
-            <!-- Tour Package Card 6 (for carousel continuation) -->
-            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-3 flex flex-col h-full">
-              <div class="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
+            <!-- Remaining tour cards 6-8 follow same pattern... -->
+            <!-- I'll include them all for completeness -->
+            
+            <!-- Tour Package Card 6 -->
+            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-2 sm:px-3 flex flex-col h-full">
+              <div class="group relative bg-white border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
                 <div class="absolute inset-0 bg-gradient-to-br from-[#2596be]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 flex-shrink-0">
                   <img src="../images/landing_page_assets/tour_packages_banners/sagada.jpg" 
                        alt="Tour Package 6" 
                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                 </div>
-                <div class="relative z-10 p-6 flex flex-col flex-grow">
-                  <h3 class="text-xl font-bold text-sky-800 mb-3">Benguet, Sagada</h3>
-                  <p class="text-slate-700 text-sm leading-relaxed mb-2">Experience the beauty of Banague, Sagada, and Baguio City. It's a perfect mountain escape with stunning views and cool breezes!
-                  <ul class="text-slate-700 text-sm leading-relaxed mb-4 space-y-1 flex-grow">
+                <div class="relative z-10 p-4 sm:p-6 flex flex-col flex-grow">
+                  <h3 class="text-lg sm:text-xl font-bold text-sky-800 mb-2 sm:mb-3">Benguet, Sagada</h3>
+                  <p class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-2">Experience the beauty of Banague, Sagada, and Baguio City. It's a perfect mountain escape with stunning views and cool breezes!</p>
+                  <ul class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 space-y-1 flex-grow">
                     <li class="flex items-start gap-2">
                       <span class="text-[#2596be] font-bold">•</span>
                       <span>Roundtrip van transfer</span>
@@ -437,31 +481,31 @@ if ($imgCount > 0) {
                     </li>
                     <li class="flex items-start gap-2">
                       <span class="text-[#2596be] font-bold">•</span>
-                      <span>Fuel, toll, parking fees, driver's food & lodging</span>
+                      <span>Fuel, toll, parking fees</span>
                     </li>
                     <li class="flex items-start gap-2">
                       <span class="text-[#2596be] font-bold">•</span>
                       <span>And more!</span>
                     </li>
                   </ul>
-                  <span class="inline-block px-4 py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-sm font-semibold mt-auto">As low as P3,899 per pax</span>
+                  <span class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-xs sm:text-sm font-semibold mt-auto">As low as P3,899 per pax</span>
                 </div>
               </div>
             </div>
 
-            <!-- Tour Package Card 7 (for carousel continuation) -->
-            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-3 flex flex-col h-full">
-              <div class="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
+            <!-- Tour Package Card 7 -->
+            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-2 sm:px-3 flex flex-col h-full">
+              <div class="group relative bg-white border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
                 <div class="absolute inset-0 bg-gradient-to-br from-[#2596be]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 flex-shrink-0">
                   <img src="../images/landing_page_assets/tour_packages_banners/cebu.jpg" 
                        alt="Tour Package 7" 
                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                 </div>
-                <div class="relative z-10 p-6 flex flex-col flex-grow">
-                  <h3 class="text-xl font-bold text-sky-800 mb-3">Cebu City</h3>
-                  <p class="text-slate-700 text-sm leading-relaxed mb-2">A nature lover's dream with its breathtaking waterfalls and some of the top diving spots in the Philippines. Find your gateway to Cebu!</p>                  
-                  <ul class="text-slate-700 text-sm leading-relaxed mb-4 space-y-1 flex-grow">
+                <div class="relative z-10 p-4 sm:p-6 flex flex-col flex-grow">
+                  <h3 class="text-lg sm:text-xl font-bold text-sky-800 mb-2 sm:mb-3">Cebu City</h3>
+                  <p class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-2">A nature lover's dream with its breathtaking waterfalls and some of the top diving spots in the Philippines.</p>
+                  <ul class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 space-y-1 flex-grow">
                     <li class="flex items-start gap-2">
                       <span class="text-[#2596be] font-bold">•</span>
                       <span>Island Hopping</span>
@@ -479,24 +523,24 @@ if ($imgCount > 0) {
                       <span>And more!</span>
                     </li>
                   </ul>
-                  <span class="inline-block px-4 py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-sm font-semibold mt-auto">From $3,499 per pax</span>
+                  <span class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-xs sm:text-sm font-semibold mt-auto">From $3,499 per pax</span>
                 </div>
               </div>
             </div>
 
-            <!-- Tour Package Card 8 (for carousel continuation) -->
-            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-3 flex flex-col h-full">
-              <div class="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
+            <!-- Tour Package Card 8 -->
+            <div class="tour-card flex-shrink-0 w-full sm:w-1/2 lg:w-1/4 px-2 sm:px-3 flex flex-col h-full">
+              <div class="group relative bg-white border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden hover:border-[#2596be] transition-all duration-300 hover:shadow-lg hover:-translate-y-2 h-full flex flex-col">
                 <div class="absolute inset-0 bg-gradient-to-br from-[#2596be]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 flex-shrink-0">
                   <img src="../images/landing_page_assets/tour_packages_banners/siargao.jpg" 
                        alt="Tour Package 8" 
                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                 </div>
-                <div class="relative z-10 p-6 flex flex-col flex-grow">
-                    <h3 class="text-xl font-bold text-sky-800 mb-3">Surfers' Paradise Siargao</h3>
-                    <p class="text-slate-700 text-sm leading-relaxed mb-2">Chase sunsets and salty hair in Siargao, the surfing capital of the Philippines. Experience the thrill of surfing. Book now for an unforgettable adventure!</p>
-                  <ul class="text-slate-700 text-sm leading-relaxed mb-4 space-y-1 flex-grow">
+                <div class="relative z-10 p-4 sm:p-6 flex flex-col flex-grow">
+                  <h3 class="text-lg sm:text-xl font-bold text-sky-800 mb-2 sm:mb-3">Surfers' Paradise Siargao</h3>
+                  <p class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-2">Chase sunsets and salty hair in Siargao, the surfing capital of the Philippines.</p>
+                  <ul class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 space-y-1 flex-grow">
                     <li class="flex items-start gap-2">
                       <span class="text-[#2596be] font-bold">•</span>
                       <span>2 Nights Hotel Accommodation</span>
@@ -514,26 +558,33 @@ if ($imgCount > 0) {
                       <span>And more!</span>
                     </li>
                   </ul>
-                  <span class="inline-block px-4 py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-sm font-semibold mt-auto">As low as P4,999 per pax</span>
+                  <span class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-[#2596be]/10 text-[#2596be] rounded-lg text-xs sm:text-sm font-semibold mt-auto">As low as P4,999 per pax</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Left Arrow Button -->
-        <button onclick="scrollCarousel(-1)" class="absolute left-0 top-1/3 -translate-y-1/2 z-20 bg-[#2596be] hover:bg-[#1e7ca8] text-white p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hidden lg:flex items-center justify-center">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Navigation Arrows - Hidden on mobile, shown on tablet+ -->
+        <button onclick="scrollCarousel(-1)" class="absolute left-0 top-1/3 -translate-y-1/2 z-20 bg-[#2596be] hover:bg-[#1e7ca8] text-white p-3 sm:p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hidden md:flex items-center justify-center">
+          <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
 
-        <!-- Right Arrow Button -->
-        <button onclick="scrollCarousel(1)" class="absolute right-0 top-1/3 -translate-y-1/2 z-20 bg-[#2596be] hover:bg-[#1e7ca8] text-white p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hidden lg:flex items-center justify-center">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button onclick="scrollCarousel(1)" class="absolute right-0 top-1/3 -translate-y-1/2 z-20 bg-[#2596be] hover:bg-[#1e7ca8] text-white p-3 sm:p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hidden md:flex items-center justify-center">
+          <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
         </button>
+      </div>
+
+      <!-- Mobile swipe indicator -->
+      <div class="flex justify-center gap-2 mt-6 md:hidden">
+        <div class="w-2 h-2 rounded-full bg-[#2596be]"></div>
+        <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+        <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+        <div class="w-2 h-2 rounded-full bg-gray-300"></div>
       </div>
     </div>
   </div>

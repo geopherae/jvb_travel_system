@@ -8,7 +8,6 @@ guard('admin');
 require_once __DIR__ . '/../includes/log_helper.php';
 use function LogHelper\generateClientSummary;
 
-
 include '../includes/header.php';
 
 // 🧭 Validate client ID
@@ -33,6 +32,13 @@ if (!$current) {
 }
 
 // 📝 Merge fields
+$companionsRaw = $_POST['companions_json'] ?? $current['companions_json'] ?? '[]';
+$companionsArr = json_decode($companionsRaw, true);
+if (!is_array($companionsArr)) {
+  $companionsArr = [];
+}
+$companionsJson = json_encode($companionsArr, JSON_UNESCAPED_UNICODE);
+
 $fields = [
   'full_name'            => trim($_POST['full_name'] ?? $current['full_name']),
   'email'                => trim($_POST['email'] ?? $current['email']),
@@ -42,9 +48,10 @@ $fields = [
   'assigned_package_id'  => $_POST['assigned_package_id'] ?? $current['assigned_package_id'],
   'trip_date_start'      => $_POST['trip_date_start'] ?? $current['trip_date_start'],
   'trip_date_end'        => $_POST['trip_date_end'] ?? $current['trip_date_end'],
-  'booking_date'       => $_POST['booking_date'] ?? $current['booking_date'],
+  'booking_date'         => $_POST['booking_date'] ?? $current['booking_date'],
   'client_profile_photo' => $current['client_profile_photo'],
-  'created_at'           => date('Y-m-d H:i:s')
+  'companions_json'      => $companionsJson,
+  'updated_at'           => date('Y-m-d H:i:s')
 ];
 
 // 📸 Handle photo upload
@@ -56,7 +63,7 @@ $update = $conn->prepare("
     full_name = ?, email = ?, phone_number = ?, address = ?,
     booking_number = ?, assigned_package_id = ?,
     trip_date_start = ?, trip_date_end = ?, booking_date = ?,
-    client_profile_photo = ?, created_at = ?
+    client_profile_photo = ?, companions_json = ?, updated_at = ?
   WHERE id = ?
 ");
 
@@ -67,17 +74,15 @@ if (!$update) {
 }
 
 $update->bind_param(
-  "sssssssssssi",
+  "ssssssssssssi",
   $fields['full_name'], $fields['email'], $fields['phone_number'], $fields['address'],
   $fields['booking_number'], $fields['assigned_package_id'],
   $fields['trip_date_start'], $fields['trip_date_end'], $fields['booking_date'],
-  $fields['client_profile_photo'], $fields['updated_at'], $clientId
+  $fields['client_profile_photo'], $fields['companions_json'], $fields['updated_at'],
+  $clientId
 );
 
 if ($update->execute()) {
-  $_SESSION['modal_status'] = 'edit_client_success';
-  $_SESSION['debug_console'][] = "✅ Client $clientId updated successfully.";
-  if ($update->execute()) {
   $_SESSION['modal_status'] = 'edit_client_success';
   $_SESSION['debug_console'][] = "✅ Client $clientId updated successfully.";
 
@@ -96,11 +101,12 @@ if ($update->execute()) {
   $business_impact = 'moderate';
 
   $audit_payload = [
-    'client_id'       => $clientId,
-    'actor_id'        => $actor_id,
-    'fields_changed'  => ['full_name', 'email', 'phone_number', 'address'],
-    'summary'         => generateClientSummary($fields),
-    'source'          => 'process_edit_client.php'
+    'client_id'        => $clientId,
+    'actor_id'         => $actor_id,
+    'fields_changed'   => ['full_name', 'email', 'phone_number', 'address', 'companions_json'],
+    'companions_count' => count($companionsArr),
+    'summary'          => generateClientSummary($fields),
+    'source'           => 'process_edit_client.php'
   ];
 
   $audit_changes = json_encode($audit_payload, JSON_UNESCAPED_UNICODE);
@@ -138,8 +144,6 @@ if ($update->execute()) {
   $audit_stmt->execute();
   $audit_stmt->close();
   $_SESSION['debug_console'][] = "🧾 Audit log saved.";
-}
-
 } else {
   $_SESSION['modal_status'] = 'edit_client_failed';
   $_SESSION['debug_console'][] = "❌ Update failed: " . $update->error;
@@ -206,3 +210,4 @@ function redirectWithDebug() {
   echo "</script>";
   exit;
 }
+?>

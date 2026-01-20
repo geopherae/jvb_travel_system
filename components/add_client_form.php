@@ -419,7 +419,27 @@ class="relative flex flex-col items-center gap-2 sm:gap-3 border-2 border-dashed
           </div>
         </div>
       </div>
+
+      <!-- Hotel Accommodation -->
+      <div>
+        <h4 class="text-xs sm:text-sm font-semibold text-gray-700 mb-2.5 sm:mb-3 flex items-center gap-1.5 sm:gap-2">
+          <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          Hotel Accommodation
+        </h4>
+        <!-- Hotel Accommodation Info -->
+        <div class="bg-sky-50 border border-sky-100 rounded-lg p-3 sm:p-4">
+          <p class="text-xs sm:text-sm text-gray-600">
+            <span class="text-gray-900">Hotel Accommodation Details can be updated in <span class="font-semibold text-sky-800">Edit Booking Details</span></span>
+          </p>
+        </div>
+
+      </div>
+
     </div>
+
+
 
     <!-- Date Warnings -->
     <div x-show="showDateWarning()" x-transition class="text-xs sm:text-sm text-amber-700 bg-amber-50 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-amber-200 flex gap-2 sm:gap-3">
@@ -431,6 +451,7 @@ class="relative flex flex-col items-center gap-2 sm:gap-3 border-2 border-dashed
         <p x-show="!datesInFuture()">Departure date cannot be in the past.</p>
       </div>
     </div>
+  
   </div>
 
   <!-- STEP 3: Passport & Agent -->

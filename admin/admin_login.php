@@ -65,9 +65,29 @@ if ($imgCount > 0) {
       transform: scale(1.08) translateY(-12px);
       z-index: 30;
     }
+
+    /* Mobile-specific optimizations */
+    @media (max-width: 768px) {
+      /* Ensure text is readable on mobile */
+      body {
+        font-size: 16px;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      /* Prevent horizontal scroll */
+      html, body {
+        overflow-x: hidden;
+        max-width: 100vw;
+      }
+
+      /* Touch-friendly button sizes */
+      button, a {
+        min-height: 44px;
+      }
+    }
   </style>
 </head>
-<body class="min-h-screen text-white overflow-x-hidden lg:overflow-hidden relative"
+<body class="min-h-screen text-white overflow-x-hidden relative"
   x-data="{}"
   @load="document.dispatchEvent(new CustomEvent('page-loaded'))">
 
@@ -79,7 +99,7 @@ if ($imgCount > 0) {
   <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 pointer-events-none z-0"></div>
   <div class="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/20 pointer-events-none z-0"></div>
 
-  <!-- Floating Gallery Photos – RIGHT HALF ONLY, 8 smaller spread photos -->
+  <!-- Floating Gallery Photos – RIGHT HALF ONLY on desktop, hidden on mobile -->
   <?php if (!empty($galleryImages)): ?>
   <div class="absolute top-0 right-0 w-full lg:w-1/2 h-full pointer-events-none overflow-hidden z-5 hidden lg:block">
     <?php foreach ($galleryImages as $index => $img): ?>
@@ -99,40 +119,40 @@ if ($imgCount > 0) {
   <?php endif; ?>
 
   <!-- Main Content -->
-  <div class="relative z-10 w-full min-h-screen flex flex-col lg:flex-row max-w-[1920px] mx-auto px-4 lg:px-6">
+  <div class="relative z-10 w-full min-h-screen flex flex-col lg:flex-row max-w-[1920px] mx-auto px-4 sm:px-6">
 
-    <!-- Hero Text Content (left side – professional tone) -->
-    <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 lg:px-16 py-8 lg:py-0">
-      <div class="max-w-xl">
-        <div class="inline-block mb-4 px-4 py-2 bg-white/15 backdrop-blur-lg rounded-full text-xs font-medium tracking-wide border border-white/20">
+    <!-- Hero Text Content (left side – professional tone) - Hidden on mobile, visible on desktop -->
+    <div class="hidden lg:flex w-full lg:w-1/2 flex-col justify-center px-4 sm:px-6 lg:px-16 py-12 sm:py-16 lg:py-0">
+      <div class="max-w-xl mx-auto lg:mx-0">
+        <div class="inline-block mb-3 sm:mb-4 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/15 backdrop-blur-lg rounded-full text-xs font-medium tracking-wide border border-white/20">
           JV-B Travel and Tours
         </div>
         
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-semibold sm:font-extrabold leading-tight mb-4 drop-shadow-lg">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold sm:font-extrabold leading-tight mb-3 sm:mb-4 drop-shadow-lg">
           Itinerary and Document<br>
           <span class="text-[#2596be] drop-shadow-xl">Management System</span>
         </h1>
         
-        <p class="md:text-2xl sm:text-xl text-gray-100 mb-6 drop-shadow-md">
+        <p class="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-100 mb-4 sm:mb-6 drop-shadow-md">
           Streamline tour management, track client progress, and deliver exceptional travel experiences.
         </p>
 
         <!-- Features -->
-        <div class="space-y-3 text-lg text-gray-100">
+        <div class="space-y-2 sm:space-y-3 text-sm sm:text-base lg:text-lg text-gray-100">
           <div class="flex items-start gap-2">
-            <svg class="w-6 h-6 text-[#2596be] flex-shrink-0 mt-0.5" fill="white" viewBox="0 0 20 20">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#2596be] flex-shrink-0 mt-0.5" fill="white" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
             <span>Real-time client tracking and communication</span>
           </div>
           <div class="flex items-start gap-2">
-            <svg class="w-6 h-6 text-[#2596be] flex-shrink-0 mt-0.5" fill="white" viewBox="0 0 20 20">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#2596be] flex-shrink-0 mt-0.5" fill="white" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
             <span>Tour Packages and Itinerary Builder</span>
           </div>
           <div class="flex items-start gap-2">
-            <svg class="w-6 h-6 text-[#2596be] flex-shrink-0 mt-0.5" fill="white" viewBox="0 0 20 20">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#2596be] flex-shrink-0 mt-0.5" fill="white" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
             <span>Faster Document Approvals</span>
@@ -141,29 +161,29 @@ if ($imgCount > 0) {
       </div>
     </div>
 
-    <!-- Login Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center px-6 py-8 lg:py-0 lg:px-8 relative">
+    <!-- Login Form - Centered on mobile, right side on desktop -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 py-6 sm:py-8 lg:py-0 lg:px-8 relative min-h-screen lg:min-h-0">
       <div class="w-full max-w-sm">
-        <div class="bg-[#ffffff]/100 backdrop-blur-lg border border-sky-700/25 rounded-3xl shadow-2xl p-6 md:p-8">
-          <div class="text-center mb-6">
+        <div class="bg-[#ffffff]/100 backdrop-blur-lg border border-sky-700/25 rounded-2xl sm:rounded-3xl shadow-2xl p-5 sm:p-6 md:p-8">
+          <div class="text-center mb-5 sm:mb-6">
             <img 
               src="../images/JVB_Logo.jpg" 
               alt="JVB Travel Logo" 
-              class="mx-auto w-24 h-24 object-contain rounded-full mb-3 shadow-lg ring-2 ring-[#2596be]/30"
+              class="mx-auto w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-full mb-3 shadow-lg ring-2 ring-[#2596be]/30"
             />
-            <h2 class="text-2xl font-bold text-sky-800">Agent Portal</h2>
-            <p class="text-gray-700 mt-1 text-md">Access your client management system</p>
+            <h2 class="text-xl sm:text-2xl font-bold text-sky-800">Agent Portal</h2>
+            <p class="text-gray-700 mt-1 text-sm sm:text-base">Access your client management system</p>
           </div>
 
           <?php if (isset($_SESSION['login_error'])): ?>
-            <div class="bg-red-500/30 border border-red-400/50 text-white px-4 py-3 rounded-xl mb-6 text-center backdrop-blur-sm text-xs">
+            <div class="bg-red-800 border border-red-400/50 text-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl mb-5 sm:mb-6 text-center backdrop-blur-sm text-xs sm:text-sm">
               <?= htmlspecialchars($_SESSION['login_error']) ?>
             </div>
             <?php unset($_SESSION['login_error']); ?>
           <?php endif; ?>
 
           <?php if (isset($_SESSION['session_expired'])): ?>
-            <div class="bg-yellow-500/30 border border-yellow-400/50 text-white px-4 py-3 rounded-xl mb-6 text-center backdrop-blur-sm text-xs">
+            <div class="bg-yellow-800 border border-yellow-400/50 text-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl mb-5 sm:mb-6 text-center backdrop-blur-sm text-xs sm:text-sm">
               Your session has expired. Please log in again.
             </div>
             <?php unset($_SESSION['session_expired']); ?>
@@ -172,8 +192,8 @@ if ($imgCount > 0) {
           <form action="process_admin_login.php" method="POST">
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>" />
 
-            <div class="mb-4">
-              <label for="username" class="block text-sm font-medium text-slate-500 mb-1.5">
+            <div class="mb-3 sm:mb-4">
+              <label for="username" class="block text-xs sm:text-sm font-medium text-slate-500 mb-1.5">
                 Username
               </label>
               <input 
@@ -181,13 +201,13 @@ if ($imgCount > 0) {
                 id="username" 
                 name="username" 
                 required
-                class="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-slate-700 placeholder-gray-300 focus:outline-none focus:border-[#2596be] focus:ring-2 focus:ring-[#2596be]/40 transition text-sm"
+                class="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/10 border border-white/30 rounded-lg text-slate-700 placeholder-gray-400 focus:outline-none focus:border-[#2596be] focus:ring-2 focus:ring-[#2596be]/40 transition text-sm sm:text-base"
                 placeholder="Enter your username"
               />
             </div>
 
-            <div class="mb-6">
-              <label for="password" class="block text-sm font-medium text-slate-500 mb-1.5">
+            <div class="mb-5 sm:mb-6">
+              <label for="password" class="block text-xs sm:text-sm font-medium text-slate-500 mb-1.5">
                 Password
               </label>
               <input 
@@ -195,27 +215,27 @@ if ($imgCount > 0) {
                 id="password" 
                 name="password" 
                 required
-                class="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-slate-700 placeholder-gray-300 focus:outline-none focus:border-[#2596be] focus:ring-2 focus:ring-[#2596be]/40 transition text-sm"
+                class="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/10 border border-white/30 rounded-lg text-slate-700 placeholder-gray-400 focus:outline-none focus:border-[#2596be] focus:ring-2 focus:ring-[#2596be]/40 transition text-sm sm:text-base"
                 placeholder="Enter your password"
               />
             </div>
 
             <button 
               type="submit"
-              class="w-full bg-[#2596be] hover:bg-[#1e7ca8] text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg text-sm"
+              class="w-full bg-[#2596be] hover:bg-[#1e7ca8] text-white font-semibold py-3 sm:py-3.5 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg text-sm sm:text-base"
             >
               Sign In
             </button>
           </form>
 
-          <p class="font-medium mt-5 text-center text-sm text-slate-500">
+          <p class="font-medium mt-4 sm:mt-5 text-center text-xs sm:text-sm text-slate-500">
             Are you a client? 
             <a href="../client/login.php" class="text-[#2596be] hover:text-[#1e7ca8] font-semibold hover:underline">
               Client Login
             </a>
           </p>
 
-          <div class="mt-5 pt-4 border-t border-slate-500/20">
+          <div class="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-slate-500/20">
             <p class="text-center text-slate-400 text-xs">
               Your login is secure and encrypted
             </p>

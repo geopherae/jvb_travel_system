@@ -1,7 +1,6 @@
 <?php
 include_once __DIR__ . '/../includes/profile-info.php';
 include_once __DIR__ . '/../includes/unread-notification-check.php';
-//include_once __DIR__ . '/../includes/checklist_helpers.php';
 ?>
 
 <aside class="hidden lg:flex flex-col w-80 h-screen fixed top-0 right-0 bg-white border-l border-gray-200 z-1">
@@ -42,12 +41,6 @@ include_once __DIR__ . '/../includes/unread-notification-check.php';
 
     <!-- 📊 Admin Metrics -->
     <?php if (isset($_SESSION['admin'])) include '../admin/admin_right_panel_metrics.php'; ?>
-
-    <!-- Client Checklist Cards (Visible to Clients Only) -->
-         <!-- Client Checklist Cards (Visible to Clients Only) -->
-    <?php if (isset($_SESSION['client_id'])): ?>
-      <?php include __DIR__ . '/../components/client_checklist_card.php'; ?>
-    <?php endif; ?>
             
 
   </div>

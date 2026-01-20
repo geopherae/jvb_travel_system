@@ -24,8 +24,8 @@ if (!$useCache) {
   $geo = @json_decode(file_get_contents("https://ipinfo.io/" . ($isLocal ? "8.8.8.8" : $ip) . "/json"));
 
   $city    = $geo->city ?? 'Olongapo';
-  $region  = $geo->region ?? '';
-  $country = $geo->country ?? '';
+  $region  = $geo->region ?? 'Zambales';
+  $country = $geo->country ?? 'PH';
   $location = trim("{$city}, {$region}, {$country}");
 
   // 2️⃣ Weather via OpenWeatherMap

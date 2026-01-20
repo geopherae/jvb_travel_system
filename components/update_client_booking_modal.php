@@ -8,10 +8,67 @@ if (!isset($conn) || !isset($client_id)) {
 }
 
 // Fetch client data
-$client_stmt = $conn->prepare("SELECT booking_number, trip_date_start, trip_date_end, booking_date, status, assigned_admin_id FROM clients WHERE id = ?");
+$client_stmt = $conn->prepare("
+    SELECT 
+        c.booking_number, 
+        c.trip_date_start, 
+        c.trip_date_end, 
+        c.booking_date, 
+        c.hotel, 
+        c.room_type, 
+        c.flight_details, 
+        c.transfer_tour_hotline, 
+        c.status, 
+        c.assigned_admin_id,
+        tp.origin,
+        tp.destination
+    FROM clients c
+    JOIN tour_packages tp ON c.assigned_package_id = tp.id
+    WHERE c.id = ?
+");
 $client_stmt->bind_param("i", $client_id);
 $client_stmt->execute();
 $client_data = $client_stmt->get_result()->fetch_assoc();
+
+// Parse flight_details back into individual fields
+$flightDetails = $client_data['flight_details'] ?? '';
+$lines = explode("\n", trim($flightDetails));
+
+// Initialize default values
+$client_data['departure_flight_number'] = '';
+$client_data['departure_route'] = '';
+$client_data['departure_time_start'] = '';
+$client_data['departure_time_end'] = '';
+$client_data['return_flight_number'] = '';
+$client_data['return_route'] = '';
+$client_data['return_time_start'] = '';
+$client_data['return_time_end'] = '';
+
+// Parse departure line (first line)
+if (!empty($lines[0]) && $lines[0] !== 'N/A') {
+    // Pattern: "5J123 MNLCRK 08:00AM-09:30AM"
+    if (preg_match('/^(\S+)\s+(\S+)\s+(\d{1,2}:\d{2}[AP]M)-(\d{1,2}:\d{2}[AP]M)$/', $lines[0], $matches)) {
+        $client_data['departure_flight_number'] = $matches[1];
+        $client_data['departure_route'] = $matches[2];
+        // Convert back to 24-hour format for time input
+        $client_data['departure_time_start'] = date('H:i', strtotime($matches[3]));
+        $client_data['departure_time_end'] = date('H:i', strtotime($matches[4]));
+    }
+}
+
+// Parse return line (second line)
+if (!empty($lines[1])) {
+    if (preg_match('/^(\S+)\s+(\S+)\s+(\d{1,2}:\d{2}[AP]M)-(\d{1,2}:\d{2}[AP]M)$/', $lines[1], $matches)) {
+        $client_data['return_flight_number'] = $matches[1];
+        $client_data['return_route'] = $matches[2];
+        $client_data['return_time_start'] = date('H:i', strtotime($matches[3]));
+        $client_data['return_time_end'] = date('H:i', strtotime($matches[4]));
+    }
+}
+
+// Prepare flight routes
+$departure_route = ($client_data['origin'] ?? '') . " → " . ($client_data['destination'] ?? '');
+$return_route    = ($client_data['destination'] ?? '') . " → " . ($client_data['origin'] ?? '');
 
 // Fetch itinerary JSON
 $itinerary_stmt = $conn->prepare("SELECT itinerary_json FROM client_itinerary WHERE client_id = ?");
@@ -47,9 +104,7 @@ $agents = $conn->query("SELECT id, admin_photo, first_name, last_name FROM admin
     <!-- 📝 Header -->
     <h2 class="text-lg font-semibold text-slate-800 mb-1">Edit Booking Details</h2>
     <p class="text-sm text-slate-600 mb-2">
-      Update your client’s booking details — like dates, status, or their assigned agent.
-      Switch to the Itinerary tab if you need to adjust their daily schedule.
-      Remember to check your edits before saving!
+      Update your client’s booking details — like flight details, itinerary, or hotel accommodation info.
     </p>
 
     <!-- 🧠 Alpine Logic -->
@@ -119,12 +174,17 @@ $agents = $conn->query("SELECT id, admin_photo, first_name, last_name FROM admin
           <button type="button" @click="tab = 'booking'"
                   :class="tab === 'booking' ? 'border-sky-500 text-sky-600' : 'text-slate-500'"
                   class="py-2 border-b-2 transition">
-            Booking Info
+            Travel Dates
           </button>
           <button type="button" @click="tab = 'itinerary'"
                   :class="tab === 'itinerary' ? 'border-sky-500 text-sky-600' : 'text-slate-500'"
                   class="py-2 border-b-2 transition">
             Itinerary
+          </button>
+          <button type="button" @click="tab = 'accommodation'"
+                  :class="tab === 'accommodation' ? 'border-sky-500 text-sky-600' : 'text-slate-500'"
+                  class="py-2 border-b-2 transition">
+            Accommodation
           </button>
         </nav>
       </div>
@@ -137,7 +197,7 @@ $agents = $conn->query("SELECT id, admin_photo, first_name, last_name FROM admin
         <input type="hidden" name="client_id" value="<?= $client_id ?>">
         <input type="hidden" name="updated_at" value="<?= date('Y-m-d H:i:s') ?>">
 
-        <!-- 📋 Booking Tab -->
+<!-- 📋 Booking Tab -->
         <div x-show="tab === 'booking'">
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -171,9 +231,15 @@ $agents = $conn->query("SELECT id, admin_photo, first_name, last_name FROM admin
                      class="w-full border rounded px-3 py-1.5 text-sm">
             </div>
 
-            <div class="col-span-2">
+            <div>
               <label class="block text-sm font-medium text-slate-700 mb-1">Booking Date</label>
               <input type="date" name="booking_date" value="<?= $client_data['booking_date'] ?>"
+                     class="w-full border rounded px-3 py-1.5 text-sm">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Transfer and Tour Hotline</label>
+              <input type="text" name="transfer_tour_hotline" value="<?= htmlspecialchars($client_data['transfer_tour_hotline'] ?? '') ?>"
                      class="w-full border rounded px-3 py-1.5 text-sm">
             </div>
           </div>
@@ -338,6 +404,79 @@ $agents = $conn->query("SELECT id, admin_photo, first_name, last_name FROM admin
           <input type="hidden" name="itinerary_json" :value="JSON.stringify(itinerary)">
         </div>
 
+<!-- 🏨 Accommodation Tab -->
+<div x-show="tab === 'accommodation'" x-cloak class="space-y-6 max-h-[500px] overflow-y-auto text-sm">
+
+  <!-- Hotel & Room Group -->
+  <div class="bg-sky-50 border rounded p-4 space-y-4">
+    <h3 class="text-sm font-semibold text-slate-800">Accommodation Details</h3>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Hotel Name</label>
+        <input type="text" name="hotel" value="<?= htmlspecialchars($client_data['hotel']) ?>"
+               class="w-full border rounded px-3 py-1.5 text-sm" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Room Type</label>
+        <input type="text" name="room_type" value="<?= htmlspecialchars($client_data['room_type']) ?>"
+               class="w-full border rounded px-3 py-1.5 text-sm">
+      </div>
+    </div>
+  </div>
+
+<!-- Departure Details -->
+<div class="bg-purple-50 border rounded p-4 space-y-4">
+  <h3 class="text-sm font-semibold text-slate-800">Departure Details</h3>
+  <div class="grid grid-cols-4 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Flight No.</label>
+      <input type="text" name="departure_flight_number" value="<?= htmlspecialchars($client_data['departure_flight_number'] ?? '') ?>"
+             class="w-full border rounded px-3 py-1.5 text-sm">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Route</label>
+      <input class="w-full border rounded px-3 py-1.5 text-sm" type="text" name="departure_route" value="<?= htmlspecialchars($client_data['departure_route'] ?? '') ?>" readonly>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Departure Time</label>
+      <input type="time" name="departure_time_start" value="<?= htmlspecialchars($client_data['departure_time_start'] ?? '') ?>"
+             class="w-full border rounded px-3 py-1.5 text-sm">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Arrival Time</label>
+      <input type="time" name="departure_time_end" value="<?= htmlspecialchars($client_data['departure_time_end'] ?? '') ?>"
+             class="w-full border rounded px-3 py-1.5 text-sm">
+    </div>
+  </div>
+</div>
+
+<!-- Return Details -->
+<div class="bg-sky-50 border rounded p-4 space-y-4">
+  <h3 class="text-sm font-semibold text-slate-800">Return Details</h3>
+  <div class="grid grid-cols-4 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Flight No.</label>
+      <input type="text" name="return_flight_number" value="<?= htmlspecialchars($client_data['return_flight_number'] ?? '') ?>"
+             class="w-full border rounded px-3 py-1.5 text-sm">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Route</label>
+      <input class="w-full border rounded px-3 py-1.5 text-sm" type="text" name="return_route" value="<?= htmlspecialchars($client_data['return_route'] ?? '') ?>" readonly>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Departure Time</label>
+      <input type="time" name="return_time_start" value="<?= htmlspecialchars($client_data['return_time_start'] ?? '') ?>"
+             class="w-full border rounded px-3 py-1.5 text-sm">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Arrival Time</label>
+      <input type="time" name="return_time_end" value="<?= htmlspecialchars($client_data['return_time_end'] ?? '') ?>"
+             class="w-full border rounded px-3 py-1.5 text-sm">
+    </div>
+  </div>
+</div>
+
+</div>
         <!-- ✅ Submit Buttons -->
         <div class="flex justify-end gap-4 mt-6">
           <button type="button"

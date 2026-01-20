@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 session_start();
-
+date_default_timezone_set('Asia/Manila');
 require_once __DIR__ . '/../actions/db.php';
 
 if (isset($_SESSION['admin_id'], $_SESSION['is_admin'])) {

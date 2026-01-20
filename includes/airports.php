@@ -1,105 +1,100 @@
 <?php
 
 return [
-  
   'Philippines' => [
-    'MNL' => 'Ninoy Aquino International Airport (Manila)',
-    'CEB' => 'Mactan-Cebu International Airport (Cebu)',
-    'DVO' => 'Francisco Bangoy International Airport (Davao)',
-    'ILO' => 'Iloilo International Airport',
-    'ZAM' => 'Zamboanga International Airport',
-    'CRK' => 'Clark International Airport (Pampanga)',
-    'PPS' => 'Puerto Princesa International Airport',
+    'MNL' => 'Manila (NAIA)',
+    'CRK' => 'Clark (Pampanga)',
+    'CEB' => 'Cebu (Mactan-Cebu)',
+    'DVO' => 'Davao',
+    'ILO' => 'Iloilo',
+    'KLO' => 'Kalibo (Boracay Intl)',
+    'MPH' => 'Caticlan (Boracay)',
+    'PPS' => 'Puerto Princesa',
+    'TAG' => 'Panglao / Bohol',
+    'BCD' => 'Bacolod',
+    'CGY' => 'Cagayan de Oro (Laguindingan)',
+    'ZAM' => 'Zamboanga',
+    'GES' => 'General Santos',
+    'USU' => 'Busuanga (Coron)',
+    'IAO' => 'Siargao',
+    'TAC' => 'Tacloban',
+    'DGT' => 'Dumaguete',
+    'RXS' => 'Roxas City',
+    'LAO' => 'Laoag',
+    'LGP' => 'Legazpi',
+    'TUG' => 'Tuguegarao',
+    'WNP' => 'Naga',
   ],
-
-  'Singapore' => [
-    'SIN' => 'Singapore Changi Airport',
+  'Hong Kong' => [
+    'HKG' => 'Hong Kong Intl',
   ],
-
   'Japan' => [
-    'HND' => 'Tokyo Haneda Airport',
-    'NRT' => 'Narita International Airport (Tokyo)',
-    'KIX' => 'Kansai International Airport (Osaka)',
-    'CTS' => 'New Chitose Airport (Sapporo)',
+    'NRT' => 'Tokyo Narita',
+    'HND' => 'Tokyo Haneda',
+    'KIX' => 'Osaka Kansai',
+    'FUK' => 'Fukuoka',
   ],
-
   'South Korea' => [
-    'ICN' => 'Incheon International Airport (Seoul)',
+    'ICN' => 'Incheon',
   ],
-
+  'Taiwan' => [
+    'TPE' => 'Taipei Taoyuan',
+  ],
   'Thailand' => [
-    'BKK' => 'Suvarnabhumi Airport (Bangkok)',
-    'DMK' => 'Don Mueang International Airport (Bangkok)',
+    'BKK' => 'Bangkok Suvarnabhumi',
+    'DMK' => 'Bangkok Don Mueang',
   ],
-
+  'Singapore' => [
+    'SIN' => 'Changi',
+  ],
   'Malaysia' => [
-    'KUL' => 'Kuala Lumpur International Airport',
-    'PEN' => 'Penang International Airport',
+    'KUL' => 'Kuala Lumpur',
   ],
-
-  'Indonesia' => [
-    'CGK' => 'Soekarno-Hatta International Airport (Jakarta)',
-    'DPS' => 'Ngurah Rai International Airport (Bali)',
+  'Vietnam' => [
+    'SGN' => 'Ho Chi Minh',
+    'HAN' => 'Hanoi',
   ],
-
-  'Australia' => [
-    'SYD' => 'Sydney Kingsford Smith Airport',
-    'MEL' => 'Melbourne Airport',
-    'BNE' => 'Brisbane Airport',
-    'PER' => 'Perth Airport',
-  ],
-
-  'United States' => [
-    'LAX' => 'Los Angeles International Airport',
-    'JFK' => 'John F. Kennedy International Airport (New York)',
-    'SFO' => 'San Francisco International Airport',
-    'ORD' => 'Chicago O’Hare International Airport',
-    'SEA' => 'Seattle-Tacoma International Airport',
-    'ATL' => 'Hartsfield–Jackson Atlanta International Airport',
-  ],
-
-  'United Kingdom' => [
-    'LHR' => 'London Heathrow Airport',
-    'LGW' => 'London Gatwick Airport',
-    'MAN' => 'Manchester Airport',
-  ],
-
-  'France' => [
-    'CDG' => 'Charles de Gaulle Airport (Paris)',
-    'ORY' => 'Orly Airport (Paris)',
-  ],
-
-  'Germany' => [
-    'FRA' => 'Frankfurt Airport',
-    'MUC' => 'Munich Airport',
-  ],
-
   'United Arab Emirates' => [
-    'DXB' => 'Dubai International Airport',
-    'AUH' => 'Abu Dhabi International Airport',
+    'DXB' => 'Dubai Intl',
+    'AUH' => 'Abu Dhabi',
   ],
-
-  'India' => [
-    'DEL' => 'Indira Gandhi International Airport (Delhi)',
-    'BOM' => 'Chhatrapati Shivaji Maharaj International Airport (Mumbai)',
-    'BLR' => 'Kempegowda International Airport (Bangalore)',
-    'MAA' => 'Chennai International Airport',
+  'Qatar' => [
+    'DOH' => 'Doha',
   ],
-
-  'China' => [
-    'PEK' => 'Beijing Capital International Airport',
-    'PVG' => 'Shanghai Pudong International Airport',
-    'CAN' => 'Guangzhou Baiyun International Airport',
+  'Saudi Arabia' => [
+    'RUH' => 'Riyadh',
+    'JED' => 'Jeddah',
   ],
-
+  'Kuwait' => [
+    'KWI' => 'Kuwait Intl',
+  ],
+  'United States' => [
+    'LAX' => 'Los Angeles',
+    'SFO' => 'San Francisco',
+    'SEA' => 'Seattle',
+    'JFK' => 'New York JFK',
+  ],
   'Canada' => [
-    'YYZ' => 'Toronto Pearson International Airport',
-    'YVR' => 'Vancouver International Airport',
-    'YUL' => 'Montréal–Trudeau International Airport',
+    'YVR' => 'Vancouver',
+    'YYZ' => 'Toronto',
   ],
-
-  'Brazil' => [
-    'GRU' => 'São Paulo–Guarulhos International Airport',
-    'GIG' => 'Rio de Janeiro–Galeão International Airport',
+  'United Kingdom' => [
+    'LHR' => 'London Heathrow',
+  ],
+  'France' => [
+    'CDG' => 'Paris Charles de Gaulle',
+  ],
+  'Germany' => [
+    'FRA' => 'Frankfurt',
+  ],
+  'Netherlands' => [
+    'AMS' => 'Amsterdam',
+  ],
+  'Australia' => [
+    'SYD' => 'Sydney',
+    'MEL' => 'Melbourne',
+  ],
+  'New Zealand' => [
+    'AKL' => 'Auckland',
   ],
 ];

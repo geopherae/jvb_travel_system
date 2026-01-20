@@ -6,7 +6,7 @@ require_once '../includes/icon_map.php';
 
 $navLinks = [
   'Dashboard'     => ['url' => '../admin/admin_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_dashboard.php', 'view_client.php', 'admin_manual.php']],
-  'Messages'      => ['url' => '../admin/messages.php',             'icon' => 'messages',  'match' => ['messages.php']],
+  'Messages'      => ['url' => '../admin/messages.php?v=1.0.1',             'icon' => 'messages',  'match' => ['messages.php']],
   'Tour Packages' => ['url' => '../admin/admin_tour_packages.php', 'icon' => 'map',       'match' => ['admin_tour_packages.php']],
   'Client Reviews' => ['url' => '../admin/admin_testimonials.php', 'icon' => 'star',      'match' => ['admin_testimonials.php']],
   'Settings'      => ['url' => '../admin/admin_settings.php',      'icon' => 'settings',  'match' => ['admin_settings.php', 'audit.php']],

@@ -219,17 +219,17 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
 
       <div class="bg-white rounded-lg p-6 space-y-4" x-data="tourFilterData()">
         <!-- Page Header -->
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <button id="openAddModal"
-                  class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-sky-500 rounded hover:bg-sky-600 transition">
+                  class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-sky-500 rounded hover:bg-sky-600 transition w-full sm:w-auto">
             + Add Tour Package
           </button>
         </div>
 
         <!-- 🔍 Search & Filter Section -->
-        <div class="flex flex-col sm:flex-row gap-4 items-end">
+        <div class="flex flex-col lg:flex-row gap-4 lg:items-end">
           <!-- Search by Package Name -->
-          <div class="flex-1">
+          <div class="flex-1 w-full">
             <label class="block text-sm font-medium text-slate-600 mb-2">Search Package Name</label>
             <input 
               type="text" 
@@ -240,7 +240,7 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
           </div>
 
           <!-- Filter by Destination -->
-          <div class="flex-1">
+          <div class="flex-1 w-full">
             <label class="block text-sm font-medium text-slate-600 mb-2">Filter by Destination</label>
             <select 
               x-model="filterDestination"
@@ -260,7 +260,7 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
           <!-- Clear Filters Button -->
           <button 
             @click="searchName = ''; filterDestination = ''"
-            class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 transition text-sm font-medium"
+            class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 transition text-sm font-medium w-full lg:w-auto"
           >
             Clear
           </button>
@@ -344,8 +344,8 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
   
   
 <!-- 🔲 Add Tour Modal -->
-<div id="addModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-4">
-  <div class="w-full max-w-5xl overflow-hidden transition-all p-6 relative">
+<div id="addModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-black/40 px-3 sm:px-4">
+  <div class="w-full max-w-5xl overflow-hidden transition-all p-0 sm:p-6 relative">
     <!-- ✅ Scrollable Content -->
     <div id="addModalContent" class="overflow-y-auto max-h-[90vh] relative">
       <?php include '../components/add_tour_package.php'; ?>

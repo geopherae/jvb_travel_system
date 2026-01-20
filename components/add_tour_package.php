@@ -1,9 +1,9 @@
 <!-- ➕ Add Tour Package Modal -->
-<div x-data="tourFormData()" x-effect="days >= 2 ? nights = days - 1 : nights = 0"  class="backdrop-blur-sm fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-5xl overflow-hidden transition-all p-6">
+<div x-data="tourFormData()" x-effect="days >= 2 ? nights = days - 1 : nights = 0"  class="backdrop-blur-sm fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-3 sm:px-4">
+  <div class="align-right bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-5xl overflow-hidden transition-all max-h-[calc(100vh-24px)] sm:max-h-[95vh] flex flex-col">
     
   <!-- 🧭 Modal Header -->
-<div class="flex items-center justify-between mb-4">
+  <div class="flex items-center justify-between px-6 pt-6 pb-4">
   <h2 class="text-xl font-bold text-sky-700">Add New Tour Package</h2>
   <button id="closeAddModal"
           type="button"
@@ -13,9 +13,9 @@
 </div>
 
 
-    <form method="POST" action="../actions/add_tour_package.php" enctype="multipart/form-data">
+    <form method="POST" action="../actions/add_tour_package.php" enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden">
       <!-- 🧩 Modal Body -->
-      <div class="flex flex-col sm:flex-row gap-6">
+      <div class="flex flex-col sm:flex-row gap-6 flex-1 overflow-y-auto px-6 pb-8">
 
 <!-- Left Column: Image + Live Preview -->
 <div class="sm:w-[50%] w-full flex flex-col bg-white rounded-lg shadow-sm overflow-hidden"
@@ -75,7 +75,7 @@
 
 <!-- Live Preview Content -->
 <div class="p-2 pt-2 px-2 space-y-2">
-  <div class="flex flex-wrap items-center justify-between gap-4">
+  <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
     <h2 class="text-xl font-semibold text-slate-800 leading-tight truncate flex-1 min-w-0"
         x-text="packageName || 'Package Title Preview'">
     </h2>
@@ -173,7 +173,7 @@
       <input type="hidden" name="requires_visa" :value="requiresVisa ? 1 : 0">
 
       <!-- ✅ Footer Actions -->
-      <div class="pt-6 border-t flex justify-end gap-8">
+            <div class="mt-auto pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-end gap-3 sm:gap-6 px-6 pb-4 sticky bottom-0 bg-white">
       <button type="button" id="cancelAddModal"
               class="text-slate-500 hover:underline text-sm">
         Cancel
@@ -184,7 +184,7 @@
               :class="!packageName.trim() || !description.trim() || !origin || !destination || price <= 0 || days < 1
                       ? 'bg-slate-300 cursor-not-allowed text-slate-500'
                       : 'bg-sky-600 hover:bg-sky-700 text-white'"
-              class="text-sm px-6 py-2.5 rounded-lg font-medium transition shadow-sm">
+              class="text-sm px-6 py-2.5 rounded-lg font-medium transition shadow-sm w-full sm:w-auto">
         Save Package
       </button>
       </div>

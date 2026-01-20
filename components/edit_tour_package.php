@@ -3,14 +3,14 @@
     x-cloak
     x-effect="days >= 2 ? nights = days - 1 : nights = 0"
     x-data="tourFormData($store.editTourModal.tourData)"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
+    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 px-3 sm:px-4 backdrop-blur-sm"
     @keydown.escape.window="$store.editTourModal.close()"
     @click.away="$store.editTourModal.close()"
   >
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[95vh] overflow-y-auto transition-all p-6">
+    <div class="bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-5xl max-h-[calc(100vh-24px)] sm:max-h-[95vh] flex flex-col overflow-hidden transition-all">
 
       <!-- Modal Header -->
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between px-6 pt-6 pb-4">
         <h2 class="text-xl font-bold text-sky-700">Edit Tour Package</h2>
         <button
           type="button"
@@ -23,12 +23,12 @@
       </div>
 
       <!-- Form -->
-      <form method="POST" action="../actions/update_tour_package.php" enctype="multipart/form-data">
+      <form method="POST" action="../actions/update_tour_package.php" enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden">
 
         <!-- Hidden package ID (required for update) -->
         <input type="hidden" name="package_id" :value="$store.editTourModal.tourData?.id">
 
-        <div class="flex flex-col lg:flex-row gap-6">
+        <div class="flex flex-col lg:flex-row gap-6 flex-1 overflow-y-auto px-6 pb-8">
 
           <!-- Left Column: Image Upload + Live Preview -->
           <div class="lg:w-1/2 w-full flex flex-col bg-white rounded-lg shadow-sm overflow-hidden">
@@ -64,7 +64,7 @@
 
             <!-- Live Preview Card -->
              <div class="p-2 pt-2 px-2 space-y-2">
- <div class="flex flex-wrap items-center justify-between gap-4">
+ <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <h3
                   class="text-xl font-semibold text-slate-800 leading-tight truncate flex-1 min-w-0"
                   x-text="packageName || 'Untitled Package'"
@@ -80,14 +80,21 @@
                   x-text="`${days || 1} Day${days != 1 ? 's' : ''} / ${nights || 0} Night${nights != 1 ? 's' : ''}`"
                 ></span>
               </div>
+              <!-- Pills Row -->
+              <div class="flex flex-wrap items-center gap-2 mt-2">
+                <!-- Requires Visa Pill (conditional) -->
                 <template x-if="requiresVisa">
-                <div class="mt-2">
                   <span class="inline-block bg-green-100 text-green-800 font-medium px-3 py-1 rounded-full text-xs">
                     Requires Visa
                   </span>
-                </div>
-              </template>
+                </template>
 
+                <!-- Origin & Destination Pill (always visible) -->
+                <span class="inline-block bg-purple-100 text-purple-800 font-semibold px-3 py-1 rounded-full text-xs">
+                  <span x-text="`${origin || 'Origin TBD'} → ${destination || 'Destination TBD'}`"></span>
+                </span>
+              </div>
+<!-- Description -->
               <p
                 class="text-sm text-slate-600 line-clamp-4"
                 x-text="description || 'No description yet.'"
@@ -169,7 +176,7 @@
         <input type="hidden" name="requires_visa" :value="requiresVisa ? 1 : 0">
 
         <!-- Form Actions -->
-        <div class="mt-2 pt-6 border-t flex justify-end gap-4">
+        <div class="mt-auto pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-end gap-3 sm:gap-4 px-6 pb-4 sticky bottom-0 bg-white">
           <button
             type="button"
             @click="$store.editTourModal.close()"
