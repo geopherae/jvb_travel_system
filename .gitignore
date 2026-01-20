@@ -39,8 +39,9 @@ logs/
 widget_cache.json
 .cache/
 
+
 # Uploads (development only - don't track in git)
-uploads/*
+uploads/
 !uploads/.gitkeep
 
 # OS Files
