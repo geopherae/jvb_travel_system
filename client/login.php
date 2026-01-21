@@ -26,6 +26,8 @@ if ($imgCount > 0) {
 }
 ?>
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,6 +36,7 @@ if ($imgCount > 0) {
   <title>JV-B Travel & Tours | Your Journey Begins Here</title>
   <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
     /* Pop-in / pop-out + floating animation */
     .photo-card {
@@ -1051,5 +1054,38 @@ if ($imgCount > 0) {
     </div>
   </footer>
 
+  // Access Code Input Formatting Script
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+  var accessCodeInput = document.getElementById('access_code');
+  if (!accessCodeInput) return;
+
+  // On input: auto-insert dash after 4 chars
+  accessCodeInput.addEventListener('input', function(e) {
+    let val = accessCodeInput.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (val.length > 4) {
+      val = val.slice(0, 4) + '-' + val.slice(4, 8);
+    }
+    else if (val.length === 4) {
+      val = val + '-';
+    }
+    accessCodeInput.value = val;
+  });
+
+  // On paste: format pasted value
+  accessCodeInput.addEventListener('paste', function(e) {
+    e.preventDefault();
+    let paste = (e.clipboardData || window.clipboardData).getData('text');
+    paste = paste.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    let formatted = paste;
+    if (paste.length > 4) {
+      formatted = paste.slice(0, 4) + '-' + paste.slice(4, 8);
+    } else if (paste.length === 4) {
+      formatted = paste + '-';
+    }
+    accessCodeInput.value = formatted;
+  });
+});
+</script>
 </body>
 </html>
