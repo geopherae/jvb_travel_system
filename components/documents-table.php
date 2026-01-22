@@ -46,22 +46,22 @@ if ($client_id) {
 <section 
   x-cloak
   x-data="documentsTable()" 
-  class="bg-white p-6 rounded-md shadow border border-gray-200">
+  class="bg-white p-4 sm:p-6 rounded-md shadow border border-gray-200">
 
   <!-- ✅ Success Toast -->
   <div x-show="toast.visible" x-transition x-cloak
-       class="fixed inset-0 flex items-start justify-center z-50 bg-black bg-opacity-15"
+       class="fixed inset-0 flex items-start justify-center z-50 bg-black bg-opacity-15 px-4"
        role="alert">
-    <div class="mt-10 bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded shadow-lg">
+    <div class="mt-10 bg-green-100 border border-green-400 text-green-700 px-4 sm:px-6 py-3 sm:py-4 rounded shadow-lg max-w-md w-full">
       <strong class="font-bold">Success!</strong>
       <p class="block mt-2 text-sm" x-text="toast.message"></p>
     </div>
   </div>
 
   <!-- 📄 Header -->
-  <div class="flex items-center justify-between mb-6">
-    <h3 class="text-lg font-semibold text-gray-800 tracking-tight flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+    <h3 class="text-base sm:text-lg font-semibold text-gray-800 tracking-tight flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M7 2a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V8l-6-6H7z" />
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -70,7 +70,7 @@ if ($client_id) {
       Client Documents
     </h3>
     <button @click="modals.upload = true"
-            class="bg-sky-500 text-white px-4 py-2 rounded hover:bg-sky-700 transition">
+            class="w-full sm:w-auto bg-sky-500 text-white px-4 py-2 rounded hover:bg-sky-600 active:bg-sky-700 transition text-sm font-medium touch-manipulation">
       Upload Document
     </button>
   </div>
@@ -80,13 +80,106 @@ if ($client_id) {
     <div class="bg-white rounded-lg overflow-hidden">
       <div class="overflow-x-auto">
         <?php if (empty($documents)): ?>
-        <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+        <div class="flex flex-col items-center justify-center py-8 sm:py-12 text-gray-500 px-4">
           <?= getEmptyStateSvg('no-documents-found'); ?>
-          <p class="text-md italic font-semibold text-sky-700 mb-1">No documents found.</p>
-          <p class="text-md text-sky-700 italic">Click the <strong>Upload Document</strong> button to start!</p>
+          <p class="text-sm sm:text-md italic font-semibold text-sky-700 mb-1 text-center">No documents found.</p>
+          <p class="text-sm sm:text-md text-sky-700 italic text-center">Click the <strong>Upload Document</strong> button to start!</p>
         </div>
         <?php else: ?>
-        <div class="rounded-lg border overflow-hidden overflow-x-auto">
+        
+        <!-- Mobile Card View (visible on mobile only) -->
+        <div class="block sm:hidden space-y-3">
+          <?php foreach ($documents as $doc): ?>
+          <div class="border border-gray-200 rounded-lg p-4 bg-white hover:bg-sky-50 transition-colors">
+            <!-- File Name & Status -->
+            <div class="flex items-start justify-between gap-2 mb-3">
+              <button @click="openFileModal(
+                <?= (int) $doc['id'] ?>,
+                '<?= htmlspecialchars("../" . implode('/', array_map('rawurlencode', explode('/', $doc['file_path'])))) ?>',
+                '<?= htmlspecialchars($doc['file_name']) ?>',
+                '<?= htmlspecialchars($doc['document_type']) ?>',
+                '<?= htmlspecialchars($doc['mime_type']) ?>',
+                '<?= htmlspecialchars($doc['document_status']) ?>',
+                '<?= htmlspecialchars($doc['admin_comments'] ?? 'No admin comments.') ?>',
+                '<?= htmlspecialchars($doc['uploaded_at']) ?>',
+                '<?= htmlspecialchars($doc['approved_at']) ?>',
+                '<?= htmlspecialchars($doc['status_updated_by']) ?>'
+              )"
+              class="flex-1 text-left font-medium text-gray-900 hover:text-sky-600 transition min-w-0">
+                <p class="truncate text-sm" title="<?= htmlspecialchars($doc['file_name'] ?? 'Unnamed File') ?>">
+                  <?= htmlspecialchars($doc['file_name'] ?? 'Unnamed File') ?>
+                </p>
+              </button>
+              <span class="px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap flex-shrink-0 <?= getStatusBadgeClass($doc['document_status'] ?? 'Under Review') ?>">
+                <?= htmlspecialchars($doc['document_status'] ?? 'Under Review') ?>
+              </span>
+            </div>
+
+            <!-- Type & Date -->
+            <div class="flex flex-wrap gap-3 text-xs text-gray-600 mb-3">
+              <div class="flex items-center gap-1">
+                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                </svg>
+                <span><?= htmlspecialchars($doc['document_type'] ?? '-') ?></span>
+              </div>
+              <div class="flex items-center gap-1">
+                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                </svg>
+                <span><?= date("M j, Y", strtotime($doc['uploaded_at'] ?? 'now')) ?></span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-4 pt-3 border-t border-gray-100">
+              <button @click="openFileModal(
+                <?= (int) $doc['id'] ?>,
+                '<?= htmlspecialchars("../" . implode('/', array_map('rawurlencode', explode('/', $doc['file_path'])))) ?>',
+                '<?= htmlspecialchars($doc['file_name']) ?>',
+                '<?= htmlspecialchars($doc['document_type']) ?>',
+                '<?= htmlspecialchars($doc['mime_type']) ?>',
+                '<?= htmlspecialchars($doc['document_status']) ?>',
+                '<?= htmlspecialchars($doc['admin_comments'] ?? 'No admin comments.') ?>',
+                '<?= htmlspecialchars($doc['uploaded_at']) ?>',
+                '<?= htmlspecialchars($doc['approved_at']) ?>',
+                '<?= htmlspecialchars($doc['status_updated_by']) ?>'
+              )"
+              class="text-sky-600 hover:text-sky-700 font-medium inline-flex items-center gap-1 text-sm touch-manipulation">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                View
+              </button>
+
+              <a href="<?= htmlspecialchars("../" . implode('/', array_map('rawurlencode', explode('/', $doc['file_path'])))) ?>"
+                 download="<?= htmlspecialchars($doc['file_name']) ?>"
+                 class="text-emerald-500 hover:text-emerald-600 font-medium inline-flex items-center gap-1 text-sm touch-manipulation"
+                 title="Download">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download
+              </a>
+
+              <button @click="printDocument('<?= htmlspecialchars("../" . implode('/', array_map('rawurlencode', explode('/', $doc['file_path'])))) ?>')"
+                      class="text-blue-500 hover:text-blue-600 font-medium inline-flex items-center gap-1 text-sm touch-manipulation"
+                      title="Print">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print
+              </button>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+
+        <!-- Desktop Table View (hidden on mobile) -->
+        <div class="hidden sm:block rounded-lg border overflow-hidden overflow-x-auto">
           <table class="w-full text-sm text-left">
             <thead class="bg-blue-50 text-gray-500 font-medium">
               <tr>
@@ -115,7 +208,7 @@ if ($client_id) {
                     '<?= htmlspecialchars($doc['approved_at']) ?>',
                     '<?= htmlspecialchars($doc['status_updated_by']) ?>'
                   )"
-                  class="hover:underline font-medium truncate max-w-xs inline-block"
+                  class="hover:underline font-medium truncate max-w-[175px] inline-block"
                   title="<?= htmlspecialchars($doc['file_name'] ?? 'Unnamed File') ?>">
                     <?= htmlspecialchars($doc['file_name'] ?? 'Unnamed File') ?>
                   </button>
@@ -152,7 +245,8 @@ if ($client_id) {
                     '<?= htmlspecialchars($doc['approved_at']) ?>',
                     '<?= htmlspecialchars($doc['status_updated_by']) ?>'
                   )"
-                  class="text-sky-600 hover:underline font-medium inline-flex items-center gap-1">
+                  class="text-sky-600 hover:underline font-medium inline-flex items-center gap-1"
+                  title="View">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -186,20 +280,18 @@ if ($client_id) {
           </table>
         </div>
         <?php endif; ?>
-      </div>
-             
 
 <!-- 📄 File Viewer Modal -->
 <div x-show="modals.viewer"
      x-transition
      x-cloak
-     class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-  <div class="bg-white w-full max-w-5xl h-[90vh] rounded-md shadow-lg flex overflow-hidden"
+     class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+  <div class="bg-white w-full max-w-5xl h-[95vh] sm:h-[90vh] rounded-lg shadow-lg flex flex-col sm:flex-row overflow-hidden"
        @keydown.window.escape="closeFileModal()"
        @click.outside="closeFileModal()">
 
-    <!-- 🖼️ Left Panel: File Preview -->
-    <div class="w-2/3 bg-gray-100 p-6 flex items-center justify-center overflow-hidden relative">
+    <!-- 🖼️ Top/Left Panel: File Preview -->
+    <div class="w-full sm:w-2/3 bg-gray-100 p-3 sm:p-6 flex items-center justify-center overflow-hidden relative flex-shrink-0 h-1/4 sm:h-full">
 
       <!-- PDF Viewer -->
       <template x-if="fileViewer.mimeType === 'application/pdf'">
@@ -215,13 +307,13 @@ if ($client_id) {
                :style="`transform: scale(${fileViewer.zoom})`"
                class="max-w-full max-h-full object-contain transition-transform duration-200"
                alt="Preview" />
-          <div class="absolute top-2 right-2 bg-white bg-opacity-80 rounded shadow p-1 flex gap-1">
+          <div class="absolute top-2 right-2 bg-white bg-opacity-90 rounded-lg shadow-lg p-1 flex gap-1">
             <button @click="fileViewer.zoom = Math.min(fileViewer.zoom + 0.1, 2)"
-                    class="text-xs px-2" title="Zoom In">➕</button>
+                    class="text-xs px-2 py-1 hover:bg-gray-100 rounded touch-manipulation" title="Zoom In">➕</button>
             <button @click="fileViewer.zoom = Math.max(fileViewer.zoom - 0.1, 0.5)"
-                    class="text-xs px-2" title="Zoom Out">➖</button>
+                    class="text-xs px-2 py-1 hover:bg-gray-100 rounded touch-manipulation" title="Zoom Out">➖</button>
             <button @click="fileViewer.zoom = 1"
-                    class="text-xs px-2" title="Reset Zoom">🔄</button>
+                    class="text-xs px-2 py-1 hover:bg-gray-100 rounded touch-manipulation" title="Reset Zoom">🔄</button>
           </div>
         </div>
       </template>
@@ -232,22 +324,22 @@ if ($client_id) {
       </template>
     </div>
 
-    <!-- 🧾 Right Panel: Metadata -->
-    <div class="w-1/3 bg-white p-6 flex flex-col justify-between">
+    <!-- 🧾 Bottom/Right Panel: Metadata -->
+    <div class="w-full sm:w-1/3 bg-white p-4 sm:p-6 flex flex-col justify-between overflow-y-auto flex-1">
       <div>
         <!-- File Name -->
         <label class="block text-sm font-medium text-gray-700 mb-1">File Name:</label>
         <input x-model="fileViewer.name"
                maxlength="100"
-               class="w-full text-sm border border-gray-300 rounded px-3 py-1 truncate focus:ring-sky-500 focus:border-sky-500"
+               class="w-full text-sm border border-gray-300 rounded px-3 py-2 truncate focus:ring-sky-500 focus:border-sky-500"
                placeholder="Document Name" />
 
         <!-- Document Type -->
-        <div class="mt-4">
+        <div class="mt-3 sm:mt-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Document Type:</label>
           <select x-model="fileViewer.type"
                   <?= $isClient ? 'disabled' : '' ?>
-                  class="w-full text-sm border rounded px-2 py-1 <?= $isClient ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '' ?>">
+                  class="w-full text-sm border rounded px-3 py-2 <?= $isClient ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '' ?>">
             <option>Passport</option>
             <option>Valid ID</option>
             <option>Visa</option>
@@ -260,11 +352,11 @@ if ($client_id) {
         </div>
 
         <!-- Status -->
-        <div class="mt-4">
+        <div class="mt-3 sm:mt-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Status:</label>
           <select x-model="fileViewer.status"
                   <?= $isClient ? 'disabled' : '' ?>
-                  class="w-full text-sm border rounded px-2 py-1 <?= $isClient ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '' ?>">
+                  class="w-full text-sm border rounded px-3 py-2 <?= $isClient ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '' ?>">
             <option>Pending</option>
             <option>Approved</option>
             <option>Rejected</option>
@@ -272,12 +364,12 @@ if ($client_id) {
         </div>
 
         <!-- Admin Comments -->
-        <div class="mt-4 relative">
+        <div class="mt-3 sm:mt-4 relative">
           <label class="block text-sm font-medium text-gray-700 mb-1">Admin Comments:</label>
           <textarea
               x-model="fileViewer.adminComments"
               :class="[
-                'w-full h-28 text-sm border rounded px-3 py-2 resize-none overflow-y-auto focus:ring-sky-500 focus:border-sky-500',
+                'w-full h-24 sm:h-28 text-sm border rounded px-3 py-2 resize-none overflow-y-auto focus:ring-sky-500 focus:border-sky-500',
                 (fileViewer.status === 'Rejected' && !fileViewer.adminComments.trim()) ? 'border-red-500 ring-2 ring-red-300 animate-pulse' : 'border-gray-300'
               ]"
               placeholder="No admin comments."
@@ -292,7 +384,7 @@ if ($client_id) {
 
         <a :href="fileViewer.path"
            target="_blank"
-           class="mt-3 inline-block text-sm text-sky-600 hover:underline">
+           class="mt-3 inline-block text-sm text-sky-600 hover:text-sky-700 hover:underline touch-manipulation">
           Open in Full Screen
         </a>
       </div>
@@ -300,7 +392,7 @@ if ($client_id) {
       <!-- 🗑️ Delete File Button -->
       <div class="mt-4">
         <button @click="deleteFile"
-                class="text-sm text-red-600 hover:underline"
+                class="text-sm text-red-600 hover:text-red-700 hover:underline touch-manipulation"
                 :disabled="deleteFileLoading">
           <template x-if="deleteFileLoading">
             <span>Deleting...</span>
@@ -312,38 +404,40 @@ if ($client_id) {
       </div>
 
       <!-- 🕓 Metadata Footer -->
-      <div class="text-xs text-gray-400 mt-6 border-t pt-4 space-y-1">
-        <p>
-          Uploaded:
+      <div class="text-xs text-gray-400 mt-4 sm:mt-6 border-t pt-3 sm:pt-4 space-y-1">
+        <p class="break-words">
+          <span class="font-medium">Uploaded:</span>
           <span x-text="fileViewer.uploadedAt 
             ? new Date(fileViewer.uploadedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) 
             : '—'"></span>
         </p>
-        <p>
-          Approved:
+        <p class="break-words">
+          <span class="font-medium">Approved:</span>
           <span x-text="fileViewer.approvedAt 
             ? new Date(fileViewer.approvedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) 
             : 'Not yet approved'"></span>
         </p>
-        <p>
-          Updated By:
+        <p class="break-words">
+          <span class="font-medium">Updated By:</span>
           <span x-text="fileViewer.updatedBy || '—'"></span>
         </p>
       </div>
 
       <!-- 🧮 Action Buttons -->
-      <div class="mt-4 flex justify-between items-center">
+      <div class="mt-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0">
         <button @click="closeFileModal()"
-                class="text-sm text-gray-600 hover:underline">Close</button>
+                class="text-sm text-gray-600 hover:text-gray-800 hover:underline py-2 sm:py-0 touch-manipulation order-2 sm:order-1">
+          Close
+        </button>
 
         <button @click="submitDocumentChanges()"
                 :disabled="submitDocumentChangesLoading || 
                   (fileViewer.status === 'Rejected' && !fileViewer.adminComments.trim())"
-                class="text-sm px-4 py-2 rounded transition font-semibold"
+                class="text-sm px-4 py-2 rounded transition font-semibold touch-manipulation order-1 sm:order-2"
                 :class="submitDocumentChangesLoading || 
                   (fileViewer.status === 'Rejected' && !fileViewer.adminComments.trim())
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-sky-600 text-white hover:bg-sky-700'">
+                  : 'bg-sky-600 text-white hover:bg-sky-700 active:bg-sky-800'">
           <template x-if="submitDocumentChangesLoading">
             <span>Saving...</span>
           </template>
