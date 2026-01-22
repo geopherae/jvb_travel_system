@@ -56,7 +56,7 @@ $stmt = $conn->prepare("
     c.left_review,
     t.id AS package_id, t.package_name, t.package_description, t.price,
     t.day_duration, t.night_duration, t.tour_cover_image,
-    t.inclusions_json, t.origin, t.destination,
+    t.inclusions_json, t.exclusions_json, t.origin, t.destination,
     t.checklist_template_id
   FROM clients c
   LEFT JOIN tour_packages t ON c.assigned_package_id = t.id
