@@ -11,6 +11,6 @@
 // ============================================
 // 🛂 VISA PROCESSING FEATURE
 // ============================================
-// Set to true to enable visa processing system
-// Set to false to disable and hide all visa-related features
-define('VISA_PROCESSING_ENABLED', true);
+// Set to true to enable visa processing system with full functionality
+// Set to false to show visa button as "Coming Soon" teaser (disabled, no link)
+define('VISA_PROCESSING_ENABLED', false);

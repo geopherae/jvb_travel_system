@@ -10,10 +10,13 @@ $navLinks = [
   'Packages'     => ['url' => VISA_PROCESSING_ENABLED ? '../admin/admin_packages.php' : '../admin/admin_tour_packages.php',     'icon' => 'chart-bar', 'match' => ['admin_packages.php', 'admin_tour_packages.php', 'admin_visa_packages.php']],
 ];
 
-// Add Visa Processing only if enabled
-if (VISA_PROCESSING_ENABLED) {
-  $navLinks['Visa Processing'] = ['url' => '../admin/admin_visa_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_visa_dashboard.php']];
-}
+// Add Visa Processing (always show, but disable if feature is off)
+$navLinks['Visa Processing'] = [
+  'url' => VISA_PROCESSING_ENABLED ? '../admin/admin_visa_dashboard.php' : '',
+  'icon' => 'chart-bar', 
+  'match' => ['admin_visa_dashboard.php'],
+  'disabled' => !VISA_PROCESSING_ENABLED
+];
 
 // Add remaining nav items
 $navLinks += [
