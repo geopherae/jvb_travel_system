@@ -3,11 +3,17 @@ $activePage = basename($_SERVER['PHP_SELF']);
 $adminName = $_SESSION['admin']['first_name'] ?? 'Guest';
 
 require_once '../includes/icon_map.php';
+require_once '../includes/feature_flags.php';
 
 $navLinks = [
   'Booking Dashboard'     => ['url' => '../admin/admin_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_dashboard.php', 'view_client.php', 'admin_manual.php']],
-  'Packages'     => ['url' => '../admin/admin_packages.php',     'icon' => 'chart-bar', 'match' => ['admin_packages.php', 'admin_tour_packages.php']],
-  'Visa Processing'     => ['url' => '../admin/admin_visa_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_visa_dashboard.php'], 'disabled' => false],
+  'Packages'     => ['url' => VISA_PROCESSING_ENABLED ? '../admin/admin_packages.php' : '../admin/admin_tour_packages.php',     'icon' => 'chart-bar', 'match' => ['admin_packages.php', 'admin_tour_packages.php', 'admin_visa_packages.php']],
+];
+
+// Add Visa Processing only if enabled
+if (VISA_PROCESSING_ENABLED) {
+  $navLinks['Visa Processing'] = ['url' => '../admin/admin_visa_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_visa_dashboard.php']];
+}
   'Messages'      => ['url' => '../admin/messages.php?v=1.0.1',             'icon' => 'messages',  'match' => ['messages.php']],
   'Client Reviews' => ['url' => '../admin/admin_testimonials.php', 'icon' => 'star',      'match' => ['admin_testimonials.php']],
 ];
