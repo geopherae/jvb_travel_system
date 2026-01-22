@@ -5,11 +5,11 @@ $adminName = $_SESSION['admin']['first_name'] ?? 'Guest';
 require_once '../includes/icon_map.php';
 
 $navLinks = [
-  'Dashboard'     => ['url' => '../admin/admin_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_dashboard.php', 'view_client.php', 'admin_manual.php']],
+  'Booking Dashboard'     => ['url' => '../admin/admin_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_dashboard.php', 'view_client.php', 'admin_manual.php']],
+  'Visa Processing'     => ['url' => '',     'icon' => 'chart-bar', 'match' => ['admin_visa_dashboard.php'], 'disabled' => true],
   'Messages'      => ['url' => '../admin/messages.php?v=1.0.1',             'icon' => 'messages',  'match' => ['messages.php']],
   'Tour Packages' => ['url' => '../admin/admin_tour_packages.php', 'icon' => 'map',       'match' => ['admin_tour_packages.php']],
   'Client Reviews' => ['url' => '../admin/admin_testimonials.php', 'icon' => 'star',      'match' => ['admin_testimonials.php']],
-  'Settings'      => ['url' => '../admin/admin_settings.php',      'icon' => 'settings',  'match' => ['admin_settings.php', 'audit.php']],
 ];
 
 
@@ -39,12 +39,21 @@ $navLinks = [
     <!-- Navigation -->
     <nav class="flex-1 px-4 pt-6 space-y-4 text-[1rem]">
       <?php foreach ($navLinks as $label => $meta): ?>
-        <?php $isActive = in_array($activePage, $meta['match'] ?? [$meta['url']]); ?>
-        <a href="<?= $meta['url'] ?>"
+        <?php
+          $isActive = in_array($activePage, $meta['match'] ?? [$meta['url']]);
+          $isDisabled = !empty($meta['disabled']);
+          $href = $isDisabled ? '' : $meta['url'];
+          $linkClasses = $isActive
+            ? 'bg-sky-500 text-white font-semibold shadow'
+            : 'hover:bg-sky-100 hover:text-sky-700 text-neutral-700';
+          if ($isDisabled) {
+            $linkClasses .= ' cursor-not-allowed opacity-60';
+          }
+        ?>
+        <a href="<?= $href ?>"
+           <?= $isDisabled ? 'title="Feature coming soon!" onclick="event.preventDefault();" aria-disabled="true"' : '' ?>
            class="block px-4 py-3 rounded-lg transition-all
-           <?= $isActive
-               ? 'bg-sky-500 text-white font-semibold shadow'
-               : 'hover:bg-sky-100 hover:text-sky-700 text-neutral-700' ?>">
+           <?= $linkClasses ?>">
           <div class="flex items-center gap-2">
             <?= getIconSvg($meta['icon']) ?>
             <span><?= htmlspecialchars($label) ?></span>
