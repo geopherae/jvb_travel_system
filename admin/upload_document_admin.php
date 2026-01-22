@@ -123,7 +123,7 @@ function generateFileName(array $file, string $customName): string {
   $original = pathinfo($file['name'], PATHINFO_FILENAME);
   $clean = preg_replace('/[^a-zA-Z0-9 \-]/', '', $original);
   $clean = preg_replace('/\s+/', ' ', $clean);
-  $clean = mb_substr($clean, 0, 50);
-  $hash = substr(md5(time() . $file['tmp_name']), 0, 6);
-  return $clean . ' ' . $hash . '.' . $ext;
+  $clean = mb_substr($clean, 0, 60);
+  // Use the admin-provided filename (sanitized) without appending a hash
+  return $clean . '.' . $ext;
 }
