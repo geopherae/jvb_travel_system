@@ -135,6 +135,7 @@ $todayDay  = getTodayItineraryDay($start, $end);
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>View Client</title>
   <?php include __DIR__ . '/../components/favicon_links.php'; ?>
 
@@ -158,73 +159,74 @@ $todayDay  = getTodayItineraryDay($start, $end);
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 
-<body class="text-gray-800 font-sans overflow-hidden" x-data="{ sidebarOpen: false, ...clientViewScope() }" x-init="initClientView()">
+<body class="text-gray-800 font-sans md:overflow-hidden" x-data="{ sidebarOpen: false, ...clientViewScope() }" x-init="initClientView()">
 
 <!-- Includes -->
 <?php $isAdmin = true; include '../components/admin_sidebar.php'; ?>
 <?php $isAdmin = true; include '../components/right-panel.php'; ?>
 <?php include '../components/status_alert.php'; ?>
 
+
 <!-- Mobile Toggle -->
 <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-30 bg-primary text-white rounded">
   ☰
 </button>
 
-<main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-4 sm:p-6 space-y-8 relative z-0">
+<main class="ml-0 lg:ml-64 lg:mr-80 min-h-screen overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 relative z-0">
 
   <!-- 🧭 Page Title -->
-  <h2 class="text-xl font-bold">Client Overview</h2>
+  <h2 class="text-xl sm:text-2xl font-bold">Client Overview</h2>
 
-<div class="max-w-7xl mx-auto space-y-10">
+  <div class="max-w-7xl mx-auto space-y-6 sm:space-y-10">
 
-  <div x-data="{ tab: 'info' }" class="space-y-6">
+    <div x-data="{ tab: 'info' }" class="space-y-4 sm:space-y-6">
 
-    <!-- 🧭 Tab Navigation -->
-    <div class="border-b pb-2">
-      <div class="flex items-center justify-between gap-4">
-        <!-- Tabs -->
-        <div class="flex gap-4 sm:gap-6 overflow-x-auto text-sm font-semibold text-gray-600 min-w-0">
-          <button @click="tab = 'info'"
-                  :class="tab === 'info' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
-                  class="pb-1 transition whitespace-nowrap shrink-0">
-            Client & Tour Info
-          </button>
-          <button @click="tab = 'itinerary'"
-                  :class="tab === 'itinerary' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
-                  class="pb-1 transition whitespace-nowrap shrink-0">
-            Itinerary
-          </button>
-          <button @click="tab = 'tripPhotos'"
-                  :class="tab === 'tripPhotos' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
-                  class="pb-1 transition whitespace-nowrap shrink-0">
-            Client Trip Photos
-          </button>
+      <!-- 🧭 Tab Navigation -->
+      <div class="border-b border-gray-200">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 pb-3">
+          <!-- Tabs -->
+          <div class="flex gap-3 sm:gap-6 overflow-x-auto scrollbar-hide text-sm font-semibold text-gray-600 -mb-px">
+            <button @click="tab = 'info'"
+                    :class="tab === 'info' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
+                    class="pb-2 transition whitespace-nowrap shrink-0">
+              Client & Tour Info
+            </button>
+            <button @click="tab = 'itinerary'"
+                    :class="tab === 'itinerary' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
+                    class="pb-2 transition whitespace-nowrap shrink-0">
+              Itinerary
+            </button>
+            <button @click="tab = 'tripPhotos'"
+                    :class="tab === 'tripPhotos' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
+                    class="pb-2 transition whitespace-nowrap shrink-0">
+              Trip Photos
+            </button>
+          </div>
+          
+          <!-- Print Button -->
+          <a 
+            href="./print_client_details.php?client_id=<?= $client['id'] ?>"
+            target="_blank"
+            class="px-3 sm:px-4 py-2 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white text-sm font-semibold rounded-lg transition shadow-sm flex items-center justify-center gap-2 whitespace-nowrap shrink-0 touch-manipulation"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            <span class="hidden xs:inline sm:inline">Print Details</span>
+            <span class="xs:hidden sm:hidden">Print</span>
+          </a>
         </div>
-        
-        <!-- Print Button -->
-        <a 
-          href="./print_client_details.php?client_id=<?= $client['id'] ?>"
-          target="_blank"
-          class="px-4 py-2 bg-sky-500 hover:bg-sky-700 text-white text-sm font-semibold rounded-lg transition shadow-sm flex items-center gap-2 whitespace-nowrap shrink-0"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-          </svg>
-          <span class="hidden sm:inline">Print Client Details</span>
-          <span class="sm:hidden">Print</span>
-        </a>
       </div>
-    </div>
 
       <!-- 📋 Tab 1: Client Info + Tour Package -->
-      <div x-show="tab === 'info'" x-transition>
-        <div class="flex flex-col sm: flex-row lg:flex-row gap-4 lg:gap-6 min-w-0">
+      <div x-show="tab === 'info'" x-transition x-cloak>
+        <div class="flex flex-col lg:flex-row gap-4 lg:gap-6">
           <!-- Client Contact Details Card -->
-          <div class="min-w-0 flex-1">
+          <div class="w-full lg:flex-1">
             <?php include '../components/client-contact-details.php'; ?>
           </div>
           <!-- 🧳 Tour Package Card -->
-          <div class="min-w-0 flex-1">
+          <div class="w-full lg:flex-1">
             <?php include '../components/tour-package-card.php'; ?>
           </div>
         </div>
@@ -236,8 +238,10 @@ $todayDay  = getTodayItineraryDay($start, $end);
       </div>
 
       <!-- 📷 Tab 3: Client Trip Photos -->
-      <div x-show="tab === 'tripPhotos'" class="rounded-lg border border-gray-200 p-6 mb-8 bg-white shadow-sm" x-transition x-cloak>
-        <?php include '../components/trip_photos_gallery.php'; ?>
+      <div x-show="tab === 'tripPhotos'" x-transition x-cloak>
+        <div class="rounded-lg border border-gray-200 p-4 sm:p-6 bg-white shadow-sm">
+          <?php include '../components/trip_photos_gallery.php'; ?>
+        </div>
       </div>
 
     </div>
@@ -248,8 +252,6 @@ $todayDay  = getTodayItineraryDay($start, $end);
     </div>
 
   </div>
-
-
 
 </main>
   <!-- ✨ Edit Client Modal -->
@@ -283,7 +285,12 @@ $todayDay  = getTodayItineraryDay($start, $end);
 <script src="https://unpkg.com/alpinejs" defer></script>
 <?php include '../components/status_alert.php'; ?>
 <?php include '../components/update_client_booking_modal.php'; ?>
-
+<?php 
+$isAdmin = true; 
+include '../components/reassign-modal.php';
+$editClientId = $client['id'];
+include __DIR__ . '/../components/unassign-modal.php'; 
+?>
 <?php include __DIR__ . '/../components/archive_client_modal.php'; ?>
 
 <script>

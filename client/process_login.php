@@ -88,7 +88,7 @@ try {
 
     // Client login
     $clientStmt = $conn->prepare("
-        SELECT id, full_name, email, access_code, client_profile_photo
+        SELECT id, full_name, email, access_code, client_profile_photo, processing_type
         FROM clients
         WHERE access_code = ?
     ");
@@ -130,12 +130,14 @@ try {
         $_SESSION['is_client']       = true;
         $_SESSION['session_token']   = $new_token;           // For single-session validation
         $_SESSION['last_activity']   = $now;                 // For inactivity timeout
+        $_SESSION['processing_type'] = (string)$client['processing_type']; // Track workflow type
         $_SESSION['client'] = [
             'id'                  => (int)$client['id'],
             'full_name'           => (string)$client['full_name'],
             'email'               => (string)$client['email'],
             'access_code'         => (string)$client['access_code'],
-            'client_profile_photo'=> (string)$client['client_profile_photo']
+            'client_profile_photo'=> (string)$client['client_profile_photo'],
+            'processing_type'     => (string)$client['processing_type']
         ];
 
         // Check for pending first-time survey (unchanged)
@@ -164,7 +166,7 @@ try {
         $surveyStmt->close();
 
         $_SESSION['show_disclaimer'] = true;
-        error_log("Client login successful: id={$client['id']}, access_code={$client['access_code']}");
+        error_log("Client login successful: id={$client['id']}, access_code={$client['access_code']}, processing_type={$client['processing_type']}");
         header("Location: client_dashboard.php");
         $clientStmt->close();
         $conn->close();

@@ -3,7 +3,7 @@ require_once '../includes/empty_state_map.php';
 
 $isAdmin = $isAdmin ?? false;
 $clients = $clients ?? [];
-$tableTitle = $isAdmin ? 'Active Clients' : 'Client Bookings';
+$tableTitle = $isAdmin ? 'Active Clients — Bookings' : 'Client Bookings';
 
 // 🧠 Detect if this is an AJAX reload or a clean reload
 $isAjaxReload = basename($_SERVER['SCRIPT_NAME']) === 'reload_clients_table.php';

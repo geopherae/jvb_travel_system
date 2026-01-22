@@ -139,7 +139,7 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
   <style>[x-cloak] { display: none !important; }</style>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard</title>
+  <title>Admin Booking Dashboard</title>
   <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs" defer></script>
@@ -216,7 +216,7 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
   <!-- Main Content -->
   <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative z-0">
 
-    <h2 class="text-xl font-bold">Admin Dashboard</h2>
+    <h2 class="text-xl font-bold">Admin Booking Dashboard</h2>
 
     <!-- Welcome Card -->
     <?php include '../components/welcome-card.php'; ?>

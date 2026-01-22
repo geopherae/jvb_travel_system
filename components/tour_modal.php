@@ -221,7 +221,7 @@ document.addEventListener('alpine:init', () => {
         <li class="flex items-start gap-2">
           <span class="flex-shrink-0 mt-0.5">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M5 13l4 4L19 7" stroke="#10893c" 
+              <path d="M5 13l4 4L19 7" stroke="#22c55e" 
                     stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </span>
@@ -244,13 +244,9 @@ document.addEventListener('alpine:init', () => {
             <ul class="space-y-3">
               <template x-for="(item, index) in $store.tourModal.activeTour.exclusions" :key="'exclusion-' + index">
                 <li class="flex items-start gap-2">
-                  <span class="flex-shrink-0 mt-0.5">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path d="M18 6L6 18M6 6l12 12" stroke="#891313" stroke-width="3" stroke-linecap="round"/>
-                    </svg>
-                  </span>
+                  <span class="text-lg" x-text="item.icon || '❌'"></span>
                   <div>
-                    <p class="text-sky-800 font-semibold" x-text="item.title || '—'"></p>
+                    <p class="text-red-500 font-semibold" x-text="item.title || '—'"></p>
                     <p class="italic text-slate-600 text-sm" x-show="item.desc" x-text="item.desc"></p>
                   </div>
                 </li>
@@ -261,6 +257,8 @@ document.addEventListener('alpine:init', () => {
             <p class="text-sm text-slate-500 italic">No exclusions listed for this package.<br>Create one in the Exclusions tab to get started!</p>
           </template>
         </div>
+      </div>
+    </div>
 
     <!-- Divider + Action Buttons (sticky on mobile) -->
     <div class="pb-4 border-t border-slate-200 mt-4 sm:mt-6 pt-4 sticky bottom-0 bg-white px-4 sm:px-5">

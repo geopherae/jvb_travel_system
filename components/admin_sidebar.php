@@ -6,9 +6,9 @@ require_once '../includes/icon_map.php';
 
 $navLinks = [
   'Booking Dashboard'     => ['url' => '../admin/admin_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_dashboard.php', 'view_client.php', 'admin_manual.php']],
-  'Visa Processing'     => ['url' => '',     'icon' => 'chart-bar', 'match' => ['admin_visa_dashboard.php'], 'disabled' => true],
+  'Packages'     => ['url' => '../admin/admin_packages.php',     'icon' => 'chart-bar', 'match' => ['admin_packages.php', 'admin_tour_packages.php']],
+  'Visa Processing'     => ['url' => '../admin/admin_visa_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_visa_dashboard.php'], 'disabled' => false],
   'Messages'      => ['url' => '../admin/messages.php?v=1.0.1',             'icon' => 'messages',  'match' => ['messages.php']],
-  'Tour Packages' => ['url' => '../admin/admin_tour_packages.php', 'icon' => 'map',       'match' => ['admin_tour_packages.php']],
   'Client Reviews' => ['url' => '../admin/admin_testimonials.php', 'icon' => 'star',      'match' => ['admin_testimonials.php']],
 ];
 

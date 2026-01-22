@@ -51,23 +51,25 @@ document.addEventListener('alpine:init', () => {
       this.tourData = found;
       this.isOpen = true;
       console.log('[editTourModal] isOpen set to true');
+      console.trace('[editTourModal] open() called from:'); // ← ADD THIS
       const tourModal = Alpine.store('tourModal');
       if (tourModal?.isOpen) {
         tourModal.closeModal();
         console.log('[editTourModal] Closed tourModal to prevent overlap');
       }
     },
-    close() {
-      this.isOpen = false;
-      this.tourId = null;
-      this.tourData = {};
-      console.log('[editTourModal] close() called');
-      const tourModal = Alpine.store('tourModal');
-      if (tourModal?.isOpen) {
-        tourModal.closeModal();
-        console.log('[editTourModal] Also closed tourModal');
+      close() {
+        console.trace('[editTourModal] close() called from:'); // ← ADD THIS
+        this.isOpen = false;
+        this.tourId = null;
+        this.tourData = {};
+        console.log('[editTourModal] close() called');
+        const tourModal = Alpine.store('tourModal');
+        if (tourModal?.isOpen) {
+          tourModal.closeModal();
+          console.log('[editTourModal] Also closed tourModal');
+        }
       }
-    }
   });
 
 

@@ -305,27 +305,55 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
 </div>
 
 
-        <!-- 📋 Other Packages -->
-        <div class="max-w-7xl mx-auto mt-12">
-          <h3 class="text-slate-600 text-sm font-semibold mb-2 uppercase tracking-wider">Other Packages</h3>
-          <div x-show="getFilteredTours().filter(t => !t.is_favorite).length > 0" class="max-h-[28rem] overflow-y-auto divide-y divide-gray-100 border border-gray-200 rounded-md bg-white shadow-sm">
-            <template x-for="tour in getFilteredTours()" :key="tour.id">
-              <template x-if="!tour.is_favorite">
-                <div @click="$store.tourModal.openModal(tour.id)" class="cursor-pointer p-4 hover:bg-slate-50 transition flex items-center justify-between gap-4">
-                  <img :src="tour.image" alt="Tour" class="w-16 h-16 object-cover rounded shrink-0" />
-                  <div class="flex-3 min-w-0 max-w-xl">
-                    <h4 class="font-semibold text-slate-800" x-text="tour.name"></h4>
-                    <p class="text-sm text-slate-600 line-clamp-2" x-text="tour.description"></p>
-                  </div>
-                  <div class="text-right ml-4 shrink-0">
-                    <p class="font-bold text-sky-700" x-text="tour.price ? '₱' + Number(tour.price).toLocaleString('en-PH') : 'TBD'"></p>
-                    <p class="text-xs font-bold mt-1 text-slate-500" x-text="`${tour.days}D/${tour.nights}N`"></p>
-                  </div>
-                </div>
-              </template>
-            </template>
+<!-- 📋 Other Packages -->
+<div class="max-w-7xl mx-auto mt-12">
+  <h3 class="text-slate-600 text-sm font-semibold mb-2 uppercase tracking-wider">
+    Other Packages
+  </h3>
+
+  <div
+    x-show="getFilteredTours().filter(t => !t.is_favorite).length > 0"
+    class="max-h-[28rem] overflow-y-auto divide-y divide-gray-100 border border-gray-200 rounded-md bg-white shadow-sm"
+  >
+    <template x-for="tour in getFilteredTours()" :key="tour.id">
+      <template x-if="!tour.is_favorite">
+        <!-- Row -->
+        <div
+          @click="$store.tourModal.openModal(tour.id)"
+          class="cursor-pointer p-4 hover:bg-slate-50 transition grid grid-cols-1 sm:grid-cols-[auto,1fr,auto] gap-4 items-start"
+        >
+          <!-- Image -->
+          <img
+            :src="tour.image"
+            alt="Tour"
+            class="w-16 h-16 object-cover rounded shrink-0 self-start"
+          />
+
+          <!-- Text -->
+          <div class="min-w-0 max-w-xl self-start">
+            <h4 class="font-semibold text-slate-800" x-text="tour.name"></h4>
+            <p
+              class="text-sm text-slate-600 line-clamp-2"
+              x-text="tour.description"
+            ></p>
+          </div>
+
+          <!-- Price & Duration -->
+          <div class="text-right ml-4 shrink-0 self-start">
+            <p
+              class="font-bold text-sky-700"
+              x-text="tour.price ? '₱' + Number(tour.price).toLocaleString('en-PH') : 'TBD'"
+            ></p>
+            <p
+              class="text-xs font-bold mt-1 text-slate-500"
+              x-text="`${tour.days}D/${tour.nights}N`"
+            ></p>
           </div>
         </div>
+      </template>
+    </template>
+  </div>
+</div>
 
 <?php if (empty($allToursForJS)): ?>
   <div class="flex flex-col items-center justify-center py-12 text-gray-500">
