@@ -14,6 +14,9 @@ $navLinks = [
 if (VISA_PROCESSING_ENABLED) {
   $navLinks['Visa Processing'] = ['url' => '../admin/admin_visa_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_visa_dashboard.php']];
 }
+
+// Add remaining nav items
+$navLinks += [
   'Messages'      => ['url' => '../admin/messages.php?v=1.0.1',             'icon' => 'messages',  'match' => ['messages.php']],
   'Client Reviews' => ['url' => '../admin/admin_testimonials.php', 'icon' => 'star',      'match' => ['admin_testimonials.php']],
 ];
