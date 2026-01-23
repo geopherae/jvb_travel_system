@@ -31,7 +31,7 @@
     <!-- Name and Status -->
     <div>
       <p class="text-base font-semibold text-gray-900"
-         x-text="isClient ? 'Travel Agent' : (recipientType === 'admin' ? (selectedUser?.name + ' (Agent)') : (selectedUser?.name || 'Select a recipient'))"></p>
+         x-text="isClient ? (selectedUser?.name || 'Travel Agent') : (recipientType === 'admin' ? (selectedUser?.name + ' (Agent)') : (selectedUser?.name || 'Select a recipient'))"></p>
       <p class="text-xs text-gray-500"
          x-show="recipientType === 'client' && selectedUser?.status"
          x-text="selectedUser?.status"></p>
