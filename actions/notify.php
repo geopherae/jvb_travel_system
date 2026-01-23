@@ -428,6 +428,32 @@ class NotificationManager {
                 'action_text' => 'Manage Packages',
                 'log_action'  => 'inventory_alert',
                 'expires_days' => 7
+            ],
+            'tour_package_created' => [
+                'category'    => 'admin_alert',
+                'title'       => 'New Tour Package Created',
+                'message'     => "A new tour package <strong>{package_name}</strong> ({origin} → {destination}) has been created. Price: <strong>₱{price}</strong> | Duration: <strong>{day_duration}D/{night_duration}N</strong>",
+                'html'        => true,
+                'icon'        => '✨',
+                'color'       => 'green',
+                'priority'    => 'normal',
+                'action_url'  => '/admin/admin_tour_packages.php',
+                'action_text' => 'View Package',
+                'log_action'  => 'tour_package_created',
+                'expires_days' => 30
+            ],
+            'new_client_added' => [
+                'category'    => 'admin_alert',
+                'title'       => 'New Client Added',
+                'message'     => "<strong>{client_name}</strong> ({email}) has been added to the system. Assigned to: <strong>{assigned_admin}</strong> | Package: <strong>{package_name}</strong>",
+                'html'        => true,
+                'icon'        => '👤',
+                'color'       => 'blue',
+                'priority'    => 'normal',
+                'action_url'  => '/admin/view_client.php?client_id={client_id}',
+                'action_text' => 'View Client',
+                'log_action'  => 'client_added',
+                'expires_days' => 14
             ]
         ];
     }

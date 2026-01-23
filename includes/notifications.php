@@ -216,9 +216,22 @@ function renderNotificationList(container, data) {
 
   // 🔔 Update bell indicator
   function updateBellIndicator() {
-    const hasUnread = cachedNotifications.some(n => n.status === 'unread');
-    if (bellIndicator) {
-      bellIndicator.style.display = hasUnread ? 'inline-block' : 'none';
+    const unreadCount = cachedNotifications.filter(n => n.status === 'unread').length;
+    const badge = document.querySelector('#notification-bell .unread-indicator');
+    
+    if (!badge) {
+      console.warn('❌ Badge element not found');
+      return;
+    }
+    
+    console.log(`🔔 Updating bell: ${unreadCount} unread notifications`);
+    
+    if (unreadCount > 0) {
+      badge.style.display = 'inline-block';
+      console.log('✅ Badge shown');
+    } else {
+      badge.style.display = 'none';
+      console.log('✅ Badge hidden (no unread)');
     }
   }
 

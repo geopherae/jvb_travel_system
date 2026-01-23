@@ -10,6 +10,7 @@ require_once __DIR__ . '/../actions/db.php';
 require_once __DIR__ . '/../includes/image_compression_helper.php';
 require_once __DIR__ . '/../components/status_alert.php';
 require_once __DIR__ . '/../includes/log_helper.php';
+require_once __DIR__ . '/../actions/notify.php';
 
 use function LogHelper\logClientOnboardingAudit;
 
@@ -191,6 +192,18 @@ if ($stmt->execute()) {
       'source'           => 'process_add_client.php'
     ]
   ]);
+
+  // 📢 Send Notification to All Admins (New Client Added)
+  $manager = new NotificationManager($conn);
+  $notifyResult = $manager->broadcastToAdmins('new_client_added', [
+    'client_name' => $fullName,
+    'email' => $email,
+    'phone_number' => $phone,
+    'package_name' => $packageName ?: 'Not Assigned',
+    'assigned_admin' => $adminName,
+    'client_id' => $clientId
+  ]);
+  error_log("[process_add_client] Notification broadcast result: " . json_encode($notifyResult));
 
   $_SESSION['modal_status'] = 'add_client_success';
   header("Location: ../admin/admin_dashboard.php");

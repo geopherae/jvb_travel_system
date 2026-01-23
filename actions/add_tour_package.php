@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../actions/db.php';
 require_once __DIR__ . '/../components/status_alert.php';
 require_once __DIR__ . '/../includes/log_helper.php';
+require_once __DIR__ . '/../actions/notify.php';
 
 use function Auth\guard;
 use function LogHelper\generatePackageSummary;
@@ -326,6 +327,20 @@ try {
         throw new Exception("Failed to save audit log: " . $audit_stmt->error);
     }
     $audit_stmt->close();
+
+    // 📢 Send Notification to All Admins (Only for New Packages)
+    if ($isNewPackage) {
+        $manager = new NotificationManager($conn);
+        $notifyResult = $manager->broadcastToAdmins('tour_package_created', [
+            'package_name' => $name,
+            'origin' => $origin,
+            'destination' => $destination,
+            'price' => number_format((float) $price, 2),
+            'day_duration' => $days,
+            'night_duration' => $nights
+        ]);
+        error_log("[add_tour_package] Notification broadcast result: " . json_encode($notifyResult));
+    }
 
     // ✅ Commit transaction
     $conn->commit();

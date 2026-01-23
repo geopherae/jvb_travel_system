@@ -28,14 +28,14 @@ include_once __DIR__ . '/../includes/unread-notification-check.php';
     <div id="notification-bell" class="relative">
       <button id="toggle-notification-overlay"
               title="Toggle Notifications"
-              class="text-gray-500 hover:text-sky-600 transition relative">
-        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              class="text-gray-500 hover:text-sky-600 transition relative p-2 rounded-lg hover:bg-sky-50">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
           <path d="M10 2a6 6 0 00-6 6v2.586l-.707.707A1 1 0 004 13h12a1 1 0 00.707-1.707L16 10.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z"/>
         </svg>
 
         <!-- 🔴 Unread Dot -->
-        <span class="unread-indicator absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"
-              style="display: <?= $hasUnreadNotifications ? 'inline-block' : 'none' ?>;"></span>
+        <span class="unread-indicator absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full ring-2 ring-white shadow-md"
+              style="display: none;"></span>
       </button>
     </div>
   </div>
