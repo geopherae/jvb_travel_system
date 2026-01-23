@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+// Set timezone to Asia/Manila
+date_default_timezone_set('Asia/Manila');
+
 header('Content-Type: application/json');
 session_start();
 

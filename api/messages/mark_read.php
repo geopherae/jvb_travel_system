@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Asia/Manila');
+
 require_once __DIR__ . '/../../actions/db.php';
 require_once __DIR__ . '/../../includes/auth.php';
 

@@ -45,5 +45,8 @@ if ($conn->connect_error) {
 // Optional charset enforcement
 $conn->set_charset('utf8mb4');
 
+// Set MySQL timezone to Asia/Manila
+$conn->query("SET time_zone = '+08:00'");
+
 // ✅ Do not expose $conn or sensitive config publicly
 ?>

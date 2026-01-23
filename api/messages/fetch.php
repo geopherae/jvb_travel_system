@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+// Set timezone to Asia/Manila
+date_default_timezone_set('Asia/Manila');
+
 ob_start();
 
 ini_set('display_errors', 1);
