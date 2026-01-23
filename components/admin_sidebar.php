@@ -43,7 +43,7 @@ $navLinks['Visa Processing'] = [
 
 // Add remaining nav items
 $navLinks += [
-  'Messages'      => ['url' => '../admin/messages.php?v=1.0.3',             'icon' => 'messages',  'match' => ['messages.php']],
+  'Messages'      => ['url' => '../admin/messages.php?v=1.0.4',             'icon' => 'messages',  'match' => ['messages.php']],
   'Client Reviews' => ['url' => '../admin/admin_testimonials.php', 'icon' => 'star',      'match' => ['admin_testimonials.php']],
 ];
 

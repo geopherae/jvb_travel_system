@@ -170,6 +170,8 @@ function stopNavIndicatorCheck() {
         navIndicatorInterval = null;
     }
 }
+
+function restartPollingInterval() {
     if (pollingInterval) {
         clearInterval(pollingInterval);
     }
