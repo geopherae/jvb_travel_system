@@ -226,18 +226,53 @@ document.addEventListener('alpine:init', () => {
             },
 
             getLastMessagePreview(recipientId, recipientType) {
-                const key = `${recipientType}_${recipientId}`;
                 const preview = this.messagePreviews[recipientId];
                 if (!preview?.message_text) return 'No messages yet';
 
                 const prefix = preview.sent_by_me ? 'You: ' : '';
-                const text = preview.message_text;
-                const maxLength = 40;
+                let text = preview.message_text || '';
                 
+                // Handle images in message text (check for image markers or JSON with image data)
+                if (text.trim().startsWith('{') || text.includes('[Image]') || text.includes('image')) {
+                    try {
+                        const parsed = JSON.parse(text);
+                        if (parsed.type === 'image' || parsed.image) {
+                            return prefix + '[Image]';
+                        }
+                    } catch (e) {
+                        // Not JSON, check for image markers
+                        if (text.includes('[Image]')) {
+                            return prefix + '[Image]';
+                        }
+                    }
+                }
+                
+                const maxLength = 40;
                 const fullText = prefix + text;
                 return fullText.length > maxLength
                     ? fullText.substring(0, maxLength) + '...'
                     : fullText;
+            },
+
+            getLastMessageTime(recipientId) {
+                const preview = this.messagePreviews[recipientId];
+                if (!preview?.created_at) return '';
+                
+                const date = new Date(preview.created_at);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+                
+                if (diffMins < 1) return 'Now';
+                if (diffMins < 60) return `${diffMins}m`;
+                if (diffHours < 24) return `${diffHours}h`;
+                if (diffDays === 1) return 'Yesterday';
+                if (diffDays < 7) return `${diffDays}d`;
+                
+                // For older messages, show the actual date
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             },
 
             isAssignedToMe(clientId) {

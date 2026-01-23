@@ -217,7 +217,7 @@ $alpineData = [
                                         </div>
                                         <p class="text-sm text-gray-500 truncate" x-text="getLastMessagePreview(admin.id, 'admin') || 'No messages yet'"></p>
                                     </div>
-                                    <p class="text-xs text-gray-400" x-text="admin.last_message_time || ''"></p>
+                                    <p class="text-xs text-gray-400 whitespace-nowrap" x-text="getLastMessageTime(admin.id)"></p>
                                 </button>
                             </li>
                         </template>
@@ -266,7 +266,7 @@ $alpineData = [
                                         </div>
                                         <p class="text-sm text-gray-500 truncate" x-text="getLastMessagePreview(client.id, 'client') || 'No messages yet'"></p>
                                     </div>
-                                    <p class="text-xs text-gray-400" x-text="client.last_message_time || ''"></p>
+                                    <p class="text-xs text-gray-400 whitespace-nowrap" x-text="getLastMessageTime(client.id)"></p>
                                 </button>
                             </li>
                         </template>

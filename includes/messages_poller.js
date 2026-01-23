@@ -3,6 +3,9 @@
 let currentController = null;
 let pollingInterval = null;
 let pollingIntervalMs = 2000;
+let previewRefreshInterval = null;
+let lastPreviewRefresh = 0;
+const PREVIEW_REFRESH_MS = 5000; // Refresh previews every 5 seconds
 
 async function pollMessages() {
     const maxRetries = 10;
@@ -123,6 +126,23 @@ function restartPollingInterval() {
     pollingInterval = setInterval(pollMessages, pollingIntervalMs);
 }
 
+function startPreviewRefresh() {
+    if (previewRefreshInterval) {
+        clearInterval(previewRefreshInterval);
+    }
+    previewRefreshInterval = setInterval(async () => {
+        const messageAppElement = document.querySelector('[x-data^="messageApp"]');
+        const messageApp = messageAppElement ? Alpine.$data(messageAppElement) : null;
+        if (messageApp && typeof messageApp.fetchMessagePreviews === 'function') {
+            try {
+                await messageApp.fetchMessagePreviews();
+            } catch (err) {
+                console.error('Error refreshing message previews:', err);
+            }
+        }
+    }, PREVIEW_REFRESH_MS);
+}
+
 function startPolling() {
     if (pollingInterval) {
         clearInterval(pollingInterval);
@@ -130,6 +150,7 @@ function startPolling() {
     pollingIntervalMs = 2000;
     pollMessages();
     restartPollingInterval();
+    startPreviewRefresh();
     console.log('Message polling started');
 }
 
@@ -137,8 +158,12 @@ function stopPolling() {
     if (pollingInterval) {
         clearInterval(pollingInterval);
         pollingInterval = null;
-        console.log('Message polling stopped');
     }
+    if (previewRefreshInterval) {
+        clearInterval(previewRefreshInterval);
+        previewRefreshInterval = null;
+    }
+    console.log('Message polling stopped');
 }
 
 // Handle page visibility to pause/resume polling

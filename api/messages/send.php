@@ -209,9 +209,6 @@ try {
         throw new Exception('Resolved thread ID is empty after creation');
     }
 
-    // Get sender photo (disabled for debugging JSON issue)
-    $photoUrl = null; // avatars temporarily disabled
-
     // Insert message
     $sql = "
         INSERT INTO messages (
@@ -232,26 +229,34 @@ try {
     $createdAt = date('Y-m-d H:i:s');
     $stmt->close();
 
-    // Fetch sender name
+    // Get sender info (name and photo)
     $senderName = 'Unknown';
+    $senderPhoto = null;
+    
     if ($userType === 'admin') {
-        $sql = "SELECT CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) AS sender_name FROM admin_accounts WHERE id = ?";
+        $sql = "SELECT CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) AS sender_name, admin_photo FROM admin_accounts WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('i', $userId);
         $stmt->execute();
         $result = $stmt->get_result();
         if ($row = $result->fetch_assoc()) {
             $senderName = trim($row['sender_name']) ?: 'Unknown';
+            if ($row['admin_photo']) {
+                $senderPhoto = '../uploads/admin_photo/' . rawurlencode($row['admin_photo']);
+            }
         }
         $stmt->close();
     } else {
-        $sql = "SELECT full_name AS sender_name FROM clients WHERE id = ?";
+        $sql = "SELECT full_name, client_profile_photo FROM clients WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('i', $userId);
         $stmt->execute();
         $result = $stmt->get_result();
         if ($row = $result->fetch_assoc()) {
-            $senderName = trim($row['sender_name']) ?: 'Unknown Client';
+            $senderName = trim($row['full_name']) ?: 'Unknown Client';
+            if ($row['client_profile_photo']) {
+                $senderPhoto = '../uploads/client_profiles/' . rawurlencode($row['client_profile_photo']);
+            }
         }
         $stmt->close();
     }
@@ -267,7 +272,7 @@ try {
         'message_text'   => (string)$messageText,
         'created_at'     => (string)$createdAt,
         'sender_name'    => $senderName,
-        'sender_photo'   => $photoUrl
+        'sender_photo'   => $senderPhoto
     ];
 
     // Note: WebSocket broadcasting handled by websocket_server.php
