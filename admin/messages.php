@@ -205,7 +205,7 @@ $alpineData = [
                                     });
                                 "
                                         :class="recipientId === admin.id && recipientType === 'admin' ? 'bg-amber-50 border-r-4 border-amber-500' : 'hover:bg-gray-50'"
-                                        class="w-full text-left px-4 py-4 transition-colors flex items-center gap-4">
+                                        class="w-full text-left px-4 py-4 transition-colors flex items-center gap-4 relative">
                                     <img :src="getRecipientDetails(admin.id, 'admin')?.avatar || '../images/default_client_profile.png'"
                                          alt="Avatar"
                                          class="w-12 h-12 rounded-full object-cover flex-shrink-0">
@@ -214,6 +214,9 @@ $alpineData = [
                                             <p class="font-medium text-gray-900 truncate" x-text="admin.full_name"></p>
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
                                                   x-text="admin.role"></span>
+                                            <template x-if="hasUnreadMessages(admin.id)">
+                                                <span class="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></span>
+                                            </template>
                                         </div>
                                         <p class="text-sm text-gray-500 truncate" x-text="getLastMessagePreview(admin.id, 'admin') || 'No messages yet'"></p>
                                     </div>
@@ -252,7 +255,7 @@ $alpineData = [
                                     });
                                 "
                                         :class="recipientId === client.id && recipientType === 'client' ? 'bg-sky-50 border-r-4 border-sky-600' : 'hover:bg-gray-50'"
-                                        class="w-full text-left px-4 py-4 transition-colors flex items-center gap-4">
+                                        class="w-full text-left px-4 py-4 transition-colors flex items-center gap-4 relative">
                                     <img :src="getRecipientDetails(client.id, 'client')?.avatar || '../images/default_client_profile.png'"
                                          alt="Avatar"
                                          class="w-12 h-12 rounded-full object-cover flex-shrink-0">
@@ -263,6 +266,9 @@ $alpineData = [
                                                   class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-sky-100 text-sky-800">
                                                 Assigned
                                             </span>
+                                            <template x-if="hasUnreadMessages(client.id)">
+                                                <span class="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></span>
+                                            </template>
                                         </div>
                                         <p class="text-sm text-gray-500 truncate" x-text="getLastMessagePreview(client.id, 'client') || 'No messages yet'"></p>
                                     </div>

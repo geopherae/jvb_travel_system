@@ -5,6 +5,29 @@ $adminName = $_SESSION['admin']['first_name'] ?? 'Guest';
 require_once '../includes/icon_map.php';
 require_once '../includes/feature_flags.php';
 
+// Check for unread messages
+$hasUnreadMessages = false;
+if (isset($_SESSION['admin']['id'])) {
+  global $conn;
+  $adminId = $_SESSION['admin']['id'];
+  $stmt = $conn->prepare("
+    SELECT COUNT(*) as unread_count 
+    FROM messages 
+    WHERE recipient_id = ? 
+      AND recipient_type = 'admin' 
+      AND read_at IS NULL
+      AND deleted_at IS NULL
+  ");
+  if ($stmt) {
+    $stmt->bind_param('i', $adminId);
+    $stmt->execute();
+    $stmt->bind_result($unreadCount);
+    $stmt->fetch();
+    $stmt->close();
+    $hasUnreadMessages = $unreadCount > 0;
+  }
+}
+
 $navLinks = [
   'Booking Dashboard'     => ['url' => '../admin/admin_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_dashboard.php', 'view_client.php', 'admin_manual.php']],
   'Packages'     => ['url' => VISA_PROCESSING_ENABLED ? '../admin/admin_packages.php' : '../admin/admin_tour_packages.php',     'icon' => 'chart-bar', 'match' => ['admin_packages.php', 'admin_tour_packages.php', 'admin_visa_packages.php']],
@@ -20,7 +43,7 @@ $navLinks['Visa Processing'] = [
 
 // Add remaining nav items
 $navLinks += [
-  'Messages'      => ['url' => '../admin/messages.php?v=1.0.1',             'icon' => 'messages',  'match' => ['messages.php']],
+  'Messages'      => ['url' => '../admin/messages.php?v=1.0.3',             'icon' => 'messages',  'match' => ['messages.php']],
   'Client Reviews' => ['url' => '../admin/admin_testimonials.php', 'icon' => 'star',      'match' => ['admin_testimonials.php']],
 ];
 
@@ -64,11 +87,14 @@ $navLinks += [
         ?>
         <a href="<?= $href ?>"
            <?= $isDisabled ? 'title="Feature coming soon!" onclick="event.preventDefault();" aria-disabled="true"' : '' ?>
-           class="block px-4 py-3 rounded-lg transition-all
+           class="block px-4 py-3 rounded-lg transition-all relative
            <?= $linkClasses ?>">
           <div class="flex items-center gap-2">
             <?= getIconSvg($meta['icon']) ?>
             <span><?= htmlspecialchars($label) ?></span>
+            <?php if ($label === 'Messages' && $hasUnreadMessages): ?>
+              <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+            <?php endif; ?>
           </div>
         </a>
       <?php endforeach; ?>

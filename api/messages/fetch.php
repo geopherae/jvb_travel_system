@@ -151,6 +151,38 @@ try {
     
     $stmt->close();
 
+    // Mark all unread messages from the sender as read by current user
+    // Messages sent TO the current user: sender_id = recipientId, sender_type = recipientType
+    // recipient_id = userId, recipient_type = userType
+    error_log("[fetch.php] About to mark messages as read: threadId=$threadId, recipientId=$recipientId, recipientType=$recipientType, userId=$userId, userType=$userType");
+    
+    $markSql = "
+        UPDATE messages 
+        SET read_at = NOW() 
+        WHERE thread_id = ? 
+          AND sender_id = ? 
+          AND sender_type = ? 
+          AND recipient_id = ? 
+          AND recipient_type = ? 
+          AND read_at IS NULL
+    ";
+    error_log("[fetch.php] Mark SQL: " . $markSql);
+    
+    $markStmt = $conn->prepare($markSql);
+    if (!$markStmt) {
+        error_log("[fetch.php] Prepare failed for mark_read: " . $conn->error);
+    } else {
+        error_log("[fetch.php] Binding params: threadId($threadId), recipientId($recipientId), recipientType($recipientType), userId($userId), userType($userType)");
+        // Types: thread_id(i), sender_id(i), sender_type(s), recipient_id(i), recipient_type(s)
+        $markStmt->bind_param('iisis', $threadId, $recipientId, $recipientType, $userId, $userType);
+        if (!$markStmt->execute()) {
+            error_log("[fetch.php] Execute failed: " . $markStmt->error);
+        } else {
+            error_log("[fetch.php] Marked " . $markStmt->affected_rows . " messages as read");
+        }
+        $markStmt->close();
+    }
+
     echo json_encode($messages);
 
 } catch (Throwable $e) {

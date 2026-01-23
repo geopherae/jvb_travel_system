@@ -24,6 +24,7 @@ document.addEventListener('alpine:init', () => {
             isFetching: false,
             seenMessageIds: new Set(),
             fetchTimeout: null,
+            unreadConversations: {},
 
             init() {
                 // Load last selected recipient from localStorage
@@ -62,6 +63,7 @@ document.addEventListener('alpine:init', () => {
 
                 // Load previews and start polling
                 this.fetchMessagePreviews();
+                this.fetchUnreadConversations();
             },
 
             debounceFetchInitialMessages() {
@@ -289,6 +291,35 @@ document.addEventListener('alpine:init', () => {
                 return client?.assigned_admin_id === this.userId;
             },
 
+            hasUnreadMessages(recipientId) {
+                return !!this.unreadConversations[recipientId];
+            },
+
+            async fetchUnreadConversations() {
+                if (!this.userId || !this.userType) return;
+
+                try {
+                    const params = new URLSearchParams({
+                        user_id: this.userId,
+                        user_type: this.userType
+                    });
+
+                    const response = await fetch(`../api/messages/unread_conversations.php?${params}`);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                    const data = await response.json();
+
+                    if (Array.isArray(data)) {
+                        this.unreadConversations = data.reduce((acc, item) => {
+                            acc[item.recipient_id] = item.unread_count;
+                            return acc;
+                        }, {});
+                    }
+                } catch (err) {
+                    console.debug('[messageApp] Error fetching unread conversations:', err);
+                }
+            },
+
             async fetchMessagePreviews() {
                 if (!this.userId || !this.userType) {
                     console.warn('[messageApp] Cannot fetch previews: missing userId or userType');
@@ -328,6 +359,8 @@ document.addEventListener('alpine:init', () => {
                             return acc;
                         }, {});
                         console.debug('[messageApp] Updated messagePreviews:', this.messagePreviews);
+                        // Also fetch unread count after updating previews
+                        this.fetchUnreadConversations();
                     } else {
                         console.warn('[messageApp] Unexpected response format (not array):', data);
                     }

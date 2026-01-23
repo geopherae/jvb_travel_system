@@ -5,7 +5,9 @@ let pollingInterval = null;
 let pollingIntervalMs = 2000;
 let previewRefreshInterval = null;
 let lastPreviewRefresh = 0;
-const PREVIEW_REFRESH_MS = 5000; // Refresh previews every 5 seconds
+let navIndicatorInterval = null;
+const PREVIEW_REFRESH_MS = 5000;
+const NAV_INDICATOR_CHECK_MS = 5000; // Check Messages navbutton every 5 seconds
 
 async function pollMessages() {
     const maxRetries = 10;
@@ -87,6 +89,9 @@ async function pollMessages() {
                     messageApp.fetchMessagePreviews();
                 }
                 
+                // Update unread indicator after messages are marked as read
+                updateSidebarUnreadIndicator();
+                
                 // Only auto-scroll if user is near bottom (within 100px)
                 const container = document.querySelector('.message-list-container, [x-ref="messageList"]');
                 if (container) {
@@ -119,7 +124,52 @@ async function pollMessages() {
     }
 }
 
-function restartPollingInterval() {
+function updateSidebarUnreadIndicator() {
+    // Check if we have unread messages and update the sidebar red dot
+    fetch('../api/messages/unread_count.php', {
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Find the Messages link in sidebar - it contains 'messages.php' in the href
+        const messagesLinks = document.querySelectorAll('a[href*="messages.php"]');
+        
+        messagesLinks.forEach(link => {
+            const redDot = link.querySelector('span.bg-red-500');
+            
+            if (data.has_unread) {
+                // Add red dot if not present
+                if (!redDot) {
+                    const span = document.createElement('span');
+                    span.className = 'absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full';
+                    link.classList.add('relative');
+                    link.appendChild(span);
+                }
+            } else {
+                // Remove red dot if present
+                if (redDot) {
+                    redDot.remove();
+                }
+            }
+        });
+    })
+    .catch(err => console.debug('Error updating unread indicator:', err));
+}
+
+function startNavIndicatorCheck() {
+    if (navIndicatorInterval) {
+        clearInterval(navIndicatorInterval);
+    }
+    navIndicatorInterval = setInterval(updateSidebarUnreadIndicator, NAV_INDICATOR_CHECK_MS);
+}
+
+function stopNavIndicatorCheck() {
+    if (navIndicatorInterval) {
+        clearInterval(navIndicatorInterval);
+        navIndicatorInterval = null;
+    }
+}
     if (pollingInterval) {
         clearInterval(pollingInterval);
     }
@@ -140,6 +190,8 @@ function startPreviewRefresh() {
                 console.error('Error refreshing message previews:', err);
             }
         }
+        // Update sidebar unread indicator for Messages navbutton
+        updateSidebarUnreadIndicator();
     }, PREVIEW_REFRESH_MS);
 }
 
@@ -151,6 +203,9 @@ function startPolling() {
     pollMessages();
     restartPollingInterval();
     startPreviewRefresh();
+    startNavIndicatorCheck();
+    // Update sidebar indicator immediately
+    updateSidebarUnreadIndicator();
     console.log('Message polling started');
 }
 
@@ -163,6 +218,7 @@ function stopPolling() {
         clearInterval(previewRefreshInterval);
         previewRefreshInterval = null;
     }
+    stopNavIndicatorCheck();
     console.log('Message polling stopped');
 }
 
