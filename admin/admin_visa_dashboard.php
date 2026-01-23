@@ -14,9 +14,30 @@ require_once __DIR__ . '/../components/status_alert.php';
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 
+// � DB connection
+require_once __DIR__ . '/../actions/db.php';
+
 // 👤 Admin info
 $adminName = $_SESSION['first_name'] ?? 'Admin';
 $isAdmin = true;
+
+// 👥 Fetch visa clients (processing_type = 'visa' or 'both')
+$visaClientQuery = "
+  SELECT 
+    c.id, 
+    c.full_name, 
+    c.client_profile_photo,
+    vp.package_name AS visa_package_name,
+    DATE_FORMAT(va.created_at, '%b %e, %Y') AS applied_date,
+    IFNULL(va.status, 'draft') AS visa_status
+  FROM clients c
+  LEFT JOIN client_visa_applications va ON c.visa_application_id = va.id
+  LEFT JOIN visa_packages vp ON va.visa_package_id = vp.id
+  WHERE c.processing_type IN ('visa', 'both')
+  ORDER BY va.created_at DESC, c.full_name ASC
+";
+$visaClientsResult = $conn->query($visaClientQuery);
+$visaClients = $visaClientsResult ? $visaClientsResult->fetch_all(MYSQLI_ASSOC) : [];
 ?>
 
 <!DOCTYPE html>
@@ -50,7 +71,10 @@ $isAdmin = true;
   <!-- Main Content -->
   <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative z-0">
     <h2 class="text-xl font-bold">Admin Visa Dashboard</h2>
-    <!-- No welcome card, rest of page empty for now -->
+
+    <!-- Visa Clients Table -->
+    <?php include '../components/visa-clients-table.php'; ?>
+
   </main>
 
 </body>
