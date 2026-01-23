@@ -354,8 +354,8 @@ $alpineData = [
     <script>
         window.initialData = <?= json_encode($alpineData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
     </script>
-    <script src="../includes/messages_poller.js?v=1.0.1"></script>
-    <script src="../assets/js/messages.js?v=1.0.1"></script>
+    <script src="../includes/messages_poller.js?v=1.0.3"></script>
+    <script src="../assets/js/messages.js?v=1.0.3"></script>
 </body>
 </html>
 

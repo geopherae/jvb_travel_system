@@ -227,7 +227,16 @@ document.addEventListener('alpine:init', () => {
 
             getLastMessagePreview(recipientId, recipientType) {
                 const preview = this.messagePreviews[recipientId];
-                if (!preview?.message_text) return 'No messages yet';
+                
+                if (!preview) {
+                    console.debug('[messageApp] No preview for recipient', recipientId);
+                    return 'No messages yet';
+                }
+                
+                if (!preview.message_text) {
+                    console.debug('[messageApp] Empty message text for recipient', recipientId);
+                    return 'No messages yet';
+                }
 
                 const prefix = preview.sent_by_me ? 'You: ' : '';
                 let text = preview.message_text || '';
@@ -281,7 +290,10 @@ document.addEventListener('alpine:init', () => {
             },
 
             async fetchMessagePreviews() {
-                if (!this.userId || !this.userType) return;
+                if (!this.userId || !this.userType) {
+                    console.warn('[messageApp] Cannot fetch previews: missing userId or userType');
+                    return;
+                }
 
                 try {
                     const params = new URLSearchParams({
@@ -289,10 +301,18 @@ document.addEventListener('alpine:init', () => {
                         user_type: this.userType
                     });
 
+                    console.debug('[messageApp] Fetching message previews:', {
+                        userId: this.userId,
+                        userType: this.userType,
+                        url: `../api/messages/preview.php?${params}`
+                    });
+
                     const response = await fetch(`../api/messages/preview.php?${params}`);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 
                     const data = await response.json();
+
+                    console.debug('[messageApp] Received preview data:', data);
 
                     if (Array.isArray(data)) {
                         this.messagePreviews = data.reduce((acc, p) => {
@@ -307,6 +327,9 @@ document.addEventListener('alpine:init', () => {
                             };
                             return acc;
                         }, {});
+                        console.debug('[messageApp] Updated messagePreviews:', this.messagePreviews);
+                    } else {
+                        console.warn('[messageApp] Unexpected response format (not array):', data);
                     }
                 } catch (err) {
                     console.error('[messageApp] Failed to load message previews:', err);

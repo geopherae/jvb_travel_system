@@ -32,9 +32,18 @@ if ($userId < 1 || !in_array($userType, ['admin', 'client'], true)) {
 }
 
 // Auth
-if ($userType === 'admin' && ($_SESSION['admin']['id'] ?? 0) != $userId) {
-    echo json_encode([]);
-    exit;
+if ($userType === 'admin') {
+    $sessionAdminId = $_SESSION['admin']['id'] ?? null;
+    if (!$sessionAdminId || $sessionAdminId != $userId) {
+        echo json_encode([]);
+        exit;
+    }
+} elseif ($userType === 'client') {
+    $sessionClientId = $_SESSION['client_id'] ?? null;
+    if (!$sessionClientId || $sessionClientId != $userId) {
+        echo json_encode([]);
+        exit;
+    }
 }
 
 // Get all threads for this user (as sender or recipient)
@@ -58,22 +67,22 @@ while ($thread = $result->fetch_assoc()) {
     
     // Determine who the "other person" is in this conversation
     $threadUserId = (int)$thread['user_id'];
-    $threadUserType = $thread['user_type'];
+    $threadUserType = (string)$thread['user_type'];
     $threadRecipientId = (int)$thread['recipient_id'];
-    $threadRecipientType = $thread['recipient_type'];
+    $threadRecipientType = (string)$thread['recipient_type'];
     
     // If current user is the thread creator, show the recipient
     // If current user is the recipient, show the thread creator
     if ($threadUserId === $userId && $threadUserType === $userType) {
         $otherPersonId = $threadRecipientId;
-        $otherPersonType = $threadRecipientType;
+        $otherPersonType = (string)$threadRecipientType;
     } else {
         $otherPersonId = $threadUserId;
-        $otherPersonType = $threadUserType;
+        $otherPersonType = (string)$threadUserType;
     }
     
     $recipientId = $otherPersonId;
-    $recipientType = $otherPersonType;
+    $recipientType = strtolower((string)$otherPersonType);
 
     // Get the latest message in this thread
     $msgStmt = $conn->prepare("
@@ -120,13 +129,13 @@ while ($thread = $result->fetch_assoc()) {
     }
 
     $previews[] = [
-        'thread_id'       => $threadId,
-        'recipient_id'    => $recipientId,
-        'recipient_type'  => strtolower($recipientType),
-        'message_text'    => $lastMsg['message_text'] ?? '',
-        'created_at'      => $lastMsg['created_at'] ?? null,
-        'recipient_name'  => $recipientName,
-        'sent_by_me'      => $sentByCurrentUser
+        'thread_id'       => (int)$threadId,
+        'recipient_id'    => (int)$recipientId,
+        'recipient_type'  => strtolower((string)$recipientType),
+        'message_text'    => ($lastMsg['message_text'] ?? '') ? (string)$lastMsg['message_text'] : '',
+        'created_at'      => isset($lastMsg['created_at']) ? (string)$lastMsg['created_at'] : null,
+        'recipient_name'  => (string)$recipientName,
+        'sent_by_me'      => (bool)$sentByCurrentUser
     ];
 }
 
