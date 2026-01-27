@@ -11,6 +11,7 @@ require_once __DIR__ . '/../includes/image_compression_helper.php';
 require_once __DIR__ . '/../components/status_alert.php';
 require_once __DIR__ . '/../includes/log_helper.php';
 require_once __DIR__ . '/../actions/notify.php';
+require_once __DIR__ . '/../includes/feature_flags.php';
 
 use function LogHelper\logClientOnboardingAudit;
 
@@ -26,6 +27,13 @@ $fullName          = trim($_POST['full_name'] ?? '');
 $email             = strtolower(trim($_POST['email'] ?? ''));
 $phone             = trim($_POST['phone_number'] ?? '');
 $address           = trim($_POST['address'] ?? '');
+$processingType    = trim($_POST['processing_type'] ?? 'booking'); // Default to 'booking'
+
+// Enforce feature flag: If visa processing is disabled, force to 'booking'
+if (!VISA_PROCESSING_ENABLED && in_array($processingType, ['visa', 'both'])) {
+  $processingType = 'booking';
+}
+
 $passportNumber    = trim($_POST['passport_number'] ?? '') ?: null; // Convert empty string to NULL
 $passportExpiry    = toMysqlDate($_POST['passport_expiry'] ?? '');
 $assignedPackageId = !empty($_POST['assigned_package_id']) ? intval($_POST['assigned_package_id']) : null;
@@ -108,18 +116,19 @@ $createdAt = date('Y-m-d H:i:s');
 
 $stmt = $conn->prepare("INSERT INTO clients (
   assigned_admin_id, full_name, email, phone_number, address,
-  client_profile_photo, access_code, assigned_package_id,
+  processing_type, client_profile_photo, access_code, assigned_package_id,
   booking_number, trip_date_start, trip_date_end,
   booking_date, passport_number, passport_expiry, status, created_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 $stmt->bind_param(
-  "sssssssissssssss",
+  "ssssssssissssssss",
   $assignedAdminId,
   $fullName,
   $email,
   $phone,
   $address,
+  $processingType,
   $photoName,
   $accessCode,
   $assignedPackageId,

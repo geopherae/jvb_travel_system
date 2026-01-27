@@ -2,49 +2,36 @@
 $activePage = basename($_SERVER['PHP_SELF']);
 $adminName = $_SESSION['admin']['first_name'] ?? 'Guest';
 
-require_once '../includes/icon_map.php';
-require_once '../includes/feature_flags.php';
-
-// Check for unread messages
-$hasUnreadMessages = false;
-if (isset($_SESSION['admin']['id'])) {
-  global $conn;
-  $adminId = $_SESSION['admin']['id'];
-  $stmt = $conn->prepare("
-    SELECT COUNT(*) as unread_count 
-    FROM messages 
-    WHERE recipient_id = ? 
-      AND recipient_type = 'admin' 
-      AND read_at IS NULL
-      AND deleted_at IS NULL
-  ");
-  if ($stmt) {
-    $stmt->bind_param('i', $adminId);
-    $stmt->execute();
-    $stmt->bind_result($unreadCount);
-    $stmt->fetch();
-    $stmt->close();
-    $hasUnreadMessages = $unreadCount > 0;
-  }
-}
+require_once __DIR__ . '/../includes/icon_map.php';
+require_once __DIR__ . '/../includes/feature_flags.php';
 
 $navLinks = [
-  'Booking Dashboard'     => ['url' => '../admin/admin_dashboard.php',     'icon' => 'chart-bar', 'match' => ['admin_dashboard.php', 'view_client.php', 'admin_manual.php']],
-  'Packages'     => ['url' => VISA_PROCESSING_ENABLED ? '../admin/admin_packages.php' : '../admin/admin_tour_packages.php',     'icon' => 'chart-bar', 'match' => ['admin_packages.php', 'admin_tour_packages.php', 'admin_visa_packages.php']],
-];
-
-// Add Visa Processing (always show, but disable if feature is off)
-$navLinks['Visa Processing'] = [
-  'url' => VISA_PROCESSING_ENABLED ? '../admin/admin_visa_dashboard.php' : '',
-  'icon' => 'chart-bar', 
-  'match' => ['admin_visa_dashboard.php'],
-  'disabled' => !VISA_PROCESSING_ENABLED
-];
-
-// Add remaining nav items
-$navLinks += [
-  'Messages'      => ['url' => '../admin/messages.php?v=1.0.4',             'icon' => 'messages',  'match' => ['messages.php']],
-  'Client Reviews' => ['url' => '../admin/admin_testimonials.php', 'icon' => 'star',      'match' => ['admin_testimonials.php']],
+  'Booking Dashboard' => [
+    'url' => 'admin_dashboard.php',
+    'icon' => 'chart-bar',
+    'match' => ['admin_dashboard.php', 'view_client.php', 'admin_manual.php']
+  ],
+  'Packages' => [
+    'url' => VISA_PROCESSING_ENABLED ? 'admin_packages.php' : 'admin_tour_packages.php',
+    'icon' => 'chart-bar',
+    'match' => ['admin_packages.php', 'admin_tour_packages.php', 'admin_visa_packages.php']
+  ],
+  'Visa Processing' => [
+    'url' => VISA_PROCESSING_ENABLED ? 'admin_visa_dashboard.php' : '',
+    'icon' => 'itinerary',
+    'match' => ['admin_visa_dashboard.php', 'view_client_visa.php'],
+    'disabled' => !VISA_PROCESSING_ENABLED
+  ],
+  'Messages' => [
+    'url' => 'messages.php?v=1.0.1',
+    'icon' => 'messages',
+    'match' => ['messages.php']
+  ],
+  'Client Reviews' => [
+    'url' => 'admin_testimonials.php',
+    'icon' => 'star',
+    'match' => ['admin_testimonials.php']
+  ],
 ];
 
 
@@ -87,14 +74,11 @@ $navLinks += [
         ?>
         <a href="<?= $href ?>"
            <?= $isDisabled ? 'title="Feature coming soon!" onclick="event.preventDefault();" aria-disabled="true"' : '' ?>
-           class="block px-4 py-3 rounded-lg transition-all relative
+           class="block px-4 py-3 rounded-lg transition-all
            <?= $linkClasses ?>">
           <div class="flex items-center gap-2">
             <?= getIconSvg($meta['icon']) ?>
             <span><?= htmlspecialchars($label) ?></span>
-            <?php if ($label === 'Messages' && $hasUnreadMessages): ?>
-              <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-            <?php endif; ?>
           </div>
         </a>
       <?php endforeach; ?>
@@ -110,7 +94,7 @@ $navLinks += [
 
     <!-- Footer -->
     <div class="p-4 border-t mb-6 border-neutral-100 text-sm text-center">
-      <a href="../admin/admin_logout.php"
+      <a href="admin_logout.php"
          class="inline-flex items-center gap-2 text-red-500 font-semibold hover:text-red-600 transition hover:underline focus:outline-none focus:ring-2 focus:ring-red-500">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

@@ -44,7 +44,7 @@ document.addEventListener('alpine:init', () => {
     @click.away="$store.tourModal.closeModal()"
     x-transition.opacity
   >
-    <!-- Close Button -->
+    <!-- Close Button (top-right) -->
     <button
       @click="$store.tourModal.closeModal()"
       class="absolute top-4 right-4 text-slate-500 hover:text-red-500 text-xl font-bold z-10"
@@ -260,27 +260,26 @@ document.addEventListener('alpine:init', () => {
       </div>
     </div>
 
-    <!-- Divider + Action Buttons (sticky on mobile) -->
-    <div class="pb-4 border-t border-slate-200 mt-4 sm:mt-6 pt-4 sticky bottom-0 bg-white px-4 sm:px-5">
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-6 pb-2 sm:pb-0">
-      <button
-        type="button"
-        class="bg-sky-600 hover:bg-sky-700 text-white text-sm px-4 py-2 rounded transition w-full sm:w-auto"
-        @click="
-          $store.editTourModal.open($store.tourModal.activeTour.id);
-          $store.tourModal.closeModal();
-        "
-      >
-        Edit Package
-      </button>
-
-      <button
-        type="button"
-        class="text-sm text-red-600 border border-red-600 px-4 py-2 rounded hover:bg-red-600 hover:text-white transition w-full sm:w-auto"
-        @click="$store.deleteTourModal.open($store.tourModal.activeTour.id)"
-      >
-        Archive Package
-      </button>
+    <!-- Sticky Action Buttons (match edit_client layout) -->
+    <div class="sticky bottom-0 flex justify-between items-center px-4 py-3 sm:px-6 sm:py-2 bg-gray-50 gap-2 sm:gap-3 z-10 mb-4 sm:mb-2 border-t border-gray-200">
+      <div class="flex w-full justify-between gap-2 sm:gap-3">
+        <button
+          type="button"
+          class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-red-500 hover:text-white bg-white border border-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors"
+          @click="$store.deleteTourModal.open($store.tourModal.activeTour.id)"
+        >
+          Archive Package
+        </button>
+        <button
+          type="button"
+          class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-sky-600 border border-transparent rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:opacity-50 transition-colors"
+          @click="
+            $store.editTourModal.open($store.tourModal.activeTour.id);
+            $store.tourModal.closeModal();
+          "
+        >
+          Edit Package
+        </button>
       </div>
     </div>
   </div>

@@ -1,0 +1,337 @@
+{
+  "metadata": {
+    "visa_package_id": null,
+    "country": "China",
+    "visa_types": ["Single Entry", "Multiple Entry"],
+    "processing_days_min": 7,
+    "processing_days_max": 10,
+    "description": "China Visa Assistance"
+  },
+  
+  "primary_requirements": [
+    {
+      "id": "req_ch_001",
+      "name": "WET SIGNED APPLICATION",
+      "description": "Properly filled and wet ink signed visa application",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 1
+    },
+    {
+      "id": "req_ch_002",
+      "name": "VALID PHILIPPINE PASSPORT",
+      "description": "At least 12 months validity. Page 3 must be signed",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 2
+    },
+    {
+      "id": "req_ch_003",
+      "name": "OLD PASSPORT/S",
+      "description": "If not available, provide Explanation Letter",
+      "document_types": ["pdf", "image"],
+      "required": false,
+      "is_confidential": false,
+      "order": 3
+    },
+    {
+      "id": "req_ch_004",
+      "name": "Colored photocopy of Passport's Bio Page and Emergency Contact Page",
+      "description": "Page 2 and last page",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 4
+    },
+    {
+      "id": "req_ch_005",
+      "name": "Colored photocopy of previous and valid visa",
+      "description": "From other countries",
+      "document_types": ["pdf", "image"],
+      "required": false,
+      "is_confidential": false,
+      "order": 5
+    },
+    {
+      "id": "req_ch_006",
+      "name": "Photocopy of Latest arrival stamp from PH Immigration",
+      "description": "Or Latest Arrival E-Travel in PH",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 6
+    },
+    {
+      "id": "req_ch_007",
+      "name": "2 pcs colored Photo for Chinese Visa",
+      "description": "48mm x 33mm, white background. Recent within 6 months, formal no smiling, colored shirt, no accessories",
+      "document_types": ["image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 7
+    }
+  ],
+
+  "conditional_requirement_groups": [
+    {
+      "id": "cond_ch_family",
+      "applicant_status": "employed",
+      "description": "Requirements if applying with family member",
+      "requirements": [
+        {
+          "id": "req_ch_fam_001",
+          "name": "PSA Birth Certificate",
+          "description": "Family member birth certificate",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ch_fam_002",
+          "name": "If Married: PSA Marriage Certificate",
+          "description": "Marriage certificate if applicable",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ch_financial",
+      "applicant_status": "employed",
+      "description": "Financial requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_ch_fin_001",
+          "name": "Original Bank Certificate with OR from Bank",
+          "description": "Account type, opening date, average daily balance and current balance. Commercial bank. OR required. Addressed to: Embassy of Peoples Republic of China, The World Center, Sen. Gil J. Puyat Ave, Makati, Metro Manila. Issued within 30 calendar days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 1
+        },
+        {
+          "id": "req_ch_fin_002",
+          "name": "Original Bank Statement",
+          "description": "Past 4 months for commercial bank, past 6 months for digital bank. Issued within 30 calendar days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ch_employed",
+      "applicant_status": "employed",
+      "description": "Requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_ch_emp_001",
+          "name": "Certificate of Employment",
+          "description": "Wet signed by authorized signatory. Position, date hired, compensation, office address, HR landline and email. Issued within 30 calendar days. If overseas employer, explain COE can't be wet signed",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ch_emp_002",
+          "name": "Photocopy of Company ID",
+          "description": "Company identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_ch_emp_003",
+          "name": "Latest Income Tax Return",
+          "description": "Form 2316 signed by both employee and employer. If no ITR, notarized Affidavit of No ITR",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ch_business_owner",
+      "applicant_status": "business_owner",
+      "description": "Requirements for business owner applicants",
+      "requirements": [
+        {
+          "id": "req_ch_bus_001",
+          "name": "Colored Photocopy of Valid DTI or SEC Permit",
+          "description": "If SEC, include GIS",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ch_bus_002",
+          "name": "Colored Photocopy of Valid Mayor's or Business Permit",
+          "description": "Business registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_ch_bus_003",
+          "name": "Colored Photocopy of BIR Company Registration: Form 2303",
+          "description": "Tax registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_ch_bus_004",
+          "name": "Latest Income Tax Return",
+          "description": "Form 1701 or Form 1702. If no ITR, notarized Affidavit",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ch_student",
+      "applicant_status": "student",
+      "description": "Requirements for student applicants",
+      "requirements": [
+        {
+          "id": "req_ch_stud_001",
+          "name": "Original School Certificate of Enrollment",
+          "description": "School enrollment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ch_stud_002",
+          "name": "Photocopy of School ID",
+          "description": "School identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ch_sponsored",
+      "applicant_status": "sponsored",
+      "description": "Requirements for sponsored applicants",
+      "requirements": [
+        {
+          "id": "req_ch_spon_001",
+          "name": "Notarized Affidavit of Support",
+          "description": "Sponsor's commitment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 1
+        },
+        {
+          "id": "req_ch_spon_002",
+          "name": "Proof of Relationship",
+          "description": "Birth Certificate or Marriage Certificate for family members, COE and business documents if employer",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_ch_spon_003",
+          "name": "Original Bank Certificate with OR from Bank",
+          "description": "Sponsor's financial proof. Issued within 30 calendar days. Addressed to Embassy",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        },
+        {
+          "id": "req_ch_spon_004",
+          "name": "Original Bank Statement",
+          "description": "Past 4 months for commercial bank, 6 months for digital. Issued within 30 days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ch_business_visa",
+      "applicant_status": "business_owner",
+      "description": "Additional requirements for business category visa",
+      "requirements": [
+        {
+          "id": "req_ch_biz_001",
+          "name": "Invitation Letter from China",
+          "description": "Stamped by inviting company, English translation, full name, DOB, passport number, company name and position, exact travel dates and purpose. Must match dates in application form",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ch_tourist",
+      "applicant_status": "employed",
+      "description": "Additional requirements for tourist category visa",
+      "requirements": [
+        {
+          "id": "req_ch_tour_001",
+          "name": "Ticket Reservations",
+          "description": "Flight booking confirmation",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ch_tour_002",
+          "name": "Hotel Reservations",
+          "description": "Accommodation booking confirmation",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_ch_tour_003",
+          "name": "Travel Itinerary",
+          "description": "Detailed day-by-day itinerary",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        }
+      ]
+    }
+  ],
+
+  "notes": {
+    "confidential_marked": "Bank Certificates, Bank Statements, ITR forms, Affidavit of Support, Financial documents",
+    "primary_only_display": "When showing in modal, only primary_requirements are shown",
+    "json_encoding": "Store as LONGTEXT in database"
+  }
+}

@@ -1,0 +1,266 @@
+{
+  "metadata": {
+    "visa_package_id": null,
+    "country": "Japan",
+    "visa_types": ["Tourist (15 days)", "Tourist (30 days)", "Tourist with Multiple Entry", "Tourist (Friend/Distant Relatives)", "Visit Relatives", "Commercial", "Commercial/Meetings"],
+    "processing_days_min": 15,
+    "processing_days_max": 30,
+    "description": "Japan Visa Assistance through VFS Japan"
+  },
+  
+  "primary_requirements": [
+    {
+      "id": "req_jp_001",
+      "name": "Wet signed Application Form",
+      "description": "Will be provided by JV-B Travel and Tours. If applying for Multiple Entry Visa, accomplish the Multiple Entry Request Form",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 1
+    },
+    {
+      "id": "req_jp_002",
+      "name": "VALID PHILIPPINE PASSPORT",
+      "description": "At least 6 months validity. Make sure page 3 is signed",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 2
+    },
+    {
+      "id": "req_jp_003",
+      "name": "2 COPIES PSA AUTHORIZATION LETTER",
+      "description": "Will be provided by JV-B Travel and Tours",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 3
+    },
+    {
+      "id": "req_jp_004",
+      "name": "2 COPIES AUTHORIZATION LETTER",
+      "description": "Will be provided by JV-B Travel and Tours",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 4
+    },
+    {
+      "id": "req_jp_005",
+      "name": "OLD PASSPORT/S WITH USED JAPAN VISA",
+      "description": "If applicable. If old passport is not available, provide Explanation Letter",
+      "document_types": ["pdf", "image"],
+      "required": false,
+      "is_confidential": false,
+      "order": 5
+    },
+    {
+      "id": "req_jp_006",
+      "name": "2 pcs colored Photo (4.5cm x 3.5cm)",
+      "description": "White background, taken within 6 months on date of application. Must be formal (no smiling), do not wear white shirt/polo shirt (must be colored)",
+      "document_types": ["image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 6
+    }
+  ],
+
+  "conditional_requirement_groups": [
+    {
+      "id": "cond_jp_employed",
+      "applicant_status": "employed",
+      "description": "Requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_jp_emp_001",
+          "name": "Original Wet Signed Certificate of Employment",
+          "description": "Indicate applicant's position, date hired, compensation, office address, HR landline number and email address. Must be issued within 30 calendar days upon submission",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_jp_emp_002",
+          "name": "Photocopy of Company ID",
+          "description": "Valid company identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_jp_emp_003",
+          "name": "Latest Income Tax Return (ITR)",
+          "description": "Form 2316 signed by both Employee and Employer. If no ITR, provide notarized Affidavit of No ITR",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        }
+      ]
+    },
+
+    {
+      "id": "cond_jp_business_owner",
+      "applicant_status": "business_owner",
+      "description": "Requirements for business owners",
+      "requirements": [
+        {
+          "id": "req_jp_bus_001",
+          "name": "Photocopy of Valid DTI or SEC Permit",
+          "description": "If SEC Permit, include the GIS (General Information Sheet)",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_jp_bus_002",
+          "name": "Photocopy of Valid Mayor's or Business Permit",
+          "description": "Current business registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_jp_bus_003",
+          "name": "Photocopy of BIR Company Registration",
+          "description": "Tax registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_jp_bus_004",
+          "name": "Latest Income Tax Return (ITR)",
+          "description": "Form 1701 or Form 1702. If no ITR, provide notarized Affidavit",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        }
+      ]
+    },
+
+    {
+      "id": "cond_jp_student",
+      "applicant_status": "student",
+      "description": "Requirements for student applicants",
+      "requirements": [
+        {
+          "id": "req_jp_stud_001",
+          "name": "Original School Certificate of Enrollment",
+          "description": "Current academic enrollment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_jp_stud_002",
+          "name": "Photocopy of School ID",
+          "description": "Valid school identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_jp_senior_citizen",
+      "applicant_status": "senior_citizen",
+      "description": "Requirements for senior citizens",
+      "requirements": [
+        {
+          "id": "req_jp_sen_001",
+          "name": "Senior Citizen ID",
+          "description": "Valid OSCA Senior Citizen ID",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        }
+      ]
+    },
+
+    {
+      "id": "cond_jp_professional",
+      "applicant_status": "professional",
+      "description": "Requirements for PRC/IBP licensed professionals",
+      "requirements": [
+        {
+          "id": "req_jp_prof_001",
+          "name": "Photocopy of PRC or IBP Card",
+          "description": "Valid professional license",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        }
+      ]
+    },
+
+    {
+      "id": "cond_jp_financial",
+      "applicant_status": "employed",
+      "description": "Financial requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_jp_fin_001",
+          "name": "Original Bank Certificate with OR from Bank",
+          "description": "Average Daily Balance must be shown. Must include type of account, opening date, average daily balance and current balance. Must be commercial bank. Must be issued within 30 calendar days upon submission",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 1
+        },
+        {
+          "id": "req_jp_fin_002",
+          "name": "Original Bank Statement from Bank",
+          "description": "Must only be provided if ADB is not shown in Bank Certificate. Must be from past 6 months, demonstrate stable cash flow. Issued within 30 calendar days",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": true,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_jp_sponsored",
+      "applicant_status": "sponsored",
+      "description": "Requirements for sponsored applicants",
+      "requirements": [
+        {
+          "id": "req_jp_spon_001",
+          "name": "Guarantee Letter from Sponsor",
+          "description": "Sponsor's guarantee of financial support",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 1
+        },
+        {
+          "id": "req_jp_spon_002",
+          "name": "Proof of Relationship",
+          "description": "PSA Birth Certificate or PSA Marriage Certificate",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        }
+      ]
+    }
+  ],
+
+  "notes": {
+    "confidential_marked": "ITR forms, Bank Certificates, Bank Statements, Guarantee Letters, Financial documents",
+    "primary_only_display": "When showing visa package info in modal, only primary_requirements are shown. Conditional groups appear after applicant_status selection",
+    "json_encoding": "Store as LONGTEXT in database"
+  }
+}

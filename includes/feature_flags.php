@@ -13,4 +13,4 @@
 // ============================================
 // Set to true to enable visa processing system with full functionality
 // Set to false to show visa button as "Coming Soon" teaser (disabled, no link)
-define('VISA_PROCESSING_ENABLED', false);
+define('VISA_PROCESSING_ENABLED', true);

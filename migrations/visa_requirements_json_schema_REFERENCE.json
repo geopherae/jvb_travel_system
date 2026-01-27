@@ -1,0 +1,224 @@
+{
+  "$schema": "https://jvb-travel-system.test/schemas/visa-requirements.json",
+  "metadata": {
+    "visa_package_id": 1,
+    "country": "United States",
+    "visa_types": ["B1/B2 (Tourist)", "B1/B2 (Business)", "Renewal", "Drop Box"],
+    "processing_days_min": 5,
+    "processing_days_max": 20,
+    "description": "US Visa application through embassy"
+  },
+  
+  "primary_requirements": [
+    {
+      "id": "req_us_001",
+      "name": "Accomplished Questionnaire",
+      "description": "Completed and signed visa questionnaire form",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 1
+    },
+    {
+      "id": "req_us_002",
+      "name": "Scanned copy of Passport",
+      "description": "At least 6 months validity prior to target travel date",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 2
+    },
+    {
+      "id": "req_us_003",
+      "name": "Soft copy and Hard copy of 2x2 picture white background",
+      "description": "Must be taken from a photo studio",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 3
+    },
+    {
+      "id": "req_us_004",
+      "name": "Other supporting documents depending on your profile",
+      "description": "As per your specific visa category",
+      "document_types": ["pdf", "image", "doc"],
+      "required": true,
+      "is_confidential": false,
+      "order": 4
+    }
+  ],
+
+  "conditional_requirement_groups": [
+    {
+      "id": "cond_us_employed",
+      "applicant_status": "employed",
+      "description": "Requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_us_emp_001",
+          "name": "Original Signed Certificate of Employment",
+          "description": "Indicate applicant's position, date hired, compensation, office address, HR landline number and email address. Must be issued within 30 calendar days upon submission",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_us_emp_002",
+          "name": "Photocopy of Company ID",
+          "description": "Valid company identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_us_emp_003",
+          "name": "Latest Income Tax Return (ITR)",
+          "description": "Form 2316 signed by both Employee and Employer. If no ITR, provide notarized Affidavit",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        }
+      ]
+    },
+
+    {
+      "id": "cond_us_business_owner",
+      "applicant_status": "business_owner",
+      "description": "Requirements for self-employed and business owners",
+      "requirements": [
+        {
+          "id": "req_us_bus_001",
+          "name": "Photocopy Valid of DTI or SEC Permit",
+          "description": "If SEC Permit, include the GIS (General Information Sheet)",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_us_bus_002",
+          "name": "Photocopy of Valid Mayor's or Business Permit",
+          "description": "Current and valid business registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_us_bus_003",
+          "name": "Photocopy of BIR Company Registration",
+          "description": "Tax registration with BIR",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_us_bus_004",
+          "name": "Latest Income Tax Return (ITR)",
+          "description": "Form 1701 or Form 1702. If no ITR, provide notarized Affidavit",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        }
+      ]
+    },
+
+    {
+      "id": "cond_us_student",
+      "applicant_status": "student",
+      "description": "Requirements for student applicants",
+      "requirements": [
+        {
+          "id": "req_us_stud_001",
+          "name": "Original School Certificate of Enrollment",
+          "description": "Current academic year enrollment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_us_stud_002",
+          "name": "Photocopy of School ID",
+          "description": "Valid school identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_us_senior_citizen",
+      "applicant_status": "senior_citizen",
+      "description": "Requirements for senior citizens",
+      "requirements": [
+        {
+          "id": "req_us_sen_001",
+          "name": "Senior Citizen ID",
+          "description": "Valid OSCA Senior Citizen ID",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        }
+      ]
+    },
+
+    {
+      "id": "cond_us_sponsored",
+      "applicant_status": "sponsored",
+      "description": "Requirements for sponsored applicants",
+      "requirements": [
+        {
+          "id": "req_us_spon_001",
+          "name": "Notarized Affidavit of Support",
+          "description": "From sponsor guaranteeing financial support",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 1
+        },
+        {
+          "id": "req_us_spon_002",
+          "name": "Proof of Relationship to the Applicant",
+          "description": "PSA Birth Certificate or PSA Marriage Certificate",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_us_spon_003",
+          "name": "Sponsor Bank Certificate with OR",
+          "description": "Original Bank Certificate with Official Receipt from bank. Must be issued within 30 days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        },
+        {
+          "id": "req_us_spon_004",
+          "name": "Sponsor Bank Statement",
+          "description": "From the past six (6) months demonstrating stable cash flow",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        }
+      ]
+    }
+  ],
+
+  "notes": {
+    "confidential_marked": "ITR forms, Bank Certificates, Bank Statements, Financial documents, Affidavit of Support",
+    "primary_only_display": "When showing visa package info in modal/quick view, only primary_requirements are shown to user. Conditional groups appear dynamically after applicant_status is selected during application creation.",
+    "json_encoding": "Store as LONGTEXT in database; encode with JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES for special character support"
+  }
+}

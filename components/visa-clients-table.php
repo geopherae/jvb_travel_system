@@ -100,7 +100,7 @@ error_log("DEBUG: visa-clients-table.php - Total visa clients: $totalClients, Pa
     </div>
 
     <?php if ($isAdmin): ?>
-      <button onclick="alert('Add visa client modal coming soon')"
+      <button @click="showAddVisaClientModal = true"
               class="backdrop-blur-sm bg-sky-500 text-white px-3 md:px-4 py-2 rounded hover:bg-sky-400 transition text-xs md:text-sm font-medium whitespace-nowrap"
               aria-label="Add New Visa Client">
         + Add New Visa Client
@@ -174,7 +174,7 @@ error_log("DEBUG: visa-clients-table.php - Total visa clients: $totalClients, Pa
         $avatarSrc = $photoFile && file_exists(__DIR__ . '/../uploads/client_profiles/' . $photoFile)
           ? '../uploads/client_profiles/' . rawurlencode($photoFile)
           : '../images/default_client_profile.png';
-        $visaPackageName = $client['visa_package_name'] ?? '—';
+        $visaPackageCountry = $client['visa_package_country'] ?? '—';
         $appliedDate = $client['applied_date'] ?? '—';
         $statusText = trim($client['visa_status'] ?? '') ?: 'draft';
       ?>
@@ -190,7 +190,7 @@ error_log("DEBUG: visa-clients-table.php - Total visa clients: $totalClients, Pa
           </div>
         </td>
 
-        <td class="p-2 md:p-4 hidden sm:table-cell text-xs md:text-sm"><?= htmlspecialchars($visaPackageName) ?></td>
+        <td class="p-2 md:p-4 hidden sm:table-cell text-xs md:text-sm"><?= htmlspecialchars($visaPackageCountry) ?></td>
         <td class="p-2 md:p-4 hidden md:table-cell text-xs md:text-sm"><?= htmlspecialchars($appliedDate) ?></td>
         <td class="p-2 md:p-4 text-center">
           <span class="px-2 md:px-3 py-1 text-xs font-semibold rounded-full <?= getVisaStatusBadgeClass($statusText) ?>">
@@ -198,12 +198,11 @@ error_log("DEBUG: visa-clients-table.php - Total visa clients: $totalClients, Pa
           </span>
         </td>
         <td class="p-2 md:p-4 text-center">
-          <button type="button"
-                  onclick="alert('View visa client function coming soon')"
-                  class="text-sky-500 font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-sky-300"
-                  aria-label="View visa application for <?= htmlspecialchars($fullName) ?>">
+          <a href="../admin/view_client_visa.php?client_id=<?= (int) $client['id'] ?>"
+             class="text-sky-500 font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-sky-300"
+             aria-label="View visa application for <?= htmlspecialchars($fullName) ?>">
             View
-          </button>
+          </a>
         </td>
       </tr>
     <?php endforeach; ?>

@@ -1,0 +1,259 @@
+{
+  "metadata": {
+    "visa_package_id": null,
+    "country": "Dubai (UAE)",
+    "visa_types": ["Tourist E-Visa (30 days)"],
+    "processing_days_min": 5,
+    "processing_days_max": 10,
+    "description": "Dubai E-Visa Assistance"
+  },
+  
+  "primary_requirements": [
+    {
+      "id": "req_db_001",
+      "name": "Accomplished Questionnaire",
+      "description": "Completed visa questionnaire",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 1
+    },
+    {
+      "id": "req_db_002",
+      "name": "Scanned copy of Passport Bio Page",
+      "description": "At least 12 months validity prior to departure. Page 3 must be signed",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 2
+    },
+    {
+      "id": "req_db_003",
+      "name": "Scanned copy of Passport size photo",
+      "description": "4.5cm x 3.5cm, white background",
+      "document_types": ["image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 3
+    },
+    {
+      "id": "req_db_004",
+      "name": "Scanned copy of Passport Cover",
+      "description": "Front and back",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 4
+    },
+    {
+      "id": "req_db_005",
+      "name": "Scanned copy of all visas and passport pages",
+      "description": "All countries visited in past 5 years with travel stamps",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 5
+    }
+  ],
+
+  "conditional_requirement_groups": [
+    {
+      "id": "cond_db_employed",
+      "applicant_status": "employed",
+      "description": "Requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_db_emp_001",
+          "name": "Copy of Certificate of Employment (COE)",
+          "description": "Employment verification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_db_emp_002",
+          "name": "Copy of ITR",
+          "description": "Income Tax Return",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_db_business_owner",
+      "applicant_status": "business_owner",
+      "description": "Requirements for business owner applicants",
+      "requirements": [
+        {
+          "id": "req_db_bus_001",
+          "name": "Copy of Valid Business Documents",
+          "description": "DTI/SEC permit",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_db_bus_002",
+          "name": "Copy of ITR",
+          "description": "Income Tax Return",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_db_financial",
+      "applicant_status": "employed",
+      "description": "Financial requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_db_fin_001",
+          "name": "Bank Statement",
+          "description": "From past 4 months, demonstrating stable and credible cash flow",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": true,
+          "order": 1
+        }
+      ]
+    },
+
+    {
+      "id": "cond_db_sponsor_employed",
+      "applicant_status": "sponsored",
+      "description": "Requirements for sponsored applicants - Sponsor employed",
+      "requirements": [
+        {
+          "id": "req_db_spon_emp_001",
+          "name": "Signed Certificate of Employment",
+          "description": "Position, date hired, compensation, office address, HR landline and email. Issued within 30 calendar days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_db_spon_emp_002",
+          "name": "Company ID",
+          "description": "Company identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_db_spon_emp_003",
+          "name": "Latest ITR (Form 2316)",
+          "description": "Individual income tax return. Affidavit if no ITR",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        },
+        {
+          "id": "req_db_spon_emp_004",
+          "name": "PRC Card or IBP Card",
+          "description": "Professional license if applicable",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 4
+        }
+      ]
+    },
+
+    {
+      "id": "cond_db_sponsor_business",
+      "applicant_status": "sponsored",
+      "description": "Requirements for sponsored applicants - Sponsor self-employed/business owner",
+      "requirements": [
+        {
+          "id": "req_db_spon_bus_001",
+          "name": "DTI or SEC Permit",
+          "description": "If SEC, include GIS",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_db_spon_bus_002",
+          "name": "Valid Mayor's or Business Permit",
+          "description": "Business registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_db_spon_bus_003",
+          "name": "BIR Company Registration",
+          "description": "Tax registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_db_spon_bus_004",
+          "name": "Latest ITR (Form 2316 for individual)",
+          "description": "Income tax return. Affidavit if no ITR",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        },
+        {
+          "id": "req_db_spon_bus_005",
+          "name": "Business Financial Statement",
+          "description": "Company financial statement",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 5
+        },
+        {
+          "id": "req_db_spon_bus_006",
+          "name": "PRC Card or IBP Card",
+          "description": "Professional license if applicable",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 6
+        }
+      ]
+    },
+
+    {
+      "id": "cond_db_notarized_support",
+      "applicant_status": "sponsored",
+      "description": "Notarized support for sponsored applicants",
+      "requirements": [
+        {
+          "id": "req_db_support_001",
+          "name": "Notarized Affidavit of Support and Guarantee Letter",
+          "description": "Sponsor's commitment and financial guarantee",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 1
+        }
+      ]
+    }
+  ],
+
+  "notes": {
+    "confidential_marked": "ITR forms, Bank Statements, Financial Statements, Affidavit of Support, Guarantee Letters",
+    "fast_processing": "Dubai E-Visa has fastest processing (5-10 working days) among all visa types",
+    "primary_only_display": "When showing in modal, only primary_requirements are shown",
+    "json_encoding": "Store as LONGTEXT in database"
+  }
+}

@@ -92,7 +92,7 @@ if ($hasPackage && !empty($client['inclusions_json'])) {
     <!-- Header: Package Name Only -->
     <div>
       <p class="text-[0.65rem] font-semibold text-sky-100 uppercase tracking-wider mb-1">Assigned Package</p>
-      <h3 class="pb-3 text-lg sm:text-2xl font-bold text-white break-words max-w-[85%] sm:max-w-[80%]">
+      <h3 class="line-clamp-1 pb-5 text-lg sm:text-xl font-bold text-white break-words max-w-[85%] sm:max-w-[80%]">
         <?= $hasPackage ? htmlspecialchars($client['package_name']) : '<span class="italic opacity-80">No Package Assigned</span>' ?>
       </h3>
       <?php 

@@ -159,7 +159,7 @@ $todayDay  = getTodayItineraryDay($start, $end);
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 
-<body class="text-gray-800 font-sans md:overflow-hidden" x-data="{ sidebarOpen: false, ...clientViewScope() }" x-init="initClientView()">
+<body class="text-gray-800 font-sans" x-data="{ sidebarOpen: false, ...clientViewScope() }" x-init="initClientView()">
 
 <!-- Includes -->
 <?php $isAdmin = true; include '../components/admin_sidebar.php'; ?>
@@ -254,34 +254,44 @@ $todayDay  = getTodayItineraryDay($start, $end);
   </div>
 
 </main>
+
+
   <!-- ✨ Edit Client Modal -->
   <div x-show="$store.modals.editClient" x-cloak
-       class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end sm:items-center justify-center backdrop-blur-sm px-3 sm:px-4"
-       x-transition
-       role="dialog" aria-modal="true"
-       @keydown.escape.window="$store.modals.editClient = false"
-       @click.outside="$store.modals.editClient = false">
+       class="fixed inset-0 z-50 overflow-y-auto"
+       aria-labelledby="modal-title" role="dialog" aria-modal="true"
+       @keydown.escape.window="$store.modals.editClient = false">
 
-    <div class="max-w-xl w-full bg-white p-4 sm:p-6 rounded-t-2xl sm:rounded-lg shadow-xl max-h-[90vh] overflow-y-auto relative"
-         tabindex="-1"
-         x-init="$el.focus()"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-90">
+    <!-- Backdrop -->
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-4 text-center sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="$store.modals.editClient = false"></div>
 
-      <!-- ❌ Close Button -->
-      <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl"
-              @click="$store.modals.editClient = false">&times;</button>
+      <!-- Modal panel -->
+      <div class="inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-0 sm:align-middle sm:max-w-4xl sm:w-full sm:max-h-[96vh]">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3 sm:px-6">
+          <div class="p-2 flex items-center justify-between">
+            <h3 class="text-lg leading-6 font-medium text-white" id="modal-title">
+              Edit Guest | Travel Booking
+            </h3>
+            <button type="button" @click="$store.modals.editClient = false"
+                    class="text-white hover:text-gray-200 transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
 
-      <?php
-        $editClientId = $client['id'];
-        include '../admin/edit_client.php';
-      ?>
+        <?php
+          $editClientId = $client['id'];
+          include '../admin/edit_client.php';
+        ?>
+      </div>
     </div>
   </div>
+
+
 <script src="https://unpkg.com/alpinejs" defer></script>
 <?php include '../components/status_alert.php'; ?>
 <?php include '../components/update_client_booking_modal.php'; ?>

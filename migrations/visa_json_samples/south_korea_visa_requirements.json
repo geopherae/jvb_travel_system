@@ -1,0 +1,302 @@
+{
+  "metadata": {
+    "visa_package_id": null,
+    "country": "South Korea",
+    "visa_types": ["Single Entry", "Multiple Entry"],
+    "processing_days_min": 10,
+    "processing_days_max": 15,
+    "description": "South Korea Visa Assistance"
+  },
+  
+  "primary_requirements": [
+    {
+      "id": "req_sk_001",
+      "name": "Accomplished and wet signed Application Form",
+      "description": "Properly filled and signed visa application",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 1
+    },
+    {
+      "id": "req_sk_002",
+      "name": "VALID PHILIPPINE PASSPORT",
+      "description": "At least 12 months validity. Make sure page 3 is signed",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 2
+    },
+    {
+      "id": "req_sk_003",
+      "name": "Photocopy of valid Passport's Bio Page",
+      "description": "Copies of passport identification page",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 3
+    },
+    {
+      "id": "req_sk_004",
+      "name": "Old Passport/s only if with travel stamps",
+      "description": "Previous passports showing travel history",
+      "document_types": ["pdf", "image"],
+      "required": false,
+      "is_confidential": false,
+      "order": 4
+    },
+    {
+      "id": "req_sk_005",
+      "name": "Photocopy of previous and valid visas",
+      "description": "Previous visa stamps and valid visas",
+      "document_types": ["pdf", "image"],
+      "required": false,
+      "is_confidential": false,
+      "order": 5
+    },
+    {
+      "id": "req_sk_006",
+      "name": "Data Privacy Consent Form KVAC",
+      "description": "Korea Visa Application Center privacy consent",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 6
+    },
+    {
+      "id": "req_sk_007",
+      "name": "2 pcs colored Photo (4.5cm x 3.5cm)",
+      "description": "White background, taken within 6 months. Must be formal (no smiling), colored shirt/polo",
+      "document_types": ["image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 7
+    }
+  ],
+
+  "conditional_requirement_groups": [
+    {
+      "id": "cond_sk_financial",
+      "applicant_status": "employed",
+      "description": "Financial requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_sk_fin_001",
+          "name": "Original Bank Certificate with OR from Bank",
+          "description": "Must include type of account, opening date, average daily balance and current balance. Commercial bank only. Issued within 30 calendar days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 1
+        },
+        {
+          "id": "req_sk_fin_002",
+          "name": "Original Bank Statement",
+          "description": "From the past 3 months. Must demonstrate stable and credible cash flow. Issued within 30 calendar days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sk_employed",
+      "applicant_status": "employed",
+      "description": "Requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_sk_emp_001",
+          "name": "Original Signed Certificate of Employment",
+          "description": "Indicate position, date hired, compensation, office address, HR landline and email. Must be issued within 30 calendar days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_sk_emp_002",
+          "name": "Photocopy of Company ID",
+          "description": "Valid company identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_sk_emp_003",
+          "name": "ITR (Income Tax Return)",
+          "description": "Form 2316 signed by both Employee and Employer. If no ITR, provide notarized Affidavit",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sk_business_owner",
+      "applicant_status": "business_owner",
+      "description": "Requirements for business owners",
+      "requirements": [
+        {
+          "id": "req_sk_bus_001",
+          "name": "Photocopy Valid of DTI or SEC Permit",
+          "description": "If SEC Permit, include the GIS",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_sk_bus_002",
+          "name": "Photocopy of Valid Mayor's or Business Permit",
+          "description": "Current business registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_sk_bus_003",
+          "name": "Photocopy of BIR Company Registration",
+          "description": "Tax registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_sk_bus_004",
+          "name": "ITR (Income Tax Return)",
+          "description": "Form 1701 or Form 1702. If no ITR, provide notarized Affidavit",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sk_student",
+      "applicant_status": "student",
+      "description": "Requirements for student applicants",
+      "requirements": [
+        {
+          "id": "req_sk_stud_001",
+          "name": "Original School Certificate of Enrollment",
+          "description": "Current academic enrollment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_sk_stud_002",
+          "name": "Photocopy of School ID",
+          "description": "Valid school identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sk_senior_citizen",
+      "applicant_status": "senior_citizen",
+      "description": "Requirements for senior citizens",
+      "requirements": [
+        {
+          "id": "req_sk_sen_001",
+          "name": "Senior Citizen ID",
+          "description": "Valid OSCA Senior Citizen ID",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sk_professional",
+      "applicant_status": "professional",
+      "description": "Requirements for professionals",
+      "requirements": [
+        {
+          "id": "req_sk_prof_001",
+          "name": "Photocopy of PRC or IBP Card",
+          "description": "Valid professional license",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sk_sponsored",
+      "applicant_status": "sponsored",
+      "description": "Requirements for sponsored applicants",
+      "requirements": [
+        {
+          "id": "req_sk_spon_001",
+          "name": "Notarized Affidavit of Support and Guarantee Letter",
+          "description": "Sponsor's commitment to support",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 1
+        },
+        {
+          "id": "req_sk_spon_002",
+          "name": "Proof of Relationship",
+          "description": "PSA Birth Certificate or PSA Marriage Certificate",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sk_family",
+      "applicant_status": "employed",
+      "description": "Requirements when applying with family",
+      "requirements": [
+        {
+          "id": "req_sk_fam_001",
+          "name": "PSA Birth Certificate",
+          "description": "Must be issued within 1 year upon submission",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_sk_fam_002",
+          "name": "If married: PSA Marriage Certificate",
+          "description": "Must be issued within 1 year upon submission",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 2
+        }
+      ]
+    }
+  ],
+
+  "notes": {
+    "confidential_marked": "Bank Certificates, Bank Statements, ITR forms, Affidavit of Support",
+    "financial_exemptions": "Elected politicians, professional license holders, major credit card holders of BDO, BPI, RCBC, Metrobank",
+    "primary_only_display": "When showing visa package info in modal, only primary_requirements are shown",
+    "json_encoding": "Store as LONGTEXT in database"
+  }
+}

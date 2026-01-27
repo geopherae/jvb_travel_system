@@ -239,7 +239,8 @@ class Chat implements MessageComponentInterface
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) throw new Exception("Thread insert prepare failed: " . $this->conn->error);
 
-        $stmt->bind_param('issi', $userId, $userType, $recipientId, $recipientType);
+        // Bind recipient_type as string to avoid coercing to 0
+        $stmt->bind_param('isis', $userId, $userType, $recipientId, $recipientType);
         $stmt->execute();
         $threadId = $this->conn->insert_id;
         $stmt->close();

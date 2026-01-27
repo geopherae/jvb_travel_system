@@ -19,6 +19,7 @@ function getStatusBadgeClass($status) {
     'cancelled'       => 'bg-red-100 text-red-700',
     'resubmit files'  => 'bg-red-100 text-red-700',
     'rejected'        => 'bg-red-100 text-red-700',
+    'not submitted'   => 'bg-gray-100 text-gray-600',
   ];
 
   $key = strtolower(trim($status ?? ''));
@@ -27,8 +28,11 @@ function getStatusBadgeClass($status) {
 
 function getStatusClass(string $status): string {
   return match ($status) {
-    'Approved' => 'bg-emerald-100 text-emerald-700 border border-emerald-300',
-    'Rejected' => 'bg-red-100 text-red-700 border border-red-300',
-    default    => 'bg-yellow-100 text-yellow-700 border border-yellow-300'
+    'Approved'      => 'bg-emerald-100 text-emerald-700 border border-emerald-300',
+    'Rejected'      => 'bg-red-100 text-red-700 border border-red-300',
+    'Pending', 
+    'Submitted'     => 'bg-yellow-100 text-yellow-700 border border-yellow-300',
+    'Not Submitted' => 'bg-gray-100 text-gray-600 border border-gray-300',
+    default         => 'bg-yellow-100 text-yellow-700 border border-yellow-300'
   };
 }

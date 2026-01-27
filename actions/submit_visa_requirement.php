@@ -19,7 +19,7 @@ if (basename($_SERVER['SCRIPT_FILENAME']) === basename(__FILE__)) exit('Access d
 
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../../includes/auth.php';
-require_once __DIR__ . '/../../includes/visa_document_handler.php';
+require_once __DIR__ . '/../includes/visa_document_handler.php';
 
 use function Auth\getActorContext;
 use function VisaDocumentHandler\uploadDocument;

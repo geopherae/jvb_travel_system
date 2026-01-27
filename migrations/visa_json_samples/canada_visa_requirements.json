@@ -1,0 +1,400 @@
+{
+  "metadata": {
+    "visa_package_id": null,
+    "country": "Canada",
+    "visa_types": ["Visitor Visa", "eTA"],
+    "processing_days_min": 30,
+    "processing_days_max": 35,
+    "description": "Canada Visa Assistance"
+  },
+  
+  "primary_requirements": [
+    {
+      "id": "req_ca_001",
+      "name": "Accomplished Questionnaire",
+      "description": "Completed visa questionnaire",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 1
+    },
+    {
+      "id": "req_ca_002",
+      "name": "Accomplished Family Information Form",
+      "description": "Family information details",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 2
+    },
+    {
+      "id": "req_ca_003",
+      "name": "Use of Family Member Representative Form",
+      "description": "If applying with minor or dependent",
+      "document_types": ["pdf", "image"],
+      "required": false,
+      "is_confidential": false,
+      "order": 3
+    },
+    {
+      "id": "req_ca_004",
+      "name": "Philippine Passport's bio page",
+      "description": "At least 6 months validity. Page 3 must be signed",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 4
+    },
+    {
+      "id": "req_ca_005",
+      "name": "All pages in valid passport",
+      "description": "With travel stamps, valid visa and expired visa",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 5
+    },
+    {
+      "id": "req_ca_006",
+      "name": "Old Passport's Bio Page and all pages",
+      "description": "With stamps, valid and expired visas from past 10 years if available",
+      "document_types": ["pdf", "image"],
+      "required": false,
+      "is_confidential": false,
+      "order": 6
+    },
+    {
+      "id": "req_ca_007",
+      "name": "Passport size photo (4.5cm x 3.5cm)",
+      "description": "White background, from photo studio, taken within 6 months",
+      "document_types": ["image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 7
+    }
+  ],
+
+  "conditional_requirement_groups": [
+    {
+      "id": "cond_ca_financial",
+      "applicant_status": "employed",
+      "description": "Financial requirements for all applicants",
+      "requirements": [
+        {
+          "id": "req_ca_fin_001",
+          "name": "Bank Certificate with OR from Bank",
+          "description": "Account type, opening date, average daily balance and current balance. Include payroll account if employed, business account if owner. Issued within 30 calendar days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 1
+        },
+        {
+          "id": "req_ca_fin_002",
+          "name": "Bank Statement for past 4 months",
+          "description": "Demonstrate stable and credible cash flow. Issued within 30 calendar days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ca_employed",
+      "applicant_status": "employed",
+      "description": "Requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_ca_emp_001",
+          "name": "Signed Certificate of Employment",
+          "description": "Position, date hired, compensation, office address, HR landline and email. Issued within 30 calendar days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ca_emp_002",
+          "name": "Company ID",
+          "description": "Valid company identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_ca_emp_003",
+          "name": "Latest ITR (Form 2316)",
+          "description": "Signed by both employee and employer. If no ITR, Affidavit of No Income Tax Return",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ca_business_owner",
+      "applicant_status": "business_owner",
+      "description": "Requirements for business owner/self-employed",
+      "requirements": [
+        {
+          "id": "req_ca_bus_001",
+          "name": "Valid DTI or SEC Permit",
+          "description": "If SEC, include GIS (General Information Sheet)",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ca_bus_002",
+          "name": "Valid Mayor's or Business Permit",
+          "description": "Business registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_ca_bus_003",
+          "name": "BIR Company Registration (Form 2303)",
+          "description": "Tax registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_ca_bus_004",
+          "name": "Latest ITR (Form 1701 or 1702)",
+          "description": "Business tax return. If no ITR, Affidavit",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        },
+        {
+          "id": "req_ca_bus_005",
+          "name": "Latest Audited Financial Statement",
+          "description": "Business financial statement",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 5
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ca_student",
+      "applicant_status": "student",
+      "description": "Requirements for student applicants",
+      "requirements": [
+        {
+          "id": "req_ca_stud_001",
+          "name": "School Certificate or Enrollment Certificate",
+          "description": "Current school enrollment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ca_stud_002",
+          "name": "School ID",
+          "description": "Valid school identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_ca_stud_003",
+          "name": "School Calendar Year",
+          "description": "Academic calendar",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ca_retired",
+      "applicant_status": "senior_citizen",
+      "description": "Requirements for retired/senior citizen",
+      "requirements": [
+        {
+          "id": "req_ca_ret_001",
+          "name": "Senior Citizen ID",
+          "description": "Valid OSCA Senior Citizen ID",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ca_ret_002",
+          "name": "Certificate of Retirement",
+          "description": "From last employer",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ca_ties",
+      "applicant_status": "employed",
+      "description": "Proof of ties in the Philippines",
+      "requirements": [
+        {
+          "id": "req_ca_ties_001",
+          "name": "Valid PRC or IBP Card",
+          "description": "Professional license",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ca_ties_002",
+          "name": "Land Title",
+          "description": "Property ownership",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_ca_ties_003",
+          "name": "Vehicle Ownership: OR and CR",
+          "description": "Official Receipt and Certificate of Registration",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_ca_ties_004",
+          "name": "Investments, Insurance Policies, Time Deposits",
+          "description": "Financial assets",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": true,
+          "order": 4
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ca_visiting",
+      "applicant_status": "visiting_family",
+      "description": "Requirements for visiting family/friend",
+      "requirements": [
+        {
+          "id": "req_ca_vis_001",
+          "name": "Invitation Letter from Family/Friend",
+          "description": "Full name, DOB, address, relationship, purpose, duration of stay, where to stay, inviter's full name, DOB, address, phone, job, citizenship",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ca_vis_002",
+          "name": "Proof of Relationship",
+          "description": "Birth certificate or marriage certificate",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_ca_vis_003",
+          "name": "Copy of Passport bio page of Family/Friend",
+          "description": "Host's passport",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_ca_vis_004",
+          "name": "Guarantee Letter from Family/Friend",
+          "description": "For accommodation and financial support",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        }
+      ]
+    },
+
+    {
+      "id": "cond_ca_sponsored",
+      "applicant_status": "sponsored",
+      "description": "Requirements for sponsored applicants",
+      "requirements": [
+        {
+          "id": "req_ca_spon_001",
+          "name": "Proof of Relationship to Applicant",
+          "description": "Birth certificate or marriage certificate",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_ca_spon_002",
+          "name": "Copy of Sponsor Passport bio page",
+          "description": "Sponsor's passport",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_ca_spon_003",
+          "name": "Sponsor's Bank Certificate",
+          "description": "Issued within 30 calendar days upon submission",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        },
+        {
+          "id": "req_ca_spon_004",
+          "name": "Sponsor's Bank Statement",
+          "description": "From past four (4) months",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        },
+        {
+          "id": "req_ca_spon_005",
+          "name": "Notarized Affidavit of Support and Guarantee Letter",
+          "description": "Sponsor's commitment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 5
+        }
+      ]
+    }
+  ],
+
+  "notes": {
+    "confidential_marked": "Bank Certificates, Bank Statements, ITR forms, Financial Statements, Guarantee Letters, Insurance policies",
+    "primary_only_display": "When showing in modal, only primary_requirements are shown",
+    "json_encoding": "Store as LONGTEXT in database"
+  }
+}

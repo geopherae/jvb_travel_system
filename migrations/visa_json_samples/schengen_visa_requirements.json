@@ -1,0 +1,408 @@
+{
+  "metadata": {
+    "visa_package_id": null,
+    "country": "Schengen (Europe)",
+    "visa_types": ["Tourist Visa"],
+    "processing_days_min": 10,
+    "processing_days_max": 15,
+    "description": "Schengen Visa Assistance for European travel"
+  },
+  
+  "primary_requirements": [
+    {
+      "id": "req_sch_001",
+      "name": "Accomplished Questionnaire",
+      "description": "Completed visa questionnaire form",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 1
+    },
+    {
+      "id": "req_sch_002",
+      "name": "VALID PHILIPPINE PASSPORT",
+      "description": "At least 6 months validity. Make sure page 3 is signed",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 2
+    },
+    {
+      "id": "req_sch_003",
+      "name": "Photocopy of Current and Old Passport travel stamps",
+      "description": "Previous and valid visas to USA, Canada, UK, Schengen, Japan, Australia, New Zealand, South Korea",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 3
+    },
+    {
+      "id": "req_sch_004",
+      "name": "Two (2) pieces of Passport Sized Colored Photo",
+      "description": "3.5 x 4.5cm, white background, taken from photo studio",
+      "document_types": ["image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 4
+    },
+    {
+      "id": "req_sch_005",
+      "name": "1 Original PSA Birth Certificate",
+      "description": "Valid PSA Birth Certificate",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 5
+    },
+    {
+      "id": "req_sch_006",
+      "name": "1 Photocopy of PSA Birth Certificate",
+      "description": "Photocopy of PSA Birth Certificate",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 6
+    },
+    {
+      "id": "req_sch_007",
+      "name": "Schengen Travel Insurance",
+      "description": "Can be availed with JV-B Travel and Tours",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 7
+    }
+  ],
+
+  "conditional_requirement_groups": [
+    {
+      "id": "cond_sch_married",
+      "applicant_status": "married",
+      "description": "Requirements for married applicants",
+      "requirements": [
+        {
+          "id": "req_sch_mar_001",
+          "name": "1 Original and 1 photocopy of PSA Marriage Certificate",
+          "description": "Marriage certificate for married applicants",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sch_widowed",
+      "applicant_status": "widowed",
+      "description": "Requirements for widowed applicants",
+      "requirements": [
+        {
+          "id": "req_sch_wid_001",
+          "name": "1 Original and 1 photocopy of Spouse's Death Certificate",
+          "description": "Death certificate of spouse",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sch_financial",
+      "applicant_status": "employed",
+      "description": "Financial requirements (18 years and above)",
+      "requirements": [
+        {
+          "id": "req_sch_fin_001",
+          "name": "Original Bank Certificate",
+          "description": "Must include account type, opening date, average daily balance and current balance. For Commercial Bank, should have OR from bank. Digital bank accepted. Addressed to Embassy. Issued within 10 days prior to appointment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 1
+        },
+        {
+          "id": "req_sch_fin_002",
+          "name": "Original Bank Statement for past 6 months",
+          "description": "Most recent 3 months originally from bank. Other 3 months from online banking acceptable if certified by bank. Demonstrate stable cash flow. Issued within 10 days prior to appointment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sch_employed",
+      "applicant_status": "employed",
+      "description": "Requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_sch_emp_001",
+          "name": "Original Signed Certificate of Employment",
+          "description": "Indicate position, date hired, compensation, office address, HR landline and email. Issued within 20 days prior to appointment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_sch_emp_002",
+          "name": "Approved Leave of Absence",
+          "description": "Approval for vacation/travel",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_sch_emp_003",
+          "name": "Photocopy of Company ID",
+          "description": "Valid company identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_sch_emp_004",
+          "name": "Photocopy of latest ITR (Form 2316)",
+          "description": "Income Tax Return for individuals. If no ITR, notarized Affidavit",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        },
+        {
+          "id": "req_sch_emp_005",
+          "name": "Photocopy of PRC Card or IBP Card",
+          "description": "Professional license if applicable",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 5
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sch_self_employed",
+      "applicant_status": "business_owner",
+      "description": "Requirements for self-employed/business owner",
+      "requirements": [
+        {
+          "id": "req_sch_bus_001",
+          "name": "Photocopy of DTI or SEC Permit",
+          "description": "If SEC, include GIS (General Information Sheet)",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_sch_bus_002",
+          "name": "Photocopy of Mayor's or Business Permit",
+          "description": "Business registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_sch_bus_003",
+          "name": "Photocopy of BIR Company Registration",
+          "description": "Tax registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_sch_bus_004",
+          "name": "Photocopy of Latest ITR (Form 1701 or 1702)",
+          "description": "Business income tax return. If no ITR, notarized Affidavit",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        },
+        {
+          "id": "req_sch_bus_005",
+          "name": "Photocopy of PRC Card or IBP Card",
+          "description": "Professional license if applicable",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 5
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sch_student",
+      "applicant_status": "student",
+      "description": "Requirements for student applicants",
+      "requirements": [
+        {
+          "id": "req_sch_stud_001",
+          "name": "Original School Certificate of Enrollment",
+          "description": "Current school enrollment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_sch_stud_002",
+          "name": "Photocopy of School ID",
+          "description": "Valid school identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_sch_stud_003",
+          "name": "Original School Calendar Year",
+          "description": "Academic calendar",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_sch_stud_004",
+          "name": "Approved Leave of Absence",
+          "description": "If travelling within school year",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 4
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sch_visiting",
+      "applicant_status": "visiting_family",
+      "description": "Requirements for visiting family/friend",
+      "requirements": [
+        {
+          "id": "req_sch_vis_001",
+          "name": "Photocopy of Passport Copy of Family/Friend",
+          "description": "Host's passport copy",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_sch_vis_002",
+          "name": "Original copy of Invitation Letter",
+          "description": "From family/friend in Europe",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_sch_vis_003",
+          "name": "Guarantee Letter from Family/Friend",
+          "description": "For accommodation and support",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sch_senior",
+      "applicant_status": "senior_citizen",
+      "description": "Requirements for senior/retired applicants",
+      "requirements": [
+        {
+          "id": "req_sch_sen_001",
+          "name": "Photocopy of Senior Citizen ID",
+          "description": "Valid OSCA Senior Citizen ID",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_sch_sen_002",
+          "name": "Retirement Certificate",
+          "description": "If applicable",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 2
+        }
+      ]
+    },
+
+    {
+      "id": "cond_sch_sponsored",
+      "applicant_status": "sponsored",
+      "description": "Requirements for sponsored applicants",
+      "requirements": [
+        {
+          "id": "req_sch_spon_001",
+          "name": "Sponsor's passport bio page",
+          "description": "Photocopy of host's passport",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_sch_spon_002",
+          "name": "Original and Photocopy of Proof of Relationship",
+          "description": "PSA Birth Certificate, Marriage Certificate, or Photos together",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_sch_spon_003",
+          "name": "Original Copy of Bank Certificate",
+          "description": "Sponsor's financial proof with same requirements as applicant",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        },
+        {
+          "id": "req_sch_spon_004",
+          "name": "Original Bank Statement for past 6 months",
+          "description": "Sponsor's bank statements",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        },
+        {
+          "id": "req_sch_spon_005",
+          "name": "Notarized Affidavit of Support and Guarantee Letter",
+          "description": "Sponsor's commitment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 5
+        }
+      ]
+    }
+  ],
+
+  "notes": {
+    "confidential_marked": "Bank Certificates, Bank Statements, ITR forms, Guarantee Letters, Financial documents",
+    "primary_only_display": "When showing in modal, only primary_requirements are shown",
+    "json_encoding": "Store as LONGTEXT in database"
+  }
+}

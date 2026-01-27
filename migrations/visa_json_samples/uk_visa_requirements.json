@@ -1,0 +1,392 @@
+{
+  "metadata": {
+    "visa_package_id": null,
+    "country": "United Kingdom",
+    "visa_types": ["Standard Visitor Visa"],
+    "processing_days_min": 15,
+    "processing_days_max": 20,
+    "description": "UK Visa Assistance"
+  },
+  
+  "primary_requirements": [
+    {
+      "id": "req_uk_001",
+      "name": "Accomplished Questionnaire",
+      "description": "Completed visa questionnaire",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 1
+    },
+    {
+      "id": "req_uk_002",
+      "name": "VALID PHILIPPINE PASSPORT",
+      "description": "At least 6 months validity. Page 3 must be signed",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 2
+    },
+    {
+      "id": "req_uk_003",
+      "name": "Scanned copy of Current and Old Passport travel stamps",
+      "description": "Previous and valid visas to USA, Canada, UK, Schengen, Japan, Australia, New Zealand, South Korea",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 3
+    },
+    {
+      "id": "req_uk_004",
+      "name": "Scanned copy of PSA Birth Certificate",
+      "description": "Birth certificate",
+      "document_types": ["pdf", "image"],
+      "required": true,
+      "is_confidential": false,
+      "order": 4
+    },
+    {
+      "id": "req_uk_005",
+      "name": "Scanned copy of PSA Marriage Certificate",
+      "description": "If applicable",
+      "document_types": ["pdf", "image"],
+      "required": false,
+      "is_confidential": false,
+      "order": 5
+    }
+  ],
+
+  "conditional_requirement_groups": [
+    {
+      "id": "cond_uk_financial",
+      "applicant_status": "employed",
+      "description": "Financial requirements for applicants",
+      "requirements": [
+        {
+          "id": "req_uk_fin_001",
+          "name": "Bank Certificate with OR from Bank",
+          "description": "Account type, opening date, average daily balance and current balance. Commercial bank only. Addressed to Embassy. Issued within 20 days prior to appointment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 1
+        },
+        {
+          "id": "req_uk_fin_002",
+          "name": "Scanned copy of Bank Statement for past 6 months",
+          "description": "Online banking acceptable",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 2
+        },
+        {
+          "id": "req_uk_fin_003",
+          "name": "Land Title or Proof of Ownership",
+          "description": "Property ownership if applicable",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_uk_fin_004",
+          "name": "Other supporting documents",
+          "description": "Investments, Time Deposit, etc.",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": true,
+          "order": 4
+        }
+      ]
+    },
+
+    {
+      "id": "cond_uk_employed",
+      "applicant_status": "employed",
+      "description": "Requirements for employed applicants",
+      "requirements": [
+        {
+          "id": "req_uk_emp_001",
+          "name": "Scanned copy of Signed Certificate of Employment",
+          "description": "Position, date hired, compensation, office address, HR landline and email. Issued within 20 days prior to appointment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_uk_emp_002",
+          "name": "Scanned copy of Approved Leave of Absence",
+          "description": "Vacation approval",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_uk_emp_003",
+          "name": "Scanned copy of Company ID",
+          "description": "Company identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_uk_emp_004",
+          "name": "Latest ITR (Form 2316)",
+          "description": "For individual. Affidavit if no ITR",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        },
+        {
+          "id": "req_uk_emp_005",
+          "name": "Scanned copy of PRC Card or IBP Card",
+          "description": "Professional license if applicable",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 5
+        },
+        {
+          "id": "req_uk_emp_006",
+          "name": "Payslips from the last 6 months",
+          "description": "Recent salary documents",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 6
+        }
+      ]
+    },
+
+    {
+      "id": "cond_uk_self_employed",
+      "applicant_status": "business_owner",
+      "description": "Requirements for self-employed/business owner",
+      "requirements": [
+        {
+          "id": "req_uk_bus_001",
+          "name": "Scanned copy of Valid DTI or SEC Permit",
+          "description": "If SEC, include GIS",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_uk_bus_002",
+          "name": "Scanned copy of Valid Mayor's or Business Permit",
+          "description": "Business registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_uk_bus_003",
+          "name": "Scanned copy of BIR Company Registration",
+          "description": "Tax registration",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        },
+        {
+          "id": "req_uk_bus_004",
+          "name": "Scanned copy of Latest ITR (Form 1701 or 1702)",
+          "description": "Affidavit if no ITR",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        },
+        {
+          "id": "req_uk_bus_005",
+          "name": "Scanned copy of PRC Card or IBP Card",
+          "description": "Professional license if applicable",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 5
+        },
+        {
+          "id": "req_uk_bus_006",
+          "name": "Other supporting documents",
+          "description": "Investments, Time Deposits, etc.",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": true,
+          "order": 6
+        }
+      ]
+    },
+
+    {
+      "id": "cond_uk_student",
+      "applicant_status": "student",
+      "description": "Requirements for student applicants",
+      "requirements": [
+        {
+          "id": "req_uk_stud_001",
+          "name": "Scanned copy of School Certificate of Enrollment",
+          "description": "School enrollment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_uk_stud_002",
+          "name": "Scanned copy of School ID",
+          "description": "School identification",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_uk_stud_003",
+          "name": "Scanned copy of School Calendar Year",
+          "description": "Academic calendar",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 3
+        }
+      ]
+    },
+
+    {
+      "id": "cond_uk_retired",
+      "applicant_status": "senior_citizen",
+      "description": "Requirements for retired/senior citizen",
+      "requirements": [
+        {
+          "id": "req_uk_ret_001",
+          "name": "Scanned copy of Senior Citizen ID",
+          "description": "OSCA Senior Citizen ID",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_uk_ret_002",
+          "name": "Retirement Certificate",
+          "description": "From last employer",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_uk_ret_003",
+          "name": "Pension Certificate, Pension Bank Certificate and Statement",
+          "description": "Past 6 months",
+          "document_types": ["pdf", "image"],
+          "required": false,
+          "is_confidential": true,
+          "order": 3
+        }
+      ]
+    },
+
+    {
+      "id": "cond_uk_visiting",
+      "applicant_status": "visiting_family",
+      "description": "Requirements for visiting family/friend",
+      "requirements": [
+        {
+          "id": "req_uk_vis_001",
+          "name": "Scanned copy of Passport Copy of Family/Friend",
+          "description": "Host's passport",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_uk_vis_002",
+          "name": "Scanned copy of Invitation Letter",
+          "description": "From family/friend in UK",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_uk_vis_003",
+          "name": "Scanned copy of Guarantee Letter",
+          "description": "For accommodation",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        }
+      ]
+    },
+
+    {
+      "id": "cond_uk_sponsored",
+      "applicant_status": "sponsored",
+      "description": "Requirements for sponsored applicants",
+      "requirements": [
+        {
+          "id": "req_uk_spon_001",
+          "name": "Scanned copy of Sponsor Passport",
+          "description": "Sponsor's passport",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 1
+        },
+        {
+          "id": "req_uk_spon_002",
+          "name": "Scanned copy of Proof of Relationship",
+          "description": "Birth Certificate, Marriage Certificate, Pictures together",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": false,
+          "order": 2
+        },
+        {
+          "id": "req_uk_spon_003",
+          "name": "Scanned copy of Sponsor's Bank Certificate",
+          "description": "Sponsor's financial proof, issued within 20 days",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 3
+        },
+        {
+          "id": "req_uk_spon_004",
+          "name": "Scanned copy of Bank Statement for past 6 months",
+          "description": "Sponsor's bank statements",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 4
+        },
+        {
+          "id": "req_uk_spon_005",
+          "name": "Scanned copy of Notarized Affidavit of Support",
+          "description": "Sponsor's commitment",
+          "document_types": ["pdf", "image"],
+          "required": true,
+          "is_confidential": true,
+          "order": 5
+        }
+      ]
+    }
+  ],
+
+  "notes": {
+    "confidential_marked": "Bank Certificates, Bank Statements, ITR forms, Payslips, Pension documents, Financial statements, Guarantee Letters, Investments",
+    "primary_only_display": "When showing in modal, only primary_requirements are shown",
+    "json_encoding": "Store as LONGTEXT in database"
+  }
+}

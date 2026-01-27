@@ -45,8 +45,8 @@ $hasPassport = !empty($passportNumber) || !empty($passportExpiry);
         loading="lazy"
       />
       <!-- Name & Status -->
-      <div class="flex-1 min-w-0 text-center sm:text-left w-full sm:w-auto">
-        <h3 class="pb-1 sm:pb-1 text-xl sm:text-2xl font-bold text-white break-words"><?= htmlspecialchars($fullName) ?></h3>
+      <div class="flex-1 min-w-0 text-center sm:text-left w-full max-w-[90%] sm:w-auto">
+        <h3 class="pb-1 sm:pb-1 text-lg sm:text-xl font-bold text-white line-clamp-1 break-words"><?= htmlspecialchars($fullName) ?></h3>
         <?php 
         $status = $client['status'] ?? 'Pending';
         $statusColors = [
