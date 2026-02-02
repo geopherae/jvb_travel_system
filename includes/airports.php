@@ -25,6 +25,10 @@ return [
     'TUG' => 'Tuguegarao',
     'WNP' => 'Naga',
   ],
+  'China' => [
+    'PEK' => 'Beijing Capital International Airport',
+    'PVG' => 'Shanghai Pudong International Airport',
+  ],
   'Hong Kong' => [
     'HKG' => 'Hong Kong Intl',
   ],
