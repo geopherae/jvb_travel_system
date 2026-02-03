@@ -245,7 +245,6 @@ class="relative flex flex-col items-center gap-1.5 sm:gap-2 border-2 border-dash
                   class="bg-white w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-3 sm:py-3.5 pt-5 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent <?php if (!VISA_PROCESSING_ENABLED) echo 'bg-gray-50 cursor-not-allowed pointer-events-none'; ?>">
             <option value="booking">Booking Only</option>
             <?php if (VISA_PROCESSING_ENABLED): ?>
-            <option value="visa">Visa Processing</option>
             <option value="both">Both Booking & Visa</option>
             <?php endif; ?>
           </select>

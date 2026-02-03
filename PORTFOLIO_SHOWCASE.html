@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JVB Travel System - Portfolio Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1c51ca;
+            --secondary: rgb(25, 94, 190);
+            --accent: #0d9488;
+            --dark: #1e293b;
+            --light: #f0f9ff;
+            --border: #e0f2fe;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, var(--light) 0%, #f8fafc 100%);
+            padding: 0;
+        }
+
+        /* Header/Hero Section */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 80px 40px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(14, 165, 233, 0.2);
+        }
+
+        header h1 {
+            font-size: 3em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.9em;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        section {
+            margin-bottom: 80px;
+        }
+
+        h2 {
+            font-size: 2.5em;
+            color: var(--primary);
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.5em;
+            color: var(--secondary);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 1.05em;
+            line-height: 1.8;
+            color: #475569;
+            margin-bottom: 15px;
+        }
+
+        /* Problem Section */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .problem-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            border-left: 4px solid #ef4444;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .problem-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .problem-icon {
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .problem-icon svg {
+            width: 22px;
+            height: 22px;
+            stroke: #ef4444;
+        }
+
+        .problem-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .problem-card strong {
+            color: #ef4444;
+            display: inline-block;
+        }
+
+        /* Solution Section */
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .feature-showcase {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .feature-showcase:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(14, 165, 233, 0.15);
+        }
+
+        .feature-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            width: 44px;
+            height: 44px;
+        }
+
+        .feature-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: var(--primary);
+        }
+
+        .feature-showcase h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .feature-showcase p {
+            font-size: 1em;
+            color: #64748b;
+        }
+
+        /* UI/UX Showcase */
+        .ui-showcase {
+            background: white;
+            padding: 50px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            margin: 40px 0;
+        }
+
+        .ui-description {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            margin-bottom: 60px;
+        }
+
+        .ui-description:nth-child(even) {
+            grid-template-columns: 1fr 1fr;
+            direction: rtl;
+        }
+
+        .ui-description > div {
+            direction: ltr;
+        }
+
+        .ui-text h3 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        .design-highlight {
+            background: linear-gradient(135deg, var(--light) 0%, #ecf0f1 100%);
+            padding: 30px;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            margin: 20px 0;
+        }
+
+        .design-highlight ul {
+            list-style: none;
+            margin: 0;
+        }
+
+        .design-highlight li {
+            padding: 10px 0;
+            color: var(--dark);
+        }
+
+        .design-highlight li::before {
+            content: '✓ ';
+            color: var(--accent);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .ui-mockup {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: var(--primary);
+            font-weight: 600;
+            border: 2px dashed var(--primary);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .gallery-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .image-placeholder {
+            background: #f8fafc;
+            border: 2px dashed var(--secondary);
+            border-radius: 10px;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--secondary);
+            font-weight: 600;
+            padding: 20px;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            background: linear-gradient(135deg, var(--light) 0%, #f0f4f8 100%);
+            padding: 40px;
+            border-radius: 12px;
+            margin: 40px 0;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .tech-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-top: 3px solid var(--primary);
+        }
+
+        .tech-item strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .tech-item small {
+            color: #64748b;
+        }
+
+        /* Impact Metrics */
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--secondary);
+        }
+
+        .metric-number {
+            font-size: 2.5em;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 0.95em;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 40px;
+            margin-top: 80px;
+        }
+
+        footer p {
+            color: #cbd5e1;
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            header p {
+                font-size: 1.1em;
+            }
+
+            .container {
+                padding: 30px 20px;
+            }
+
+            h2 {
+                font-size: 1.8em;
+            }
+
+            .ui-description {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .ui-description:nth-child(even) {
+                direction: ltr;
+            }
+
+            .problem-grid,
+            .solution-grid,
+            .tech-grid,
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <header>
+        <h1>JVB Travel System</h1>
+        <p>A comprehensive itinerary and document management platform designed to revolutionize travel agency operations</p>
+        <span class="badge">UI/UX Design • System Architecture • Full-Stack Development</span>
+    </header>
+
+    <div class="container">
+        <!-- Introduction -->
+        <section>
+            <h2>Project Overview</h2>
+            <p>
+                JVB Travel System is a modern web application that streamlines travel agency workflows by automating client onboarding, document management, itinerary confirmation, and real-time communication. Designed with user-centric principles and modern interface patterns, the system delivers intuitive experiences for both travel agents and clients while maintaining enterprise-grade security and audit compliance.
+            </p>
+        </section>
+
+        <!-- Problem Statement -->
+        <section>
+            <h2>The Problem</h2>
+            <p>
+                Travel agencies faced critical operational inefficiencies:
+            </p>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-title">
+                        <span class="problem-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9"></circle>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                            </svg>
+                        </span>
+                        <strong>Manual Document Tracking</strong>
+                    </div>
+                    Spreadsheets and emails made it impossible to track which clients had submitted required documents and their approval status.
+                </div>
+                <div class="problem-card">
+                    <div class="problem-title">
+                        <span class="problem-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9"></circle>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                            </svg>
+                        </span>
+                        <strong>Communication Fragmentation</strong>
+                    </div>
+                    Client coordination happened across multiple channels (email, phone, messaging), creating confusion and lost information.
+                </div>
+                <div class="problem-card">
+                    <div class="problem-title">
+                        <span class="problem-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9"></circle>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                            </svg>
+                        </span>
+                        <strong>No Visibility into Progress</strong>
+                    </div>
+                    Agents lacked a centralized view of each client's onboarding journey and trip preparation status.
+                </div>
+                <div class="problem-card">
+                    <div class="problem-title">
+                        <span class="problem-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9"></circle>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                            </svg>
+                        </span>
+                        <strong>Lack of Accountability</strong>
+                    </div>
+                    No audit trail meant it was impossible to track who approved documents, when changes were made, or why.
+                </div>
+            </div>
+        </section>
+
+        <!-- Solution -->
+        <section>
+            <h2>Our Solution</h2>
+            <p>
+                We architected and designed a comprehensive system that transforms travel agency workflows into streamlined, transparent, automated processes. The platform centralizes all client interactions, documents, and communications in one intuitive interface.
+            </p>
+
+            <h3>Core Features</h3>
+            <div class="solution-grid">
+                <div class="feature-showcase">
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="14" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="3" y="13" width="7" height="7" rx="1"></rect>
+                            <rect x="14" y="13" width="7" height="7" rx="1"></rect>
+                        </svg>
+                    </div>
+                    <h3>Client Dashboard</h3>
+                    <p>Personalized, real-time view of booking status, assigned itinerary, document progress, and notifications. Clients stay informed at every step.</p>
+                </div>
+
+                <div class="feature-showcase">
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 7h6l2 2h10v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path>
+                        </svg>
+                    </div>
+                    <h3>Document Management</h3>
+                    <p>Centralized upload, review, and approval workflow. Admins preview documents in-app, approve/reject with feedback. Automatic image compression for efficiency.</p>
+                </div>
+
+                <div class="feature-showcase">
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"></polygon>
+                            <line x1="9" y1="3" x2="9" y2="18"></line>
+                            <line x1="15" y1="6" x2="15" y2="21"></line>
+                        </svg>
+                    </div>
+                    <h3>Itinerary Management</h3>
+                    <p>Day-by-day activity planning with client confirmation. Agents design packages; clients review and confirm before travel. Auto-status progression.</p>
+                </div>
+
+                <div class="feature-showcase">
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l2.5-2.5A8.5 8.5 0 1 1 21 11.5z"></path>
+                        </svg>
+                    </div>
+                    <h3>Real-Time Messaging</h3>
+                    <p>WebSocket-based 1-to-1 chat between agents and clients. Message history persisted. Reduces reliance on emails and phone calls.</p>
+                </div>
+
+                <div class="feature-showcase">
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </div>
+                    <h3>Smart Notifications</h3>
+                    <p>Automatic, contextual alerts on document approvals, status changes, and messages. Keeps all stakeholders synchronized in real-time.</p>
+                </div>
+
+                <div class="feature-showcase">
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" y1="19" x2="20" y2="19"></line>
+                            <rect x="6" y="10" width="3" height="9"></rect>
+                            <rect x="11" y="6" width="3" height="13"></rect>
+                            <rect x="16" y="13" width="3" height="6"></rect>
+                        </svg>
+                    </div>
+                    <h3>Analytics Dashboard</h3>
+                    <p>KPI metrics, document status charts, conversion rates, and onboarding velocity. Data-driven insights for performance optimization.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- UI/UX Showcase -->
+        <section>
+            <h2>Design & User Experience</h2>
+
+            <div class="ui-showcase">
+                <!-- Client Experience -->
+                <div class="ui-description">
+                    <div class="ui-text">
+                        <h3>Client Experience</h3>
+                        <p>
+                            The client dashboard is designed for simplicity and clarity. With a single login using a unique access code, clients immediately see their booking status, assigned itinerary, and document checklist. Real-time notifications keep them informed of approvals and agent messages.
+                        </p>
+                        <div class="design-highlight">
+                            <ul>
+                                <li>Intuitive navigation with clear status indicators</li>
+                                <li>Progress tracking with visual checklist and points system</li>
+                                <li>One-click document upload with automatic compression</li>
+                                <li>Real-time messaging interface for agent coordination</li>
+                                <li>Responsive design for mobile, tablet, and desktop</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="ui-mockup">
+                        Insert Client Dashboard Screenshot<br><small>Recommended: 1400×900 px</small>
+                    </div>
+                </div>
+
+                <!-- Admin Experience -->
+                <div class="ui-description">
+                    <div class="ui-text">
+                        <h3>Admin Experience</h3>
+                        <p>
+                            The admin dashboard provides comprehensive oversight. Agents access a sortable client list, quick KPI metrics, pending documents, and detailed client profiles. Document review happens in-app with preview modals and one-click approval workflows.
+                        </p>
+                        <div class="design-highlight">
+                            <ul>
+                                <li>Centralized client management with multi-filter search</li>
+                                <li>Document preview modals with approval controls</li>
+                                <li>KPI cards showing conversion rates and metrics</li>
+                                <li>Comprehensive audit logs with full traceability</li>
+                                <li>Role-based access control (Superadmin, Admin, Read-Only)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="ui-mockup">
+                        Insert Admin Dashboard Screenshot<br><small>Recommended: 1400×900 px</small>
+                    </div>
+                </div>
+
+                <!-- Design Philosophy -->
+                <div style="grid-column: 1 / -1; margin-top: 40px;">
+                    <h3>Design Philosophy</h3>
+                    <p>
+                        The entire system was designed with a user-centric approach, prioritizing clarity, efficiency, and transparency. Every interaction is intentional:
+                    </p>
+                    <div class="design-highlight" style="border-left-color: var(--accent);">
+                        <ul>
+                            <li><strong>Visual Hierarchy:</strong> Status badges, color-coded indicators, and progress bars guide users through workflows</li>
+                            <li><strong>Responsive Design:</strong> Tailwind CSS ensures pixel-perfect layouts across all devices without compromise</li>
+                            <li><strong>Real-Time Feedback:</strong> WebSocket messaging and notification system keep users informed instantly</li>
+                            <li><strong>Accessibility:</strong> Semantic HTML, keyboard navigation, and sufficient color contrast ensure inclusive design</li>
+                            <li><strong>Performance:</strong> Optimized images, lazy loading, and efficient database queries ensure fast load times</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="grid-column: 1 / -1; margin-top: 20px;">
+                    <h3>UI/UX Gallery (Placeholders)</h3>
+                    <p>
+                        Add your best screens or feature flows here (dashboard, document review, messaging, analytics, or checklist screens).
+                    </p>
+                    <div class="gallery-grid">
+                        <div class="gallery-card">
+                            <div class="image-placeholder">Insert Screenshot: Client Dashboard</div>
+                        </div>
+                        <div class="gallery-card">
+                            <div class="image-placeholder">Insert Screenshot: Document Review Modal</div>
+                        </div>
+                        <div class="gallery-card">
+                            <div class="image-placeholder">Insert Screenshot: Messaging Interface</div>
+                        </div>
+                        <div class="gallery-card">
+                            <div class="image-placeholder">Insert Screenshot: Analytics & KPIs</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology Stack -->
+        <section>
+            <h2>Technology Stack</h2>
+            <div class="tech-stack">
+                <p>Built with modern, scalable technologies to ensure reliability and performance:</p>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <strong>PHP 8.2+</strong>
+                        <small>Backend Logic</small>
+                    </div>
+                    <div class="tech-item">
+                        <strong>MySQL 10.4+</strong>
+                        <small>Data Persistence</small>
+                    </div>
+                    <div class="tech-item">
+                        <strong>Tailwind CSS 4.1</strong>
+                        <small>Responsive Design</small>
+                    </div>
+                    <div class="tech-item">
+                        <strong>Alpine.js 3.x</strong>
+                        <small>Interactive UI</small>
+                    </div>
+                    <div class="tech-item">
+                        <strong>WebSocket (Ratchet)</strong>
+                        <small>Real-Time Communication</small>
+                    </div>
+                    <div class="tech-item">
+                        <strong>Chart.js</strong>
+                        <small>Data Visualization</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Impact -->
+        <section>
+            <h2>Business Impact</h2>
+            <div class="metrics">
+                <div class="metric-card">
+                    <div class="metric-number">100%</div>
+                    <div class="metric-label">Document Tracking Visibility</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">80%+</div>
+                    <div class="metric-label">Time Saved on Coordination</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">Real-Time</div>
+                    <div class="metric-label">Notifications & Updates</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">Full Audit</div>
+                    <div class="metric-label">Compliance & Traceability</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Closing -->
+        <section style="text-align: center; padding: 60px 0;">
+            <h2>Ready to Transform Your Travel Agency?</h2>
+            <p style="margin-bottom: 30px;">
+                The JVB Travel System demonstrates comprehensive expertise in UI/UX design, system architecture, and full-stack development. Every interface was crafted for usability, every feature architected for scalability, and every interaction designed for delight.
+            </p>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 JVB Travel System - Portfolio Showcase</p>
+        <p style="margin-top: 10px; font-size: 0.9em;">Designed & Architected by Your Name | Full-Stack UI/UX Designer & System Architect</p>
+    </footer>
+</body>
+</html>

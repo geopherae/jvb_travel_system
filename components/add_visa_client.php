@@ -1,6 +1,6 @@
 <?php
-// Fetch visa packages for dropdown
-$visaPackagesStmt = $conn->prepare("SELECT id, country, processing_days FROM visa_packages WHERE is_active = 1 ORDER BY country ASC");
+// Fetch visa packages for dropdown (including visa_types_json)
+$visaPackagesStmt = $conn->prepare("SELECT id, country, processing_days, visa_types_json FROM visa_packages WHERE is_active = 1 ORDER BY country ASC");
 $visaPackagesStmt->execute();
 $visaPackagesResult = $visaPackagesStmt->get_result();
 $visaPackages = [];
@@ -32,12 +32,12 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
     <div class="inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-0 sm:align-middle sm:max-w-4xl sm:w-full sm:max-h-[96vh]">
       <form method="POST" action="../actions/process_add_visa_client.php" enctype="multipart/form-data"
         class="flex flex-col h-full font-sans"
-        x-data="visaClientForm(<?= $isAddingToGroup ? htmlspecialchars(json_encode($groupData), ENT_QUOTES, 'UTF-8') : 'null' ?>)" 
+        x-data="visaClientForm(<?= $isAddingToGroup ? htmlspecialchars(json_encode($groupData), ENT_QUOTES, 'UTF-8') : 'null' ?>, <?= isset($currentAdminId) ? (int)$currentAdminId : 'null' ?>)" 
         @submit="$el.classList.add('submitting')">
 
-        <!-- Hidden field for group_code -->
-        <input type="hidden" name="group_code" x-model="groupCode" />
-        <input type="hidden" name="assigned_admin_id" x-model="assignedAdminId" />
+    <!-- Hidden field for group_code -->
+    <input type="hidden" name="group_code" x-model="groupCode" />
+    <input type="hidden" name="assigned_admin_id" x-model="assignedAdminId" />
   <input type="hidden" name="application_mode" x-model="applicationMode" />
 
         <!-- Header -->
@@ -130,11 +130,16 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
                 </label>
                 <input id="email" type="email" name="email" x-model="email" required placeholder="maria@example.com"
                        class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-3 sm:py-3.5 pt-5 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                       :class="{ 'border-red-500 ring-red-500': email && !isValidEmail(), 'border-green-500 ring-green-500': isValidEmail() }" />
+                       :class="{ 'border-red-500 ring-red-500': email && (!isValidEmail() || emailExists), 'border-green-500 ring-green-500': isValidEmail() && !emailExists }" />
                 <p x-show="email && !isValidEmail()" class="text-xs text-red-500 mt-1.5 flex items-center gap-1">
                   <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
                   Invalid email format.
                 </p>
+                <p x-show="emailExists" class="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                  <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                  Email already exists in the database.
+                </p>
+                <p x-show="checkingEmail" class="text-xs text-gray-500 mt-1.5">Checking email…</p>
               </div>
 
               <!-- Phone Number -->
@@ -192,6 +197,18 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
                     <option value="group">Group Application</option>
                   </select>
                   <p class="text-xs text-gray-500 mt-1.5">Choose Individual for single client or Group for family/group.</p>
+                </div>
+
+                <!-- Financial Source -->
+                <div class="relative top-4">
+                  <label for="financial_source" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700">
+                    Financial Source <span class="text-red-500">*</span>
+                  </label>
+                  <select id="financial_source" name="financial_source" x-model="financialSource" required
+                          class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-3 sm:py-3.5 pt-5 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    <option value="self_funded">Self-Funded</option>
+                    <option value="sponsor">Sponsor</option>
+                  </select>
                 </div>
               </div>
 
@@ -330,28 +347,62 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
 
           <!-- Visa Package Selection -->
           <div class="border-t border-gray-200 pt-4 sm:pt-6 mt-4 sm:mt-6">
-            <label for="visa_package_id" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
-              <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-              Visa Package (Optional)
-            </label>
-            <select id="visa_package_id" name="visa_package_id" x-model.number="selectedVisaPackage"
-                    class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-              <option value="">Select a visa package...</option>
-              <?php foreach ($visaPackages as $pkg): ?>
-                <option value="<?= $pkg['id'] ?>" data-processing-days="<?= $pkg['processing_days'] ?>">
-                  <?= htmlspecialchars($pkg['country']) ?> (<?= $pkg['processing_days'] ?> days)
-                </option>
-              <?php endforeach; ?>
-            </select>
-            <p class="text-xs text-gray-500 mt-1.5 sm:mt-2">Choose a visa package if known, or leave blank for later assignment.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              
+              <!-- Visa Package Dropdown -->
+              <div>
+                <label for="visa_package_id" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+                  <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  Visa Package (Optional)
+                </label>
+                <select id="visa_package_id" name="visa_package_id" x-model.number="selectedVisaPackage" 
+                        @change="onVisaPackageChange()"
+                        class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                  <option value="">Select a visa package...</option>
+                  <?php foreach ($visaPackages as $pkg): ?>
+                    <option value="<?= $pkg['id'] ?>" 
+                            data-processing-days="<?= $pkg['processing_days'] ?>"
+                            data-visa-types="<?= htmlspecialchars(json_encode($pkg['visa_types_json'] ? json_decode($pkg['visa_types_json'], true) : []), ENT_QUOTES, 'UTF-8') ?>">
+                      <?= htmlspecialchars($pkg['country']) ?> (<?= $pkg['processing_days'] ?> days)
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+                <p class="text-xs text-gray-500 mt-1.5 sm:mt-2">Choose a visa package if known, or leave blank for later assignment.</p>
+              </div>
+
+              <!-- Visa Type Dropdown (Enabled only after package selection) -->
+              <div>
+                <label for="visa_type_selected" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+                  <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                  </svg>
+                  Visa Type <span class="text-red-500">*</span>
+                </label>
+                <select id="visa_type_selected" name="visa_type_selected" x-model="visaTypeSelected" 
+                        :disabled="!selectedVisaPackage"
+                        class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500">
+                  <option value="">Select Visa Type</option>
+                  <template x-for="visaType in availableVisaTypes" :key="visaType">
+                    <option :value="visaType" x-text="visaType"></option>
+                  </template>
+                </select>
+                <p class="text-xs text-gray-500 mt-1.5 sm:mt-2" x-show="!selectedVisaPackage">
+                  Select a visa package above to choose a visa type.
+                </p>
+                <p class="text-xs text-gray-500 mt-1.5 sm:mt-2" x-show="selectedVisaPackage && availableVisaTypes.length === 0">
+                  No visa types available for this package.
+                </p>
+              </div>
+
+            </div>
           </div>
 
         </div>
 
         <!-- STEP 3: Group Members (Only if Group Application) -->
-        <div x-show="step === 3 && applicationMode === 'group'" class="px-4 py-5 sm:p-6 space-y-4 sm:space-y-6 max-h-[60vh] overflow-y-auto">
+        <div x-show="step === 3 && applicationMode === 'group'" class="px-4 py-5 sm:p-6 space-y-3 sm:space-y-5 max-h-[60vh] overflow-y-auto">
 
           <!-- Progress Header -->
           <div class="flex items-start sm:items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200 gap-3">
@@ -385,7 +436,7 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
           <p class="text-xs text-gray-600">Up to {{ maxGroupMembers }} additional companions per application. Added: <span x-text="groupMembers.length"></span>.</p>
 
           <!-- Group Members List -->
-          <div class="space-y-3 max-h-72 overflow-y-auto pr-1">
+          <div class="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
             <template x-for="(member, index) in groupMembers" :key="member.id">
               <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
                 <div class="flex items-center justify-between mb-3">
@@ -396,6 +447,37 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
                   </button>
+                </div>
+
+                <!-- Visa Type & Financial Source Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                  <div class="relative">
+                    <label :for="'companion_visa_type_' + index" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700">
+                      Visa Type <span class="text-red-500">*</span>
+                    </label>
+                    <select :id="'companion_visa_type_' + index" x-model="member.visaType"
+                           :name="'companion_visa_type_' + index" required
+                           class="w-full border border-gray-300 rounded-lg px-3 py-3 pt-5 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                      <option value="">Select visa type</option>
+                      <template x-for="vtype in availableVisaTypes" :key="vtype">
+                        <option :value="vtype" x-text="vtype"></option>
+                      </template>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Same as lead applicant or select different</p>
+                  </div>
+
+                  <div class="relative">
+                    <label :for="'companion_financial_' + index" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700">
+                      Financial Source
+                    </label>
+                    <select :id="'companion_financial_' + index" x-model="member.financialSource"
+                           :name="'companion_financial_' + index"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-3 pt-5 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                      <option value="">Not specified</option>
+                      <option value="self_funded">Self-Funded</option>
+                      <option value="sponsor">Sponsor</option>
+                    </select>
+                  </div>
                 </div>
 
                 <!-- Basic Info Row -->
@@ -526,7 +608,7 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
                       class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors">
                 Cancel
               </button>
-              <button type="button" @click="step = 2"
+              <button type="button" @click="proceedStep1()" :disabled="checkingEmail"
                       class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-sky-600 border border-transparent rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors">
                 Next: Passport Details
               </button>
@@ -578,16 +660,19 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
 </div>
 
 <script>
-  function visaClientForm(groupData = null) {
+  function visaClientForm(groupData = null, currentAdminId = null) {
     return {
       step: 1,
       applicationMode: 'individual', // 'individual' or 'group'
       isAddingToGroup: !!groupData,
       groupCode: groupData?.group_code || '',
       processingType: groupData?.processing_type || 'visa',
-      assignedAdminId: groupData?.assigned_admin_id || '',
+      assignedAdminId: groupData?.assigned_admin_id || (currentAdminId ? String(currentAdminId) : ''),
+      financialSource: 'self_funded',
       fullName: '',
       email: '',
+      emailExists: false,
+      checkingEmail: false,
       phone: '',
       address: '',
       accessCode: '',
@@ -596,6 +681,8 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
       applicantStatus: '',
       copied: false,
       selectedVisaPackage: groupData?.visa_package_id || '',
+      visaTypeSelected: '',
+      availableVisaTypes: [],
       
       // Group members (companions)
       groupMembers: [],
@@ -623,7 +710,33 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
         // Validation happens on blur, checked by isPassportValid()
       },
       canProceedStep1() {
-        return this.fullName.trim() !== '' && this.isValidEmail() && this.isValidPhone() && this.address.trim() !== '';
+        return this.fullName.trim() !== '' && this.isValidEmail() && !this.emailExists && this.isValidPhone() && this.address.trim() !== '';
+      },
+      async checkEmailExists() {
+        this.emailExists = false;
+        if (!this.email || !this.isValidEmail()) return false;
+        this.checkingEmail = true;
+        try {
+          const response = await fetch('../actions/check_client_email.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ email: this.email })
+          });
+          const data = await response.json();
+          this.emailExists = !!data.exists;
+          return !this.emailExists;
+        } catch (e) {
+          return false;
+        } finally {
+          this.checkingEmail = false;
+        }
+      },
+      async proceedStep1() {
+        const ok = await this.checkEmailExists();
+        if (!ok) return;
+        if (this.canProceedStep1()) {
+          this.step = 2;
+        }
       },
       
       // Get today's date in YYYY-MM-DD format
@@ -640,9 +753,71 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
       // Access code generation
       generateAccessCode() {
         if (!this.fullName.trim()) return;
-        const base = this.fullName.trim().replace(/\s+/g, '').toUpperCase();
-        const suffix = Date.now().toString().slice(-4);
-        this.accessCode = base.slice(0, 4) + '-' + suffix;
+        const nameParts = this.fullName.trim().split(/\s+/);
+        // First 2 letters of first name + first 2 letters of second/last name + dash + 4 random numbers
+        let prefix = '';
+        if (nameParts.length >= 2) {
+          prefix = (nameParts[0].substring(0, 2) + nameParts[nameParts.length - 1].substring(0, 2)).toUpperCase();
+        } else {
+          prefix = nameParts[0].substring(0, 4).toUpperCase().padEnd(4, 'X');
+        }
+        const randomNum = Math.floor(1000 + Math.random() * 9000);
+        this.accessCode = prefix + '-' + randomNum;
+      },
+      
+      // Handle visa package selection and load visa types
+      onVisaPackageChange() {
+        this.availableVisaTypes = [];
+        this.visaTypeSelected = '';
+        
+        if (!this.selectedVisaPackage) {
+          console.log('[onVisaPackageChange] No package selected');
+          return;
+        }
+        
+        // Find the selected package option
+        const selectElement = document.getElementById('visa_package_id');
+        const selectedOption = selectElement.querySelector(`option[value="${this.selectedVisaPackage}"]`);
+        
+        if (!selectedOption) {
+          console.error('[onVisaPackageChange] Selected option not found');
+          return;
+        }
+        
+        // Get the visa_types_json from data attribute
+        const visaTypesJson = selectedOption.getAttribute('data-visa-types') || '[]';
+        console.log('[onVisaPackageChange] Raw data-visa-types:', visaTypesJson);
+        
+        try {
+          const visaTypesData = JSON.parse(visaTypesJson);
+          console.log('[onVisaPackageChange] Parsed visa types data:', visaTypesData);
+          
+          if (Array.isArray(visaTypesData) && visaTypesData.length > 0) {
+            // Extract 'type' field from each object in the array
+            // Format: [{"type": "B1/B2 Tourist", "price": 22000}, ...]
+            this.availableVisaTypes = visaTypesData.map(item => {
+              if (typeof item === 'object' && item.type) {
+                return item.type;
+              }
+              return item;
+            }).filter(Boolean);
+            
+            console.log('[onVisaPackageChange] Extracted visa types:', this.availableVisaTypes);
+            
+            // Auto-select the first visa type
+            if (this.availableVisaTypes.length > 0) {
+              this.visaTypeSelected = this.availableVisaTypes[0];
+              console.log('[onVisaPackageChange] Auto-selected visa type:', this.visaTypeSelected);
+            }
+          } else {
+            console.warn('[onVisaPackageChange] No visa types found or invalid format. Data:', visaTypesData);
+            this.availableVisaTypes = [];
+          }
+        } catch (e) {
+          console.error('[onVisaPackageChange] Failed to parse visa_types_json:', visaTypesJson);
+          console.error('[onVisaPackageChange] Error:', e.message);
+          this.availableVisaTypes = [];
+        }
       },
       
       // Group member management
@@ -660,7 +835,9 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
           relationship: '',
           passportNumber: '',
           passportExpiry: '',
-          applicantStatus: ''
+          applicantStatus: '',
+          visaType: this.visaTypeSelected, // Inherit lead applicant's visa type
+          financialSource: 'self_funded'
         });
       },
       

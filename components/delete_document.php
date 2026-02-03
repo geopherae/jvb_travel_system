@@ -1,7 +1,10 @@
 <?php
-session_start();
-
 require_once __DIR__ . '/../includes/auth.php';
+use function Auth\guard;
+
+// Authenticate before any output
+guard('any');
+
 require_once __DIR__ . '/../actions/db.php';
 require_once __DIR__ . '/../components/status_alert.php';
 
@@ -14,7 +17,8 @@ $input = json_decode(file_get_contents('php://input'), true);
 $docId = isset($input['id']) ? (int) $input['id'] : 0;
 
 if ($docId <= 0 || !$actorId) {
-  setToastStatus('document_delete_failed', 'Invalid document ID or session');
+  echo json_encode(['success' => false, 'message' => 'Invalid document ID or session']);
+  exit();
 }
 
 // 🔍 Confirm document ownership (clients) or existence (admins)
@@ -30,7 +34,8 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-  setToastStatus('document_delete_failed', 'Document not found or unauthorized');
+  echo json_encode(['success' => false, 'message' => 'Document not found or unauthorized']);
+  exit();
 }
 
 $doc = $result->fetch_assoc();
@@ -67,11 +72,3 @@ $logStmt->execute();
 $_SESSION['modal_status'] = 'document_deleted';
 echo json_encode(['success' => true, 'message' => 'Document deleted successfully']);
 exit();
-
-
-// 🔧 Helper
-function setToastStatus(string $statusKey, string $errorMessage): void {
-  $_SESSION['modal_status'] = $statusKey;
-  echo json_encode(['success' => false, 'message' => $errorMessage]);
-  exit();
-}

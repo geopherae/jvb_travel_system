@@ -53,9 +53,8 @@ $visa_apps_stmt = $conn->prepare("
     cva.id,
     cva.visa_package_id,
     cva.application_mode,
-    cva.visa_type_selected,
-    cva.visa_types_json,
     cva.created_at,
+    cva.status,
     vp.country,
     vp.processing_days
   FROM client_visa_applications cva
@@ -79,6 +78,7 @@ foreach ($visa_applications as &$app) {
       phone_number,
       passport_number,
       passport_expiry,
+      access_code,
       created_at
     FROM client_visa_companions
     WHERE visa_application_id = ?
@@ -104,6 +104,29 @@ $statusColors = [
   'approved_for_submission' => 'bg-green-100 text-green-700',
   'booking' => 'bg-purple-100 text-purple-700',
 ];
+
+// ✅ Build applicant list for dropdown/store (lead + companions)
+$applicantsList = [];
+$applicantsList[] = [
+  'name' => $client['full_name'] ?? 'Unnamed Client',
+  'relationship' => 'Lead Applicant',
+];
+
+if (!empty($visa_applications) && !empty($visa_applications[0]['companions'])) {
+  foreach ($visa_applications[0]['companions'] as $companion) {
+    $applicantsList[] = [
+      'name' => $companion['full_name'] ?? 'Unnamed',
+      'relationship' => $companion['relationship'] ?? 'Companion',
+    ];
+  }
+}
+
+$hasGroupApplicants = count($applicantsList) > 1;
+// Safe JSON for Alpine store (escape special chars to prevent script injection)
+$applicantsJson = json_encode(
+  $applicantsList,
+  JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+);
 ?>
 
 <!DOCTYPE html>
@@ -115,6 +138,20 @@ $statusColors = [
   <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.store('modals', {
+        clientId: null,
+        reassignVisa: false,
+      });
+
+      Alpine.store('applicantSelector', {
+        currentIdx: 0,
+        totalApplicants: <?= count($applicantsList) ?>,
+        applicants: <?= $applicantsJson ?>
+      });
+    });
+  </script>
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 
@@ -124,6 +161,7 @@ $statusColors = [
 <?php $isAdmin = true; include '../components/admin_sidebar.php'; ?>
 <?php $isAdmin = true; include '../components/right-panel.php'; ?>
 <?php include '../components/status_alert.php'; ?>
+<?php include '../components/reassign-visa-modal.php'; ?>
 
 <!-- Mobile Toggle -->
 <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-30 bg-primary text-white rounded">
@@ -135,24 +173,36 @@ $statusColors = [
   <!-- 🧭 Page Title -->
   <h2 class="text-xl sm:text-2xl font-bold">Client Visa Applications</h2>
 
-  <div class="max-w-6xl mx-auto space-y-6">
+  <div class="space-y-6">
 
-  <!-- 👤 Client Info Dashboard -->
-  <?php 
-    // Prepare data for the new component
-    $visa_application = !empty($visa_applications) ? [
-      'application_mode' => $visa_applications[0]['application_mode'] ?? 'individual',
-      'country' => $visa_applications[0]['country'] ?? 'Unknown',
-      'processing_days' => $visa_applications[0]['processing_days'] ?? 0,
-    ] : [
-      'application_mode' => 'individual',
-      'country' => 'Unknown',
-      'processing_days' => 0,
-    ];
-    $companions = !empty($visa_applications) ? ($visa_applications[0]['companions'] ?? []) : [];
-    $isAdmin = true;
-    include __DIR__ . '/../components/visa_client_info_dashboard.php';
-  ?>
+  <!-- Two-column grid for cards (force 2 columns) -->
+  <div class="grid grid-cols-2 gap-2 items-start">
+    <!-- 👤 Client Info Dashboard -->
+    <div class="h-full">
+      <?php 
+        // Prepare data for the new component
+        $visa_application = !empty($visa_applications) ? [
+          'application_mode' => $visa_applications[0]['application_mode'] ?? 'individual',
+          'country' => $visa_applications[0]['country'] ?? 'Unknown',
+          'processing_days' => $visa_applications[0]['processing_days'] ?? 0,
+          'applicant_status' => $visa_applications[0]['applicant_status'] ?? 'draft',
+        ] : [
+          'application_mode' => 'individual',
+          'country' => 'Unknown',
+          'processing_days' => 0,
+          'applicant_status' => 'draft',
+        ];
+        $companions = !empty($visa_applications) ? ($visa_applications[0]['companions'] ?? []) : [];
+        $isAdmin = true;
+        include __DIR__ . '/../components/visa_client_info_dashboard.php';
+      ?>
+
+
+    <!-- 🛂 Visa Package Card -->
+    <div class="h-full">
+      <?php include __DIR__ . '/../components/visa-package-card.php'; ?>
+    </div>
+  </div>
 
     <!-- Documents -->
     <?php 

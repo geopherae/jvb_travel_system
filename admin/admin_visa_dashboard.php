@@ -20,6 +20,7 @@ require_once __DIR__ . '/../actions/db.php';
 
 // 👤 Admin info
 $adminName = $_SESSION['first_name'] ?? 'Admin';
+$currentAdminId = $_SESSION['admin']['id'] ?? null;
 $isAdmin = true;
 
 // 👥 Fetch visa clients (processing_type = 'visa' or 'both')
@@ -84,7 +85,11 @@ $visaClients = $visaClientsResult ? $visaClientsResult->fetch_all(MYSQLI_ASSOC) 
   </main>
 
   <!-- Add Visa Client Modal -->
-  <?php include '../components/add_visa_client.php'; ?>
+  <?php 
+    // Pass the current admin ID to the form for initialization
+    $adminIdJson = json_encode((int)$currentAdminId, JSON_UNESCAPED_UNICODE);
+    include '../components/add_visa_client.php'; 
+  ?>
 
   <!-- Add Another Group Member Toast Action -->
   <?php if (isset($_GET['visa_added']) && isset($_SESSION['visa_client_added'])): ?>

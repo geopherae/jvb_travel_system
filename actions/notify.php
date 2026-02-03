@@ -188,6 +188,36 @@ class NotificationManager {
                 'log_action'  => 'package_unassigned',
                 'expires_days' => 14
             ],
+
+            // ═══════════════════════════════════════════════════════════════
+            // VISA PACKAGE NOTIFICATIONS
+            // ═══════════════════════════════════════════════════════════════
+            'visa_package_assigned' => [
+                'category'    => 'visa',
+                'title'       => 'Visa Package Assigned',
+                'message'     => "You have been assigned the <strong>{visa_package_name}</strong> visa package. Please review your visa requirements.",
+                'html'        => true,
+                'icon'        => '🛂',
+                'color'       => 'blue',
+                'priority'    => 'high',
+                'action_url'  => '/client/client_visa_dashboard.php',
+                'action_text' => 'View Visa Dashboard',
+                'log_action'  => 'visa_package_assigned',
+                'expires_days' => 60
+            ],
+            'visa_package_reassigned' => [
+                'category'    => 'visa',
+                'title'       => 'Visa Package Updated',
+                'message'     => "Your visa package has been updated to <strong>{visa_package_name}</strong>. Please review your updated requirements.",
+                'html'        => true,
+                'icon'        => '🔄',
+                'color'       => 'orange',
+                'priority'    => 'high',
+                'action_url'  => '/client/client_visa_dashboard.php',
+                'action_text' => 'Review Requirements',
+                'log_action'  => 'visa_package_reassigned',
+                'expires_days' => 30
+            ],
             
             // ═══════════════════════════════════════════════════════════════
             // PHOTO NOTIFICATIONS
@@ -453,6 +483,32 @@ class NotificationManager {
                 'action_url'  => '/admin/view_client.php?client_id={client_id}',
                 'action_text' => 'View Client',
                 'log_action'  => 'client_added',
+                'expires_days' => 14
+            ],
+            'new_visa_client_added' => [
+                'category'    => 'admin_alert',
+                'title'       => 'New Visa Client Added',
+                'message'     => "<strong>{client_name}</strong> ({email}) has been added for visa processing. Assigned to: <strong>{assigned_admin}</strong> | Package: <strong>{visa_package}</strong> | Type: <strong>{processing_type}</strong>",
+                'html'        => true,
+                'icon'        => '🛂',
+                'color'       => 'blue',
+                'priority'    => 'normal',
+                'action_url'  => '/admin/admin_visa_dashboard.php',
+                'action_text' => 'View Visa Client',
+                'log_action'  => 'visa_client_added',
+                'expires_days' => 14
+            ],
+            'new_visa_group_added' => [
+                'category'    => 'admin_alert',
+                'title'       => 'New Visa Group Application',
+                'message'     => "Group visa application received: <strong>{lead_guest}</strong> + <strong>{companion_count}</strong> companion(s). Assigned to: <strong>{assigned_admin}</strong> | Package: <strong>{visa_package}</strong> | Type: <strong>{processing_type}</strong>",
+                'html'        => true,
+                'icon'        => '👥',
+                'color'       => 'purple',
+                'priority'    => 'high',
+                'action_url'  => '/admin/admin_visa_dashboard.php',
+                'action_text' => 'View Group',
+                'log_action'  => 'visa_group_added',
                 'expires_days' => 14
             ]
         ];

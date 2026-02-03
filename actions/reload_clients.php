@@ -12,6 +12,7 @@ $clientQuery = "
     c.full_name, 
     c.booking_number,
     c.client_profile_photo, 
+    c.processing_type,
     CASE
       WHEN c.trip_date_start IS NOT NULL AND c.trip_date_end IS NOT NULL THEN
         CONCAT(DATEDIFF(c.trip_date_end, c.trip_date_start) + 1, ' Days / ',

@@ -181,7 +181,7 @@ Alpine.data('tourFormData', (tour = {}) => ({
     }
 
     // Limit results for performance and cleaner dropdown
-    const limitedMatches = matches.slice(0, 15);
+    const limitedMatches = matches.slice(0, 100);
 
     if (type === 'origin') {
       this.originMatches = limitedMatches;
@@ -384,6 +384,9 @@ function tourRowData(tourId) {
   document.addEventListener('alpine:init', () => {
     Alpine.store('modals', {
       unassign: false,
+      reassign: false,
+      reassignVisa: false,
+      clientId: null,
       data: {
         clientId: null
       },

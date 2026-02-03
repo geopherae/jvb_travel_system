@@ -20,6 +20,31 @@ function toMysqlDate($input) {
   return $timestamp ? date('Y-m-d', $timestamp) : null;
 }
 
+function columnExists($conn, $table, $column) {
+  $sql = "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?";
+  $stmt = $conn->prepare($sql);
+  if (!$stmt) return false;
+  $stmt->bind_param("ss", $table, $column);
+  $stmt->execute();
+  $stmt->bind_result($count);
+  $stmt->fetch();
+  $stmt->close();
+  return $count > 0;
+}
+
+function hasJsonCheckConstraint($conn, $table, $column) {
+  $sql = "SELECT cc.CHECK_CLAUSE FROM information_schema.CHECK_CONSTRAINTS cc\n          JOIN information_schema.TABLE_CONSTRAINTS tc\n            ON cc.CONSTRAINT_SCHEMA = tc.CONSTRAINT_SCHEMA\n           AND cc.CONSTRAINT_NAME = tc.CONSTRAINT_NAME\n         WHERE tc.TABLE_SCHEMA = DATABASE()\n           AND tc.TABLE_NAME = ?\n           AND tc.CONSTRAINT_TYPE = 'CHECK'\n           AND cc.CHECK_CLAUSE LIKE ?";
+  $like = '%json_valid(`' . $column . '`)%';
+  $stmt = $conn->prepare($sql);
+  if (!$stmt) return false;
+  $stmt->bind_param("ss", $table, $like);
+  $stmt->execute();
+  $stmt->store_result();
+  $has = $stmt->num_rows > 0;
+  $stmt->close();
+  return $has;
+}
+
 // Sanitize inputs
 $processingType    = trim($_POST['processing_type'] ?? 'visa');
 $applicationMode    = trim($_POST['application_mode'] ?? 'individual'); // 'individual' or 'group'
@@ -30,7 +55,8 @@ $email             = strtolower(trim($_POST['email'] ?? ''));
 $phone             = trim($_POST['phone_number'] ?? '');
 $address           = trim($_POST['address'] ?? '');
 $accessCode        = trim($_POST['access_code'] ?? '');
-$groupCode         = trim($_POST['group_code'] ?? '') ?: null; // Use existing group code or NULL
+$financialSource   = trim($_POST['financial_source'] ?? 'self_funded');
+$financialSource   = in_array($financialSource, ['self_funded', 'sponsor'], true) ? $financialSource : 'self_funded';
 
 // Passport & visa status fields for lead applicant
 $passportNumber    = trim($_POST['passport_number'] ?? '') ?: null;
@@ -58,6 +84,10 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Invalid email addre
 if (!preg_match('/^09\d{9}$/', $phone)) $errors[] = 'Phone must start with 09 and have 11 digits.';
 if ($address === '') $errors[] = 'Address is required.';
 if (!in_array($processingType, ['booking', 'visa', 'both'])) $errors[] = 'Invalid processing type.';
+if (empty($assignedAdminId)) $errors[] = 'Assigned admin is required.';
+if ($applicationMode === 'group' && empty($visaPackageId)) {
+  $errors[] = 'Group applications require a visa package selection.';
+}
 
 // If a visa package is selected, verify it exists to avoid silent failures later
 if ($visaPackageId) {
@@ -111,16 +141,13 @@ if ($photoFile && $photoFile['error'] === UPLOAD_ERR_OK) {
 // Check for errors
 if (!empty($errors)) {
   $_SESSION['form_errors'] = $errors;
+  error_log("[process_add_visa_client] Validation errors found: " . json_encode($errors));
   header("Location: ../admin/admin_visa_dashboard.php");
   exit();
 }
 
-// Generate group code if not provided (first member of group)
-if (!$groupCode) {
-  $groupBase = strtoupper(preg_replace('/[^A-Z0-9]/', '', substr($fullName, 0, 6)));
-  $groupSuffix = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
-  $groupCode = $groupBase . '-GROUP-' . $groupSuffix;
-}
+// Note: group_code column removed from clients table
+// Each companion now has individual access_code in client_visa_companions table
 
 // Decode group members if provided (Step 3 submission)
 $groupMembers = [];
@@ -145,34 +172,51 @@ $emailCheck->execute();
 $emailCheck->store_result();
 
 if ($emailCheck->num_rows > 0) {
-  $_SESSION['message'] = 'Client already exists';
+  $dupMessage = 'Client already exists with this email.';
+  $_SESSION['message'] = $dupMessage;
   $_SESSION['message_type'] = 'error';
+  $_SESSION['form_errors'] = [$dupMessage];
+  error_log("[process_add_visa_client] Duplicate email blocked: $email");
   header("Location: ../admin/admin_visa_dashboard.php");
   exit();
 }
 $emailCheck->close();
+
+// Generate unique group access code for group applications (different from lead's code)
+$groupAccessCode = null;
+if ($applicationMode === 'group') {
+  // Generate group access code: XXXX-NNNN format
+  $groupAccessCode = strtoupper(str_pad(substr($fullName, 0, 4), 4, 'G')) . '-' . rand(1000, 9999);
+  // Ensure it's different from lead's access code
+  while ($groupAccessCode === $accessCode) {
+    $groupAccessCode = strtoupper(str_pad(substr($fullName, 0, 4), 4, 'G')) . '-' . rand(1000, 9999);
+  }
+  error_log("[process_add_visa_client] Generated group access code: $groupAccessCode (lead code: $accessCode)");
+}
 
 /**
  * Create a single client record with optional visa application
  */
 function createVisaClient(
   $conn, $assignedAdminId, $fullName, $email, $phone, $address,
-  $photoName, $accessCode, $groupCode, $processingType,
+  $photoName, $accessCode, $processingType,
   $passportNumber, $passportExpiry, $visaLeadApplicantStatus,
-  $visaPackageId, $visaTypeSelected, $applicationMode = 'individual'
+  $visaPackageId, $visaTypeSelected, $applicationMode = 'individual',
+  $financialSource = 'self_funded', $groupAccessCode = null
 ) {
+  error_log("[createVisaClient] Starting with assignedAdminId=$assignedAdminId, fullName=$fullName, email=$email, visaPackageId=$visaPackageId");
   $status    = 'Awaiting Docs';
   $createdAt = date('Y-m-d H:i:s');
 
-  $stmt = $conn->prepare("INSERT INTO clients (
-    assigned_admin_id, full_name, email, phone_number, address,
-    client_profile_photo, access_code, group_code, processing_type,
-    passport_number, passport_expiry, visa_lead_applicant_status,
-    status, created_at
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-  $stmt->bind_param(
-    "isssssssssssss",
+  $clientColumns = [
+    'assigned_admin_id', 'full_name', 'email', 'phone_number', 'address',
+    'client_profile_photo', 'access_code', 'processing_type',
+    'passport_number', 'passport_expiry', 'visa_lead_applicant_status',
+    'status', 'created_at'
+  ];
+  $clientPlaceholders = array_fill(0, count($clientColumns), '?');
+  $clientTypes = 'issssssssssss';
+  $clientValues = [
     $assignedAdminId,
     $fullName,
     $email,
@@ -180,61 +224,128 @@ function createVisaClient(
     $address,
     $photoName,
     $accessCode,
-    $groupCode,
     $processingType,
     $passportNumber,
     $passportExpiry,
     $visaLeadApplicantStatus,
     $status,
     $createdAt
-  );
+  ];
+
+  if (columnExists($conn, 'clients', 'financial_source')) {
+    $clientColumns[] = 'financial_source';
+    $clientPlaceholders[] = '?';
+    $clientTypes .= 's';
+    $clientValues[] = $financialSource;
+  }
+
+  $clientSql = "INSERT INTO clients (" . implode(', ', $clientColumns) . ") VALUES (" . implode(', ', $clientPlaceholders) . ")";
+  $stmt = $conn->prepare($clientSql);
+  if (!$stmt) {
+    throw new Exception('Database error: ' . $conn->error);
+  }
+
+  $bindParams = [&$clientTypes];
+  foreach ($clientValues as $index => $value) {
+    $bindParams[] = &$clientValues[$index];
+  }
+
+  $bindResult = call_user_func_array([$stmt, 'bind_param'], $bindParams);
+  if (!$bindResult) {
+    throw new Exception('Database error: ' . $stmt->error);
+  }
 
   if (!$stmt->execute()) {
     throw new Exception('Database error: ' . $stmt->error);
   }
 
   $clientId = $stmt->insert_id;
+  error_log("[createVisaClient] Client inserted successfully with id: $clientId");
   $stmt->close();
 
   // Create visa application if visa package selected
   $visaApplicationId = null;
-  if ($visaPackageId) {
+  error_log("[createVisaClient] visaPackageId type: " . gettype($visaPackageId) . ", value: " . var_export($visaPackageId, true));
+  
+  if ($visaPackageId !== null && $visaPackageId > 0) {
     error_log("[createVisaClient] Attempting to create visa application with visa_package_id: $visaPackageId");
     
-    // Build visa_types_json if visa_type_selected is provided
-    $visaTypesJson = null;
-    if ($visaTypeSelected) {
-      $visaTypesJson = json_encode([$visaTypeSelected], JSON_UNESCAPED_UNICODE);
+    // Insert visa application with only supported columns
+    // Note: visa_type_selected is stored in client_visa_requirements, not in client_visa_applications
+    $hasGroupAccessCodeCol = columnExists($conn, 'client_visa_applications', 'group_access_code');
+    $hasApplicantStatusCol = columnExists($conn, 'client_visa_applications', 'applicant_status');
+    $applicantStatusIsJson = hasJsonCheckConstraint($conn, 'client_visa_applications', 'applicant_status');
+    $finalApplicantStatus = $visaLeadApplicantStatus;
+    if ($applicantStatusIsJson && $visaLeadApplicantStatus !== null) {
+      $finalApplicantStatus = json_encode($visaLeadApplicantStatus, JSON_UNESCAPED_UNICODE);
     }
-    // applicant_status column has JSON_VALID check; store as JSON string
-    $applicantStatusJson = json_encode($visaLeadApplicantStatus ?? '', JSON_UNESCAPED_UNICODE);
-    
+
+    // Build columns: client_id, visa_package_id, application_mode, applicant_status, [optional: group_access_code]
+    $visaAppColumns = "client_id, visa_package_id, application_mode";
+    $visaAppPlaceholders = "?, ?, ?";
+    $bindTypes = "iis";  // i=int, i=int, s=string (application_mode)
+    $bindValues = [
+      $clientId,
+      intval($visaPackageId),
+      $applicationMode
+    ];
+
+    // Add visa_type if column exists
+    if (columnExists($conn, 'client_visa_applications', 'visa_type') && $visaTypeSelected !== null) {
+      $visaAppColumns .= ", visa_type";
+      $visaAppPlaceholders .= ", ?";
+      $bindTypes .= "s";
+      $bindValues[] = $visaTypeSelected;
+    }
+
+    // Add applicant_status if column exists and provided
+    if ($hasApplicantStatusCol && $finalApplicantStatus !== null) {
+      $visaAppColumns .= ", applicant_status";
+      $visaAppPlaceholders .= ", ?";
+      $bindTypes .= "s";
+      $bindValues[] = $finalApplicantStatus;
+    }
+
+    // Add group_access_code if column exists
+    if ($hasGroupAccessCodeCol) {
+      $finalGroupAccessCode = $groupAccessCode !== null ? $groupAccessCode : $accessCode;
+      $visaAppColumns .= ", group_access_code";
+      $visaAppPlaceholders .= ", ?";
+      $bindTypes .= "s";
+      $bindValues[] = $finalGroupAccessCode;
+      error_log("[createVisaClient] Group access code included: $finalGroupAccessCode");
+    }
+
     $visaAppSql = "INSERT INTO client_visa_applications (
-      client_id, visa_package_id, application_mode, visa_type_selected, visa_types_json, applicant_status, status, created_at, updated_at, approved_at
-    ) VALUES (?, ?, ?, ?, ?, ?, 'draft', ?, ?, NULL)";
+      $visaAppColumns, status, created_at, updated_at
+    ) VALUES ($visaAppPlaceholders, 'draft', ?, ?)";
+    
+    error_log("[createVisaClient] Preparing SQL: " . $visaAppSql);
+    error_log("[createVisaClient] Bind types: $bindTypes, Values: " . json_encode($bindValues));
     
     $visaAppStmt = $conn->prepare($visaAppSql);
     if (!$visaAppStmt) {
       throw new Exception("[createVisaClient] Prepare failed: " . $conn->error . " | SQL: " . $visaAppSql);
     }
     
-    $bindResult = $visaAppStmt->bind_param(
-      "iissssss",
-      $clientId,
-      $visaPackageId,
-      $applicationMode,
-      $visaTypeSelected,
-      $visaTypesJson,
-      $applicantStatusJson,
-      $createdAt,
-      $createdAt
-    );
+    // Add created_at and updated_at timestamps
+    $bindTypes .= "ss";
+    $bindValues[] = $createdAt;
+    $bindValues[] = $createdAt;
+
+    // Build bind_param array
+    $bindParams = [&$bindTypes];
+    foreach ($bindValues as $index => $value) {
+      $bindParams[] = &$bindValues[$index];
+    }
+
+    $bindResult = call_user_func_array([$visaAppStmt, 'bind_param'], $bindParams);
     if (!$bindResult) {
-      throw new Exception("[createVisaClient] Bind failed: " . $visaAppStmt->error . " | Params: client=$clientId, pkg=$visaPackageId, mode=$applicationMode, typeSel=" . var_export($visaTypeSelected, true) . ", typesJson=" . var_export($visaTypesJson, true) . ", applStatus=" . var_export($visaLeadApplicantStatus, true) . ", createdAt=$createdAt");
+      throw new Exception("[createVisaClient] Bind failed: " . $visaAppStmt->error);
     }
     
     if (!$visaAppStmt->execute()) {
-      throw new Exception("[createVisaClient] Execute failed: " . $visaAppStmt->error . " | Params: client=$clientId, pkg=$visaPackageId, mode=$applicationMode, typeSel=" . var_export($visaTypeSelected, true) . ", typesJson=" . var_export($visaTypesJson, true) . ", applStatus=" . var_export($visaLeadApplicantStatus, true) . ", createdAt=$createdAt");
+      throw new Exception("[createVisaClient] Execute failed: " . $visaAppStmt->error . " (Check database constraints and data types)");
     }
     
     $visaApplicationId = $visaAppStmt->insert_id;
@@ -243,19 +354,66 @@ function createVisaClient(
     $visaAppStmt->close();
     
     // Update client with visa_application_id
-    $updateClientSql = "UPDATE clients SET visa_application_id = ? WHERE id = ?";
-    $updateClientStmt = $conn->prepare($updateClientSql);
-    if (!$updateClientStmt) {
-      throw new Exception("[createVisaClient] Update prepare failed: " . $conn->error . " | SQL: " . $updateClientSql);
+    if ($visaApplicationId > 0) {
+      $updateClientSql = "UPDATE clients SET visa_application_id = ? WHERE id = ?";
+      $updateClientStmt = $conn->prepare($updateClientSql);
+      if (!$updateClientStmt) {
+        throw new Exception("[createVisaClient] Update prepare failed: " . $conn->error . " | SQL: " . $updateClientSql);
+      }
+      
+      $updateClientStmt->bind_param("ii", $visaApplicationId, $clientId);
+      if (!$updateClientStmt->execute()) {
+        throw new Exception("[createVisaClient] Update execute failed: " . $updateClientStmt->error);
+      }
+      error_log("[createVisaClient] Client $clientId updated with visa_application_id: $visaApplicationId");
+      $updateClientStmt->close();
+      
+      // 🆕 Copy visa requirements from visa_packages template to client_visa_requirements
+      // This mirrors the tour_packages → client itinerary pattern
+      $fetchVisaPkgSql = "SELECT requirements_json FROM visa_packages WHERE id = ?";
+      $fetchVisaPkgStmt = $conn->prepare($fetchVisaPkgSql);
+      if (!$fetchVisaPkgStmt) {
+        throw new Exception("[createVisaClient] Fetch visa package prepare failed: " . $conn->error);
+      }
+      
+      $fetchVisaPkgStmt->bind_param("i", $visaPackageId);
+      if (!$fetchVisaPkgStmt->execute()) {
+        throw new Exception("[createVisaClient] Fetch visa package execute failed: " . $fetchVisaPkgStmt->error);
+      }
+      
+      $fetchVisaPkgStmt->bind_result($requirementsJson);
+      $fetchVisaPkgStmt->fetch();
+      $fetchVisaPkgStmt->close();
+      
+      // Validate and use default if requirements_json is empty
+      $requirementsJson = $requirementsJson ?: json_encode([], JSON_UNESCAPED_UNICODE);
+      
+      // Validate JSON
+      if (json_decode($requirementsJson, true) === null && $requirementsJson !== '[]') {
+        error_log("[createVisaClient] Warning: Invalid requirements_json from visa_package $visaPackageId, using empty array");
+        $requirementsJson = json_encode([], JSON_UNESCAPED_UNICODE);
+      }
+      
+      // Insert into client_visa_requirements for the main client (companion_id = NULL)
+      $visaReqSql = "INSERT INTO client_visa_requirements 
+        (client_id, companion_id, visa_type, requirements_json, created_at, updated_at) 
+        VALUES (?, NULL, ?, ?, ?, ?)";
+      
+      $visaReqStmt = $conn->prepare($visaReqSql);
+      if (!$visaReqStmt) {
+        throw new Exception("[createVisaClient] Insert visa requirements prepare failed: " . $conn->error);
+      }
+      
+      $visaReqStmt->bind_param("issss", $clientId, $visaTypeSelected, $requirementsJson, $createdAt, $createdAt);
+      if (!$visaReqStmt->execute()) {
+        throw new Exception("[createVisaClient] Insert visa requirements execute failed: " . $visaReqStmt->error);
+      }
+      
+      error_log("[createVisaClient] Client $clientId: Visa requirements copied from package $visaPackageId (visa_type: $visaTypeSelected)");
+      $visaReqStmt->close();
     }
-    
-    $updateClientStmt->bind_param("ii", $visaApplicationId, $clientId);
-    if (!$updateClientStmt->execute()) {
-      throw new Exception("[createVisaClient] Update execute failed: " . $updateClientStmt->error);
-    }
-    $updateClientStmt->close();
   } else {
-    error_log("[createVisaClient] No visa_package_id provided, skipping visa application creation");
+    error_log("[createVisaClient] No visa_package_id provided (value: " . var_export($visaPackageId, true) . "), skipping visa application creation");
   }
 
   // Insert survey tracking entries
@@ -283,13 +441,16 @@ function createVisaClient(
 try {
   $result = createVisaClient(
     $conn, $assignedAdminId, $fullName, $email, $phone, $address,
-    $photoName, $accessCode, $groupCode, $processingType,
+    $photoName, $accessCode, $processingType,
     $passportNumber, $passportExpiry, $visaLeadApplicantStatus,
-    $visaPackageId, $visaTypeSelected, $applicationMode
+    $visaPackageId, $visaTypeSelected, $applicationMode,
+    $financialSource, $groupAccessCode
   );
   $clientId = $result['clientId'];
   $visaApplicationId = $result['visaApplicationId'];
+  error_log("[process_add_visa_client] Client created successfully: id=$clientId, visaApplicationId=$visaApplicationId");
 } catch (Exception $e) {
+  error_log("[process_add_visa_client] Exception during client creation: " . $e->getMessage());
   $_SESSION['form_errors'] = [$e->getMessage()];
   header("Location: ../admin/admin_visa_dashboard.php");
   exit();
@@ -301,83 +462,126 @@ $createdClients = [
 ];
 
 // Process additional group members if present
+error_log("[process_add_visa_client] Checking for group members. groupMembers count: " . count($groupMembers) . ", visaApplicationId: " . var_export($visaApplicationId, true));
 if (!empty($groupMembers)) {
-  foreach ($groupMembers as $member) {
-    // Generate unique access code for each member
-    $memberAccessCode = 'V-' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 10));
+  error_log("[process_add_visa_client] Processing " . count($groupMembers) . " group members");
+  foreach ($groupMembers as $idx => $member) {
+    error_log("[process_add_visa_client] Processing member #$idx: " . json_encode($member));
     
     // Validate member data
     $memberName = trim($member['fullName'] ?? '');
     $memberEmail = strtolower(trim($member['email'] ?? ''));
     $memberPhone = trim($member['phone'] ?? '');
-    $memberAddress = trim($member['address'] ?? '');
+    $memberAge = !empty($member['age']) ? intval($member['age']) : null;
     $memberRelationship = trim($member['relationship'] ?? '') ?: null;
     $memberPassportNumber = trim($member['passportNumber'] ?? '') ?: null;
     $memberPassportExpiry = toMysqlDate($member['passportExpiry'] ?? '');
     $memberApplicantStatus = trim($member['applicantStatus'] ?? '') ?: null;
+    $memberFinancialSource = trim($member['financialSource'] ?? '') ?: null;
+    $memberVisaType = trim($member['visaType'] ?? '') ?: $visaTypeSelected;  // Use their own visa_type or fall back to lead's
 
-    if (empty($memberName) || empty($memberEmail) || empty($memberPhone) || empty($memberAddress)) {
+    if (empty($memberName)) {
       continue; // Skip invalid members
     }
 
-    // Check for duplicate email
-    $emailCheck = $conn->prepare("SELECT id FROM clients WHERE email = ?");
-    $emailCheck->bind_param("s", $memberEmail);
-    $emailCheck->execute();
-    $emailCheck->store_result();
-    if ($emailCheck->num_rows > 0) {
-      $emailCheck->close();
-      continue; // Skip duplicate emails
+    // Generate unique access code for each companion (format: xxxx-yyyy)
+    $nameParts = preg_split('/\s+/', trim($memberName));
+    if (count($nameParts) >= 2) {
+      $companionAccessCode = strtoupper(substr($nameParts[0], 0, 2) . substr($nameParts[count($nameParts) - 1], 0, 2)) . '-' . rand(1000, 9999);
+    } else {
+      $companionAccessCode = strtoupper(str_pad(substr($nameParts[0], 0, 4), 4, 'X')) . '-' . rand(1000, 9999);
     }
-    $emailCheck->close();
-
-    try {
-      $memberResult = createVisaClient(
-        $conn, $assignedAdminId, $memberName, $memberEmail, $memberPhone, $memberAddress,
-        '', $memberAccessCode, $groupCode, $processingType,
-        $memberPassportNumber, $memberPassportExpiry, $memberApplicantStatus,
-        $visaPackageId, $visaTypeSelected, $applicationMode
-      );
+    
+    // Insert companion directly into client_visa_companions table (companions don't get client records)
+    if ($visaApplicationId) {
+      $companionSql = "INSERT INTO client_visa_companions (
+        visa_application_id, full_name, email, phone_number, access_code, relationship, applicant_status,
+        passport_number, passport_expiry, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
       
-      $memberClientId = $memberResult['clientId'];
-      $memberVisaAppId = $memberResult['visaApplicationId'];
-      
-      // If visa application exists, also create companion record in client_visa_companions
-      if ($visaApplicationId) {
-        $companionStmt = $conn->prepare("INSERT INTO client_visa_companions (
-          visa_application_id, full_name, email, phone_number, passport_number, passport_expiry,
-          relationship, applicant_status, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $nowTs = date('Y-m-d H:i:s');
-        $companionStmt->bind_param(
-          "isssssssss",
-          $visaApplicationId,
-          $memberName,
-          $memberEmail,
-          $memberPhone,
-          $memberPassportNumber,
-          $memberPassportExpiry,
-          $memberRelationship,
-          $memberApplicantStatus,
-          $nowTs,
-          $nowTs
-        );
-        
-        if (!$companionStmt->execute()) {
-          error_log("[process_add_visa_client] Failed to insert companion: " . $companionStmt->error);
-        }
-        $companionStmt->close();
+      $companionStmt = $conn->prepare($companionSql);
+      if (!$companionStmt) {
+        continue;
       }
       
+      $nowTs = date('Y-m-d H:i:s');
+      
+      $bindResult = $companionStmt->bind_param(
+        "issssssssss",
+        $visaApplicationId,
+        $memberName,
+        $memberEmail,
+        $memberPhone,
+        $companionAccessCode,
+        $memberRelationship,
+        $memberApplicantStatus,
+        $memberPassportNumber,
+        $memberPassportExpiry,
+        $nowTs,
+        $nowTs
+      );
+      
+      if (!$bindResult) {
+        $companionStmt->close();
+        continue;
+      }
+      
+      if (!$companionStmt->execute()) {
+        $companionStmt->close();
+        continue;
+      }
+      
+      $companionId = $companionStmt->insert_id;
+      $companionStmt->close();
+      
+      // Safeguard: Ensure companion ID is never 0 (should be auto-increment >= 1)
+      if ($companionId <= 0) {
+        error_log("[process_add_visa_client] ERROR: Companion inserted with invalid ID: $companionId. This indicates a database schema issue.");
+        continue;
+      }
+      
+      // 🆕 Copy visa requirements from visa_packages template to client_visa_requirements for this companion
+      $fetchVisaPkgSql = "SELECT requirements_json FROM visa_packages WHERE id = ?";
+      $fetchVisaPkgStmt = $conn->prepare($fetchVisaPkgSql);
+      if ($fetchVisaPkgStmt) {
+        $fetchVisaPkgStmt->bind_param("i", $visaPackageId);
+        if ($fetchVisaPkgStmt->execute()) {
+          $fetchVisaPkgStmt->bind_result($companionRequirementsJson);
+          $fetchVisaPkgStmt->fetch();
+          $fetchVisaPkgStmt->close();
+          
+          // Validate and use default if requirements_json is empty
+          $companionRequirementsJson = $companionRequirementsJson ?: json_encode([], JSON_UNESCAPED_UNICODE);
+          
+          // Validate JSON
+          if (json_decode($companionRequirementsJson, true) === null && $companionRequirementsJson !== '[]') {
+            $companionRequirementsJson = json_encode([], JSON_UNESCAPED_UNICODE);
+          }
+          
+          // Insert into client_visa_requirements for this companion
+          $visaReqSql = "INSERT INTO client_visa_requirements 
+            (client_id, companion_id, visa_type, requirements_json, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?)";
+          
+          $visaReqStmt = $conn->prepare($visaReqSql);
+          if ($visaReqStmt) {
+            $visaReqStmt->bind_param("iissss", $clientId, $companionId, $memberVisaType, $companionRequirementsJson, $nowTs, $nowTs);
+            $visaReqStmt->execute();
+            $visaReqStmt->close();
+          }
+        }
+      }
+      
+      // Track companion for notification/audit
       $createdClients[] = [
-        'id' => $memberClientId,
+        'id' => 'companion_' . $companionId,
         'name' => $memberName,
-        'email' => $memberEmail,
-        'access_code' => $memberAccessCode
+        'email' => $memberEmail ?: 'N/A',
+        'access_code' => $companionAccessCode,
+        'is_companion' => true
       ];
-    } catch (Exception $e) {
-      error_log("Failed to create group member: " . $e->getMessage());
-      // Continue processing other members
+      
+      $companionStmt->close();
     }
   }
 }
@@ -406,29 +610,32 @@ if ($assignedAdminId) {
 }
 
 // Log audit
-// Log audit for each created client
+// Log audit for each created client and companion
 foreach ($createdClients as $client) {
-  logClientOnboardingAudit($conn, [
-    'actor_id'   => $assignedAdminId,
-    'client_id'  => $client['id'],
-    'payload'    => [
-      'client_name'      => $client['name'],
-      'processing_type'  => $processingType,
-      'visa_package'     => $visaPackageName,
-      'assigned_admin'   => $adminName,
-      'group_code'       => $groupCode,
-      'application_mode' => $applicationMode,
-      'source'           => 'process_add_visa_client.php'
-    ]
-  ]);
+  // Only log for actual client records (not companions)
+  if (!isset($client['is_companion']) || !$client['is_companion']) {
+    logClientOnboardingAudit($conn, [
+      'actor_id'   => $assignedAdminId,
+      'client_id'  => $client['id'],
+      'payload'    => [
+        'client_name'      => $client['name'],
+        'processing_type'  => $processingType,
+        'visa_package'     => $visaPackageName,
+        'assigned_admin'   => $adminName,
+        'application_mode' => $applicationMode,
+        'access_code'      => $client['access_code'],
+        'source'           => 'process_add_visa_client.php'
+      ]
+    ]);
+  }
 }
 
 // Send Notification to All Admins
 $manager = new NotificationManager($conn);
-$clientCount = count($createdClients);
+$companionCount = count(array_filter($createdClients, function($c) { return isset($c['is_companion']) && $c['is_companion']; }));
 
-if ($clientCount === 1) {
-  // Single client notification
+if ($companionCount === 0) {
+  // Single client notification (individual application)
   $notifyResult = $manager->broadcastToAdmins('new_visa_client_added', [
     'client_name' => $fullName,
     'email' => $email,
@@ -439,23 +646,36 @@ if ($clientCount === 1) {
     'client_id' => $clientId
   ]);
 } else {
-  // Group notification
+  // Group notification (application with companions)
   $notifyResult = $manager->broadcastToAdmins('new_visa_group_added', [
-    'group_code' => $groupCode,
-    'client_count' => $clientCount,
+    'companion_count' => $companionCount,
     'lead_guest' => $fullName,
     'processing_type' => ucfirst($processingType),
     'visa_package' => $visaPackageName ?: 'Not Assigned',
-    'assigned_admin' => $adminName
+    'assigned_admin' => $adminName,
+    'client_id' => $clientId
   ]);
 }
 error_log("[process_add_visa_client] Notification broadcast result: " . json_encode($notifyResult));
 
 // Success toast message
-if ($clientCount === 1) {
-  $_SESSION['message'] = "Visa client <strong>" . htmlspecialchars($fullName) . "</strong> added successfully! Access Code: <code class='font-mono'>" . htmlspecialchars($accessCode) . "</code> | Group Code: <code class='font-mono'>" . htmlspecialchars($groupCode) . "</code>";
+if ($companionCount === 0) {
+  // Individual application
+  $_SESSION['message'] = "Visa client <strong>" . htmlspecialchars($fullName) . "</strong> added successfully! Access Code: <code class='font-mono'>" . htmlspecialchars($accessCode) . "</code>";
 } else {
-  $_SESSION['message'] = "Successfully added <strong>$clientCount</strong> visa clients to Group <code class='font-mono'>" . htmlspecialchars($groupCode) . "</code>. Lead guest: <strong>" . htmlspecialchars($fullName) . "</strong>";
+  // Group application with companions
+  $_SESSION['message'] = "Successfully added <strong>" . htmlspecialchars($fullName) . "</strong> with <strong>$companionCount</strong> companion(s). Lead Access Code: <code class='font-mono'>" . htmlspecialchars($accessCode) . "</code>";
+  
+  // Add companion access codes to message
+  $companionCodes = [];
+  foreach ($createdClients as $client) {
+    if (isset($client['is_companion']) && $client['is_companion']) {
+      $companionCodes[] = htmlspecialchars($client['name']) . ": <code class='font-mono'>" . htmlspecialchars($client['access_code']) . "</code>";
+    }
+  }
+  if (!empty($companionCodes)) {
+    $_SESSION['message'] .= "<br><span class='text-sm'>Companions: " . implode(', ', $companionCodes) . "</span>";
+  }
 }
 $_SESSION['message_type'] = 'success';
 
@@ -465,13 +685,12 @@ if ($visaPackageId && empty($visaApplicationId)) {
   $_SESSION['message_type'] = 'warning';
 }
 
-// Store group data for "Add Another Group Member" option (only for individual mode)
+// Store client data for potential follow-up actions (only for individual mode)
 if ($applicationMode === 'individual') {
   $_SESSION['visa_client_added'] = [
     'client_id' => $clientId,
     'client_name' => $fullName,
     'access_code' => $accessCode,
-    'group_code' => $groupCode,
     'processing_type' => $processingType,
     'visa_package_id' => $visaPackageId,
     'assigned_admin_id' => $assignedAdminId

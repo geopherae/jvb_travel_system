@@ -1,9 +1,12 @@
 <?php
 require_once '../includes/icon_map.php';
 require_once '../actions/db.php';
+require_once '../includes/feature_flags.php';
 
 $activePage = basename($_SERVER['PHP_SELF']);
 $clientName = 'Guest';
+$processingType = $_SESSION['processing_type'] ?? 'booking'; // Default to booking
+$isCompanion = $_SESSION['is_companion'] ?? false;
 
 if (isset($_SESSION['client_id'])) {
   $clientQuery = $conn->prepare("SELECT full_name FROM clients WHERE id = ? LIMIT 1");
@@ -17,18 +20,63 @@ if (isset($_SESSION['client_id'])) {
   $clientQuery->close();
 }
 
-$navLinks = [
-  'Dashboard'     => ['url' => '../client/client_dashboard.php',        'icon' => 'chart-bar', 'match' => ['client_dashboard.php', 'client_manual.php']],
-  'Messages'      => ['url' => '../client/messages_client.php', 'icon' => 'chat-alt',   'match' => ['messages_client.php']],
-  'My Itinerary'  => ['url' => '../client/view_client_itinerary.php',   'icon' => 'briefcase',   'match' => ['view_client_itinerary.php']],
-  // 'Messages'   => ['url' => 'client_messages.php',         'icon' => 'chat-alt',   'match' => ['client_messages.php']],
+// Define all possible navigation links
+$allNavLinks = [
+  'Dashboard'       => [
+    'url' => '../client/client_dashboard.php', 
+    'icon' => 'chart-bar', 
+    'match' => ['client_dashboard.php', 'client_manual.php'],
+    'show_for' => ['booking', 'both'], // Travel Booking tab
+    'category' => 'Travel Booking'
+  ],
+  'My Itinerary'    => [
+    'url' => '../client/view_client_itinerary.php', 
+    'icon' => 'briefcase', 
+    'match' => ['view_client_itinerary.php'],
+    'show_for' => ['booking', 'both'], // Travel Booking tab
+    'category' => 'Travel Booking'
+  ],
+  'Visa Processing' => [
+    'url' => '../client/client_visa_dashboard.php', 
+    'icon' => 'itinerary', 
+    'match' => ['client_visa_dashboard.php'],
+    'show_for' => ['visa', 'both'], // Visa Processing tab
+    'category' => 'Visa Processing',
+    'requires_feature' => 'VISA_PROCESSING_ENABLED'
+  ],
+  'Messages'        => [
+    'url' => '../client/messages_client.php', 
+    'icon' => 'chat-alt', 
+    'match' => ['messages_client.php'],
+    'show_for' => ['booking', 'visa', 'both'], // Shows for all types
+    'category' => 'Messages'
+  ],
 ];
+
+// Filter nav links based on processing type
+$navLinks = [];
+foreach ($allNavLinks as $label => $meta) {
+  // Check processing type match
+  if (!in_array($processingType, $meta['show_for'])) {
+    continue;
+  }
+  
+  // Check feature flag if required
+  if (isset($meta['requires_feature'])) {
+    $featureName = $meta['requires_feature'];
+    if (!defined($featureName) || !constant($featureName)) {
+      continue; // Skip if feature flag not enabled
+    }
+  }
+  
+  $navLinks[$label] = $meta;
+}
 ?>
 
 <div>
   <!-- Mobile Toggle -->
   <button @click="sidebarOpen = !sidebarOpen"
-          class="w-10 h-10 lg:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-brand"
+          class="w-10 h-10 lg:hidden fixed top-4 left-4 z-60 bg-white p-2 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-brand"
           aria-label="Toggle Sidebar">
     <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>

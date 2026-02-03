@@ -595,8 +595,50 @@ function generatePackageDeletionSummary(int $packageId, int $affectedClients): s
   return "Tour Package #$packageId deleted. $affectedClients client(s) were assigned to this package. All related itinerary templates and metadata removed.";
 }
 
-//Add Client Payload
-function logClientOnboardingAudit($conn, array $data): bool {
+// Add Client Payload + Generic Audit Logger
+// Supports two signatures:
+// 1) logClientOnboardingAudit($conn, ['actor_id'=>..., 'client_id'=>..., 'payload'=>[...]])
+// 2) logClientOnboardingAudit($conn, $clientId, $actionType, $changes = [], $actor = null)
+function logClientOnboardingAudit($conn, $dataOrClientId, $actionType = null, $changes = null, $actor = null): bool {
+  // Legacy payload format
+  if (is_array($dataOrClientId) && $actionType === null) {
+    $data = $dataOrClientId;
+    $action_type     = 'add_client';
+    $actor_id        = $data['actor_id'] ?? 0;
+    $actor_role      = 'admin';
+    $target_id       = $data['client_id'] ?? 0;
+    $target_type     = 'client';
+    $changes         = json_encode($data['payload'] ?? [], JSON_UNESCAPED_UNICODE);
+    $severity        = 'normal';
+    $module          = 'client';
+    $timestamp       = date('Y-m-d H:i:s');
+    $session_id      = session_id();
+    $ip_address      = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $user_agent      = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+    $kpi_tag         = 'client_onboarding';
+    $business_impact = 'moderate';
+  } else {
+    // Generic signature
+    $clientId    = is_numeric($dataOrClientId) ? (int)$dataOrClientId : 0;
+    $action_type = $actionType ?: 'client_action';
+
+    $actor_id   = is_array($actor) ? ($actor['id'] ?? 0) : 0;
+    $actor_role = is_array($actor) ? ($actor['role'] ?? 'system') : 'system';
+
+    $target_id   = $clientId ?: (is_array($changes) && isset($changes['client_id']) ? (int)$changes['client_id'] : 0);
+    $target_type = $target_id ? 'client' : 'system';
+
+    $changes         = json_encode(is_array($changes) ? $changes : [], JSON_UNESCAPED_UNICODE);
+    $severity        = 'normal';
+    $module          = (strpos($action_type, 'visa_') === 0) ? 'visa' : 'client';
+    $timestamp       = date('Y-m-d H:i:s');
+    $session_id      = is_array($actor) ? ($actor['session_id'] ?? session_id()) : session_id();
+    $ip_address      = is_array($actor) ? ($actor['ip'] ?? ($_SERVER['REMOTE_ADDR'] ?? 'unknown')) : ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    $user_agent      = is_array($actor) ? ($actor['user_agent'] ?? ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')) : ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown');
+    $kpi_tag         = $action_type;
+    $business_impact = 'moderate';
+  }
+
   $stmt = $conn->prepare("
     INSERT INTO audit_logs (
       action_type, actor_id, actor_role,
@@ -608,21 +650,6 @@ function logClientOnboardingAudit($conn, array $data): bool {
       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )
   ");
-
-  $action_type     = 'add_client';
-  $actor_id        = $data['actor_id'] ?? 0;
-  $actor_role      = 'admin';
-  $target_id       = $data['client_id'] ?? 0;
-  $target_type     = 'client';
-  $changes         = json_encode($data['payload'], JSON_UNESCAPED_UNICODE);
-  $severity        = 'normal';
-  $module          = 'client';
-  $timestamp       = date('Y-m-d H:i:s');
-  $session_id      = session_id();
-  $ip_address      = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-  $user_agent      = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
-  $kpi_tag         = 'client_onboarding';
-  $business_impact = 'moderate';
 
   $stmt->bind_param(
     "sissssssssssss",

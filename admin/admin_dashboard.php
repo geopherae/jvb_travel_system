@@ -6,19 +6,18 @@ if (empty($_SESSION['admin']['id'])) {
   exit();
 }
 
-// 📦 Includes
-include_once __DIR__ . '/../includes/header.php';
+// 📦 Includes (DB & logic first, before status_alert which outputs HTML)
 require_once __DIR__ . '/../includes/status-helpers.php';
 require_once __DIR__ . '/../actions/client_status_checker.php';
-require_once __DIR__ . '/../components/status_alert.php';
-
+require_once __DIR__ . '/../actions/db.php';
+include_once __DIR__ . '/../includes/header.php';
 
 // 🚫 Disable caching
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 
-// 🛠 DB connection
-require_once __DIR__ . '/../actions/db.php';
+// ⚠️ Status alert (outputs HTML - include AFTER headers)
+require_once __DIR__ . '/../components/status_alert.php';
 
 $adminId = $_SESSION['admin']['id'] ?? null;
 
@@ -90,6 +89,7 @@ $clientQuery = "
     c.full_name, 
     c.booking_number,
     c.client_profile_photo, 
+    c.processing_type,
     CASE
       WHEN c.trip_date_start IS NOT NULL AND c.trip_date_end IS NOT NULL THEN
         CONCAT(DATEDIFF(c.trip_date_end, c.trip_date_start) + 1, ' Days / ',

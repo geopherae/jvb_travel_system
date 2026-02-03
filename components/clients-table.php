@@ -39,6 +39,12 @@ if ($search !== '') {
   });
 }
 
+// 🔎 Filter clients by processing_type (only "booking" or "both")
+$clients = array_filter($clients, function ($client) {
+  $processingType = strtolower(trim($client['processing_type'] ?? ''));
+  return $processingType === 'booking' || $processingType === 'both';
+});
+
 // 🔃 Apply status sort
 if ($sort === 'status') {
   usort($clients, function ($a, $b) use ($order) {

@@ -87,7 +87,154 @@ try {
     }
     $adminStmt->close();
 
-    // Client login
+    // === CHECK FOR GROUP ACCESS CODE (VISA APPLICATIONS) ===
+    // Group access code allows any member of a group application to see all applicants' documents
+    if (VISA_PROCESSING_ENABLED) {
+        $groupAccessStmt = $conn->prepare("
+            SELECT id AS app_id, client_id, application_mode, status
+            FROM client_visa_applications
+            WHERE group_access_code = ?
+        ");
+        if (!$groupAccessStmt) {
+            throw new Exception("Group access query preparation failed: " . $conn->error);
+        }
+
+        $groupAccessStmt->bind_param("s", $access_code);
+        $groupAccessStmt->execute();
+        $groupAccessResult = $groupAccessStmt->get_result();
+
+        if ($groupAccessResult->num_rows === 1) {
+            $groupApp = $groupAccessResult->fetch_assoc();
+            $groupLeadClientId = $groupApp['client_id'];
+
+            // Fetch group lead client info for session
+            $groupLeadStmt = $conn->prepare("
+                SELECT id, full_name, email, client_profile_photo, processing_type
+                FROM clients
+                WHERE id = ?
+            ");
+            $groupLeadStmt->bind_param("i", $groupLeadClientId);
+            $groupLeadStmt->execute();
+            $groupLeadResult = $groupLeadStmt->get_result();
+            
+            if ($groupLeadResult->num_rows === 1) {
+                $groupLead = $groupLeadResult->fetch_assoc();
+                
+                // Generate session token
+                $new_token = bin2hex(random_bytes(32));
+                $now = time();
+
+                session_regenerate_id(true);
+
+                // Reset rate limiting on successful login
+                unset($_SESSION['client_attempts'], $_SESSION['client_last_attempt']);
+
+                // Set session for group access
+                $_SESSION['client_id']        = (int)$groupLeadClientId;
+                $_SESSION['is_client']        = true;
+                $_SESSION['is_companion']     = false;
+                $_SESSION['group_access_enabled'] = true; // KEY: Flag for group access
+                $_SESSION['visa_app_id']      = (int)$groupApp['app_id']; // Link to specific visa app
+                $_SESSION['session_token']    = $new_token;
+                $_SESSION['last_activity']    = $now;
+                $_SESSION['processing_type']  = 'visa'; // Group access is always visa
+                
+                $_SESSION['client'] = [
+                    'id'                  => (int)$groupLeadClientId,
+                    'full_name'           => (string)$groupLead['full_name'],
+                    'email'               => (string)$groupLead['email'],
+                    'access_code'         => (string)$access_code, // Store the group access code
+                    'client_profile_photo'=> (string)$groupLead['client_profile_photo'],
+                    'processing_type'     => 'visa',
+                    'is_companion'        => false,
+                    'is_group_access'     => true
+                ];
+
+                $_SESSION['show_disclaimer'] = true;
+                error_log("Group access login successful: app_id={$groupApp['app_id']}, client_id={$groupLeadClientId}, group_access_code={$access_code}");
+                
+                $groupLeadStmt->close();
+                $groupAccessStmt->close();
+                $conn->close();
+                header("Location: client_visa_dashboard.php");
+                exit;
+            }
+            $groupLeadStmt->close();
+        }
+        $groupAccessStmt->close();
+    }
+
+    // === CHECK VISA COMPANION FIRST ===
+    // If access_code exists in client_visa_companions, they're a group member
+    if (VISA_PROCESSING_ENABLED) {
+        $companionStmt = $conn->prepare("
+            SELECT id AS companion_id, client_id, full_name, email, access_code
+            FROM client_visa_companions
+            WHERE access_code = ?
+        ");
+        if (!$companionStmt) {
+            throw new Exception("Companion query preparation failed: " . $conn->error);
+        }
+
+        $companionStmt->bind_param("s", $access_code);
+        $companionStmt->execute();
+        $companionResult = $companionStmt->get_result();
+
+        if ($companionResult->num_rows === 1) {
+            $companion = $companionResult->fetch_assoc();
+
+            // Generate session token for companion
+            $new_token = bin2hex(random_bytes(32));
+            $now = time();
+            $now_datetime = date('Y-m-d H:i:s', $now);
+
+            // Update companion record with session token
+            $updateCompanionStmt = $conn->prepare("
+                UPDATE client_visa_companions 
+                SET session_token = ?, last_activity = ? 
+                WHERE id = ?
+            ");
+            $updateCompanionStmt->bind_param("ssi", $new_token, $now_datetime, $companion['companion_id']);
+            $updateCompanionStmt->execute();
+            $updateCompanionStmt->close();
+
+            session_regenerate_id(true);
+
+            // Reset rate limiting on successful login
+            unset($_SESSION['client_attempts'], $_SESSION['client_last_attempt']);
+
+            // Set session for companion - ALWAYS visa processing
+            $_SESSION['client_id']       = (int)$companion['client_id']; // Link to main client
+            $_SESSION['companion_id']    = (int)$companion['companion_id']; // Their own companion ID
+            $_SESSION['is_client']       = true;
+            $_SESSION['is_companion']    = true; // Flag to identify companion login
+            $_SESSION['session_token']   = $new_token;
+            $_SESSION['last_activity']   = $now;
+            $_SESSION['processing_type'] = 'visa'; // Companions always see visa processing
+            
+            $_SESSION['client'] = [
+                'id'                  => (int)$companion['companion_id'],
+                'full_name'           => (string)$companion['full_name'],
+                'email'               => (string)$companion['email'],
+                'access_code'         => (string)$companion['access_code'],
+                'client_profile_photo'=> '', // Companions don't have profile photos yet
+                'processing_type'     => 'visa',
+                'is_companion'        => true
+            ];
+
+            $_SESSION['show_disclaimer'] = true;
+            error_log("Companion login successful: companion_id={$companion['companion_id']}, access_code={$companion['access_code']}, linked_to_client_id={$companion['client_id']}");
+            
+            $companionStmt->close();
+            $conn->close();
+            // Companions always have visa processing
+            header("Location: client_visa_dashboard.php");
+            exit;
+        }
+        $companionStmt->close();
+    }
+
+    // === CLIENT LOGIN (Main Account) ===
     $selectFields = "id, full_name, email, access_code, client_profile_photo";
     if (VISA_PROCESSING_ENABLED) {
         $selectFields .= ", processing_type";
@@ -134,14 +281,15 @@ try {
         // Store critical session data
         $_SESSION['client_id']       = (int)$client['id'];
         $_SESSION['is_client']       = true;
+        $_SESSION['is_companion']    = false; // Main client, not a companion
         $_SESSION['session_token']   = $new_token;           // For single-session validation
         $_SESSION['last_activity']   = $now;                 // For inactivity timeout
         
-        // Track workflow type (visa processing optional)
+        // Track workflow type based on processing_type from DB
         if (VISA_PROCESSING_ENABLED && isset($client['processing_type'])) {
-            $_SESSION['processing_type'] = (string)$client['processing_type'];
+            $_SESSION['processing_type'] = (string)$client['processing_type']; // 'booking', 'visa', or 'both'
         } else {
-            $_SESSION['processing_type'] = 'booking'; // Fallback to booking
+            $_SESSION['processing_type'] = 'booking'; // Fallback to booking if feature disabled
         }
         
         $_SESSION['client'] = [
@@ -150,7 +298,8 @@ try {
             'email'               => (string)$client['email'],
             'access_code'         => (string)$client['access_code'],
             'client_profile_photo'=> (string)$client['client_profile_photo'],
-            'processing_type'     => $_SESSION['processing_type']
+            'processing_type'     => $_SESSION['processing_type'],
+            'is_companion'        => false
         ];
 
         // Check for pending first-time survey (unchanged)
@@ -181,9 +330,15 @@ try {
         $_SESSION['show_disclaimer'] = true;
         $processingType = VISA_PROCESSING_ENABLED ? $client['processing_type'] ?? 'booking' : 'booking';
         error_log("Client login successful: id={$client['id']}, access_code={$client['access_code']}, processing_type=$processingType");
-        header("Location: client_dashboard.php");
+        
+        // Redirect based on processing type
+        // If 'visa' only, go to visa dashboard
+        // If 'booking' or 'both', go to booking dashboard
+        $redirectUrl = ($processingType === 'visa') ? 'client_visa_dashboard.php' : 'client_dashboard.php';
+        
         $clientStmt->close();
         $conn->close();
+        header("Location: $redirectUrl");
         exit;
     }
 

@@ -117,7 +117,10 @@ if (isset($statusMap[$status])) {
       review_hidden: "🔒 Review is now hidden from homepage.",
       review_toggle_failed: "❌ Failed to update review visibility. Please try again.",
       review_deleted: "🗑️ Review deleted successfully.",
-      review_delete_failed: "❌ Failed to delete review. Please try again."
+      review_delete_failed: "❌ Failed to delete review. Please try again.",
+      visa_document_approved: "✅ Document approved successfully!",
+      visa_document_rejected: "✅ Document rejected.",
+      visa_document_updated: "✅ Document status updated successfully!"
     }[status] || "ℹ️ Action completed.";
   }
 
@@ -134,7 +137,10 @@ if (isset($statusMap[$status])) {
       review_hidden: "success",
       review_toggle_failed: "error",
       review_deleted: "success",
-      review_delete_failed: "error"
+      review_delete_failed: "error",
+      visa_document_approved: "success",
+      visa_document_rejected: "success",
+      visa_document_updated: "success"
     }[status] || "success";
   }
 

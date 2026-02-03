@@ -144,6 +144,7 @@ $todayDay  = getTodayItineraryDay($start, $end);
     Alpine.store('modals', {
       clientId: null,
       reassign: false,
+      reassignVisa: false,
       unassign: false,
       editBooking: false,
       archiveClient: false,
@@ -291,13 +292,12 @@ $todayDay  = getTodayItineraryDay($start, $end);
     </div>
   </div>
 
-
-<script src="https://unpkg.com/alpinejs" defer></script>
 <?php include '../components/status_alert.php'; ?>
 <?php include '../components/update_client_booking_modal.php'; ?>
 <?php 
 $isAdmin = true; 
 include '../components/reassign-modal.php';
+include '../components/reassign-visa-modal.php';
 $editClientId = $client['id'];
 include __DIR__ . '/../components/unassign-modal.php'; 
 ?>

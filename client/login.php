@@ -4,6 +4,13 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$requestUri = $_SERVER['REQUEST_URI'] ?? '/client/login.php';
+$baseUrl = $scheme . '://' . $host;
+$canonicalUrl = $baseUrl . $requestUri;
+$ogImageUrl = $baseUrl . '/images/image_login_3.jpg';
+
 $imageDir = __DIR__ . "/../images/login_gallery_images";
 $baseImages = [];
 if (is_dir($imageDir)) {
@@ -34,6 +41,22 @@ if ($imgCount > 0) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JV-B Travel & Tours | Your Journey Begins Here</title>
+  <meta name="description" content="Secure client login for JV-B Travel & Tours. Manage your itinerary, documents, and trip updates in one place." />
+  <meta name="keywords" content="JV-B Travel, travel agency, client login, itinerary, tour packages, travel documents" />
+  <meta name="author" content="JV-B Travel & Tours" />
+  <link rel="canonical" href="<?= htmlspecialchars($canonicalUrl, ENT_QUOTES) ?>" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="JV-B Travel & Tours" />
+  <meta property="og:title" content="JV-B Travel & Tours | Your Journey Begins Here" />
+  <meta property="og:description" content="Secure client login for JV-B Travel & Tours. Manage your itinerary, documents, and trip updates in one place." />
+  <meta property="og:url" content="<?= htmlspecialchars($canonicalUrl, ENT_QUOTES) ?>" />
+  <meta property="og:image" content="<?= htmlspecialchars($ogImageUrl, ENT_QUOTES) ?>" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="JV-B Travel & Tours | Your Journey Begins Here" />
+  <meta name="twitter:description" content="Secure client login for JV-B Travel & Tours. Manage your itinerary, documents, and trip updates in one place." />
+  <meta name="twitter:image" content="<?= htmlspecialchars($ogImageUrl, ENT_QUOTES) ?>" />
   <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -813,6 +836,158 @@ if ($imgCount > 0) {
     </div>
   </div>
 
+    <!-- Meet our Team Section -->
+  <section class="relative z-10 bg-gradient-to-br from-gray-50 to-gray-100 py-20 px-6">
+    <div class="max-w-7xl mx-auto">
+      <!-- Section Header -->
+      <div class="text-center mb-16">
+        <h2 class="text-4xl md:text-5xl font-bold text-sky-900 mb-4">Meet Our Team</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Dedicated professionals committed to making your travel dreams a reality. Our experienced team ensures every journey is seamless, memorable, and tailored to your needs.
+        </p>
+      </div>
+
+    <!-- Team Grid -->
+    <div class="space-y-12">
+      <!-- Leadership Team -->
+      <div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <!-- General Manager -->
+          <div class="group bg-white rounded-3xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 border-transparent hover:border-sky-400">
+            <div class="relative bg-gradient-to-br from-sky-50 to-sky-100 p-8">
+              <div class="flex justify-center">
+                <div class="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-lg group-hover:scale-105 transition-transform duration-500">
+                  <img 
+                    src="../images/team_members/jennifer_belleza.jpg" 
+                    alt="Jennifer V. Belleza" 
+                    class="w-full h-full object-cover"
+                    onerror="this.src='../images/default-avatar.jpg'"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="p-4 text-center">
+              <h3 class="text-2xl font-bold text-sky-900 mb-2">Jennifer V. Belleza</h3>
+              <div class="inline-block bg-sky-100 text-sky-700 px-4 py-1 rounded-full text-sm font-semibold mb-4">
+                General Manager
+              </div>
+              <p class="text-gray-600 text-sm leading-relaxed">
+                Provides overall leadership and direction of the company. Oversees business strategy, partnerships, service quality, and ensures that all operations align with the company's vision and client standards.
+              </p>
+            </div>
+          </div>
+
+          <!-- Operations Manager -->
+          <div class="group bg-white rounded-3xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 border-transparent hover:border-sky-400">
+            <div class="relative bg-gradient-to-br from-sky-50 to-sky-100 p-8">
+              <div class="flex justify-center">
+                <div class="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-lg group-hover:scale-105 transition-transform duration-500">
+                  <img 
+                    src="../images/team_members/vincy_belleza.jpg" 
+                    alt="Vincy Belleza" 
+                    class="w-full h-full object-cover"
+                    onerror="this.src='../images/default-avatar.jpg'"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="p-4 text-center">
+              <h3 class="text-2xl font-bold text-sky-900 mb-2">Vincy Belleza</h3>
+              <div class="inline-block bg-sky-100 text-sky-700 px-4 py-1 rounded-full text-sm font-semibold mb-4">
+                Operations Manager
+              </div>
+              <p class="text-gray-600 text-sm leading-relaxed">
+                Manages day-to-day operations of the agency, including coordination with suppliers, monitoring bookings, supporting the travel consultants, and ensuring smooth and efficient service delivery.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Travel Consultants & Support Team -->
+      <div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <!-- Travel Consultant 1 -->
+          <div class="group bg-white rounded-3xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 border-transparent hover:border-sky-400">
+            <div class="relative bg-gradient-to-br from-sky-50 to-sky-100 p-6">
+              <div class="flex justify-center">
+                <div class="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-lg group-hover:scale-105 transition-transform duration-500">
+                  <img 
+                    src="../images/team_members/elissa_kelledes.jpg" 
+                    alt="Elissa Kelledes" 
+                    class="w-full h-full object-cover"
+                    onerror="this.src='../images/default-avatar.jpg'"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="p-4 text-center">
+              <h3 class="text-xl font-bold text-sky-900 mb-2">Elissa Kelledes</h3>
+              <div class="inline-block bg-sky-100 text-sky-700 px-3 py-1 rounded-full text-xs font-semibold mb-3">
+                Travel Consultant
+              </div>
+              <p class="text-gray-600 text-sm leading-relaxed">
+                Assists clients with travel inquiries, itinerary planning, reservations, and documentation. Ensures accurate bookings and provides excellent customer service from inquiry to post-travel.
+              </p>
+            </div>
+          </div>
+
+          <!-- Travel Consultant 2 -->
+          <div class="group bg-white rounded-3xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 border-transparent hover:border-sky-400">
+            <div class="relative bg-gradient-to-br from-sky-50 to-sky-100 p-6">
+              <div class="flex justify-center">
+                <div class="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-lg group-hover:scale-105 transition-transform duration-500">
+                  <img 
+                    src="../images/team_members/joan_belleza.jpg" 
+                    alt="Joan Belleza" 
+                    class="w-full h-full object-cover"
+                    onerror="this.src='../images/default-avatar.jpg'"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="p-4 text-center">
+              <h3 class="text-xl font-bold text-sky-900 mb-2">Joan Belleza</h3>
+              <div class="inline-block bg-sky-100 text-sky-700 px-3 py-1 rounded-full text-xs font-semibold mb-3">
+                Travel Consultant
+              </div>
+              <p class="text-gray-600 text-sm leading-relaxed">
+                Handles client consultations, travel arrangements, and after-sales support. Focuses on delivering reliable, personalized, and hassle-free travel experiences.
+              </p>
+            </div>
+          </div>
+
+          <!-- Logistics & Operations Assistant -->
+          <div class="group bg-white rounded-3xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 border-transparent hover:border-sky-400">
+            <div class="relative bg-gradient-to-br from-sky-50 to-sky-100 p-6">
+              <div class="flex justify-center">
+                <div class="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-lg group-hover:scale-105 transition-transform duration-500">
+                  <img 
+                    src="../images/team_members/edwin_ecleo.jpg" 
+                    alt="Edwin Ecleo" 
+                    class="w-full h-full object-cover"
+                    onerror="this.src='../images/default-avatar.jpg'"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="p-4 text-center">
+              <h3 class="text-xl font-bold text-sky-900 mb-2">Edwin Ecleo</h3>
+              <div class="inline-block bg-sky-100 text-sky-700 px-3 py-1 rounded-full text-xs font-semibold mb-3">
+                Logistics & Operations Assistant
+              </div>
+              <p class="text-gray-600 text-sm leading-relaxed">
+                Provides on-call logistical support, including document delivery, field errands, and official driving duties for vehicle rentals and company operations.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+          </section>
+  </div>
+</div>
+
   <!-- JavaScript: Staggered pop-in + slow cycle -->
   <script>
     // Carousel state
@@ -945,6 +1120,9 @@ if ($imgCount > 0) {
       }
     });
   </script>
+   
+    </div>
+  </section>
 
   <!-- Footer -->
   <footer class="relative z-10 bg-gradient-to-br from-sky-900 to-sky-950 text-white py-12 px-6">

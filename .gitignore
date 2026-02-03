@@ -10,6 +10,9 @@
 .env.local
 .env.*.local
 
+# Database Connection (never commit credentials)
+actions/db.php
+
 # Database Backups
 *.sql
 !jvb_travel_db.sql

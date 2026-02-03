@@ -466,7 +466,7 @@ if ($client_id) {
     <div class="h-2 bg-gradient-to-r"
          :class="confirmAction.type === 'approve' ? 'from-emerald-400 to-emerald-600' 
                  : confirmAction.type === 'reject' ? 'from-red-400 to-red-600'
-                 : 'from-amber-400 to-amber-600'">
+                 : 'from-red-700 to-red-700'">
     </div>
 
     <!-- Content Container -->
@@ -489,7 +489,7 @@ if ($client_id) {
         <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
              :class="confirmAction.type === 'approve' ? 'bg-emerald-100' 
                      : confirmAction.type === 'reject' ? 'bg-red-100'
-                     : 'bg-amber-100'">
+                     : 'bg-red-100'">
           <!-- Approve Icon -->
           <template x-if="confirmAction.type === 'approve'">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -504,7 +504,7 @@ if ($client_id) {
           </template>
           <!-- Delete Icon -->
           <template x-if="confirmAction.type === 'delete'">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </template>
@@ -559,7 +559,7 @@ if ($client_id) {
                 class="flex-1 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 :class="confirmAction.type === 'approve' 
                         ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-lg' 
-                        : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 hover:shadow-lg'">
+                        : 'bg-red-700 hover:bg-red-600 hover:shadow-lg'">
           <span x-text="confirmAction.type === 'approve' ? 'Approve' : confirmAction.type === 'reject' ? 'Reject' : 'Delete'">
             Confirm
           </span>
