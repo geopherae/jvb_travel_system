@@ -1,6 +1,6 @@
 <?php
 // Auth check
-require_once __DIR__ . '/../admin_session_check.php';
+require_once __DIR__ . '/admin_session_check.php';
 require_once __DIR__ . '/../includes/auth.php';
 use function Auth\guard;
 guard('admin');
