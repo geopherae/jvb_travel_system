@@ -112,10 +112,16 @@
           Close
         </button>
         <button @click="saveChanges()"
-                class="flex-1 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-all duration-200 touch-manipulation">
+                :disabled="!viewer.submissionId"
+                :class="!viewer.submissionId ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white'"
+                class="flex-1 text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-all duration-200 touch-manipulation">
           Save Changes
         </button>
       </div>
+      <p x-show="!viewer.submissionId"
+         class="mt-2 text-xs text-red-600">
+        Submission ID is required to update status.
+      </p>
     </div>
   </div>
 </div>
