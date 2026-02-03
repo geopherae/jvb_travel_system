@@ -1,15 +1,38 @@
 <?php
-// Auth check
-require_once __DIR__ . '../admin_session_check.php';
-require_once __DIR__ . '/../includes/auth.php';
-use function Auth\guard;
-guard('admin');
+// Enable detailed error logging for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', '0');  // Don't display errors to users
+ini_set('log_errors', '1');      // Log errors to file
+ini_set('error_log', __DIR__ . '/../logs/admin_visa_packages.log');
 
-require_once __DIR__ . '/../includes/feature_flags.php';
-require_once __DIR__ . '/../includes/header.php';
-require_once __DIR__ . '/../actions/db.php';
+// Log page load attempt
+error_log('[' . date('Y-m-d H:i:s') . '] admin_visa_packages.php page load started', 3, __DIR__ . '/../logs/admin_visa_packages.log');
 
-date_default_timezone_set('Asia/Manila');
+try {
+    // Auth check
+    error_log('Starting auth checks...', 3, __DIR__ . '/../logs/admin_visa_packages.log');
+    require_once __DIR__ . '/../admin_session_check.php';
+    require_once __DIR__ . '/../includes/auth.php';
+    use function Auth\guard;
+    guard('admin');
+    error_log('Auth passed', 3, __DIR__ . '/../logs/admin_visa_packages.log');
+
+    require_once __DIR__ . '/../includes/feature_flags.php';
+    error_log('Feature flags loaded', 3, __DIR__ . '/../logs/admin_visa_packages.log');
+    
+    require_once __DIR__ . '/../includes/header.php';
+    error_log('Header loaded', 3, __DIR__ . '/../logs/admin_visa_packages.log');
+    
+    require_once __DIR__ . '/../actions/db.php';
+    error_log('Database connection loaded', 3, __DIR__ . '/../logs/admin_visa_packages.log');
+
+    date_default_timezone_set('Asia/Manila');
+    error_log('Timezone set', 3, __DIR__ . '/../logs/admin_visa_packages.log');
+} catch (Exception $e) {
+    error_log('Critical error during initialization: ' . $e->getMessage(), 3, __DIR__ . '/../logs/admin_visa_packages.log');
+    http_response_code(500);
+    die('Error initializing page. Check logs for details.');
+}
 
 $visaPackages = [];
 $decodeJson = function ($json) {
@@ -80,7 +103,7 @@ try {
     <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative z-0">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
-        <h2 class="text-xl font-bold text-gray-900">Visa Packages</h1>
+        <h2 class="text-xl font-bold text-gray-900">Visa Packages</h2>
         <p class="text-gray-600 text-sm mt-1">Listing all active visa packages.</p>
       </div>
       <div class="flex flex-wrap gap-2 items-center">
