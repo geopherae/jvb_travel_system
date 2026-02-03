@@ -140,10 +140,10 @@ error_log("DEBUG: visa-clients-table.php - Total visa clients: $totalClients, Pa
   </div>
 <?php else: ?>
       <div class="rounded-lg border overflow-hidden min-w-full">
-<table class="w-full text-xs md:text-sm text-left">
+<table class="w-full table-fixed text-xs md:text-sm text-left">
   <thead class="bg-blue-50 text-gray-500 font-medium text-center">
     <tr>
-      <th scope="col" class="p-2 md:p-3">Client Name</th>
+      <th scope="col" class="p-2 md:p-3 w-[40%] max-w-[40%] text-left">Client Name</th>
       <th scope="col" class="p-2 md:p-3 hidden sm:table-cell">Visa Package</th>
       <th scope="col" class="p-2 md:p-3 hidden md:table-cell">Applied Date</th>
       <th scope="col" class="p-2 md:p-3">
@@ -182,15 +182,21 @@ error_log("DEBUG: visa-clients-table.php - Total visa clients: $totalClients, Pa
         class="text-gray-700 hover:text-sky-600 transition-colors odd:bg-white even:bg-sky-50"
         data-client-id="<?= (int) $client['id'] ?>"
       >
-        <td class="p-2 md:p-4">
-          <div class="flex items-center gap-2">
+        <td class="p-2 md:p-4 w-[35%] max-w-[35%]">
+          <div class="flex items-center gap-2 min-w-0">
             <img src="<?= $avatarSrc ?>" alt="Profile photo of <?= htmlspecialchars($fullName) ?>"
                  class="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover border-2 border-white shadow-md shadow-gray-100" loading="lazy" />
-            <span class="font-medium text-xs md:text-sm"><?= htmlspecialchars($fullName) ?></span>
+            <span class="font-medium text-xs md:text-sm truncate block" title="<?= htmlspecialchars($fullName) ?>">
+              <?= htmlspecialchars($fullName) ?>
+            </span>
           </div>
         </td>
 
-        <td class="p-2 md:p-4 hidden sm:table-cell text-xs md:text-sm"><?= htmlspecialchars($visaPackageCountry) ?></td>
+        <td class="p-2 md:p-4 hidden sm:table-cell text-xs md:text-sm">
+          <span class="break-words line-clamp-1" title="<?= htmlspecialchars($visaPackageCountry) ?>">
+            <?= htmlspecialchars($visaPackageCountry) ?>
+          </span>
+        </td>
         <td class="p-2 md:p-4 hidden md:table-cell text-xs md:text-sm"><?= htmlspecialchars($appliedDate) ?></td>
         <td class="p-2 md:p-4 text-center">
           <span class="px-2 md:px-3 py-1 text-xs font-semibold rounded-full <?= getVisaStatusBadgeClass($statusText) ?>">
