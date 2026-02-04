@@ -1184,6 +1184,19 @@ if ($imgCount > 0) {
             </svg>
             <a href="mailto:reservations.jvandbtravel@gmail.com" class="hover:text-[#2596be] transition break-all">reservations.jvandbtravel@gmail.com</a>
           </div>
+          
+          <!-- Google Map Embed -->
+          <div class="mt-4 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3856.845758402797!2d120.27772587457689!3d14.833912271322998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x339671ccece4f729%3A0x80f25a50d60a2595!2sJV-B%20Travel%20and%20Tours!5e0!3m2!1sen!2sph!4v1770209891942!5m2!1sen!2sph" 
+                    width="100%" 
+                    height="150" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade"
+                    class="w-full">
+            </iframe>
+          </div>
         </div>
 
         <!-- New Kalalake Office -->
@@ -1219,6 +1232,19 @@ if ($imgCount > 0) {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
             </svg>
             <a href="mailto:newkalalake.jvandbtravel@gmail.com" class="hover:text-[#2596be] transition break-all">newkalalake.jvandbtravel@gmail.com</a>
+          </div>
+          
+          <!-- Google Map Embed -->
+          <div class="mt-4 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3856.8867167523113!2d120.28486307457699!3d14.83161467138007!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33967151d7e20e71%3A0x639a6d3939f8c480!2sJV-B%20Travel%20and%20Tours%20%7C%20New%20Kalalake!5e0!3m2!1sen!2sph!4v1770210005645!5m2!1sen!2sph" 
+                    width="100%" 
+                    height="150" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade"
+                    class="w-full">
+            </iframe>
           </div>
         </div>
 
