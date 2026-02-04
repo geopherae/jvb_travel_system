@@ -6,7 +6,7 @@
       const toastContainer = document.getElementById('toast-container') || (() => {
         const container = document.createElement('div');
         container.id = 'toast-container';
-        container.className = 'fixed bottom-4 right-4 z-[60] space-y-2';
+        container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
         document.body.appendChild(container);
         return container;
       })();
@@ -217,7 +217,7 @@
   x-show="$store.visaPackageModal.isOpen"
   x-transition.opacity
   x-cloak
-  class="backdrop-blur-sm fixed inset-0 z-[50] flex items-end sm:items-center justify-center bg-black/55 px-3 sm:px-4"
+  class="backdrop-blur-sm fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 px-3 sm:px-4"
   @keydown.escape.window="$store.visaPackageModal.close()"
   role="dialog"
   aria-modal="true"
@@ -403,7 +403,7 @@
   x-transition.opacity
   x-data="visaPackageFormData()"
   x-effect="loadFrom($store.editVisaPackageModal.packageData || {})"
-  class="fixed inset-0 z-[55] flex items-end sm:items-center justify-center bg-black/55 px-3 sm:px-4 backdrop-blur-sm"
+  class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 px-3 sm:px-4 backdrop-blur-sm"
   @keydown.escape.window="$store.editVisaPackageModal.close()"
   @click.self="$store.editVisaPackageModal.close()"
 >

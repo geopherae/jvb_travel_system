@@ -11,9 +11,9 @@
   <!-- Left: Avatar, Name, and Status -->
   <div class="flex items-center space-x-3">
     <!-- Back button for mobile -->
-    <button class="md:hidden text-gray-600 hover:text-gray-800"
-            @click="recipientId = null; selectedUser = null; sidebarOpen = true">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <button class="md:hidden text-gray-600 hover:text-gray-800 touch-manipulation p-2"
+            @click="recipientId = null; selectedUser = null; messages = []; threadId = null;">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
     </button>

@@ -33,7 +33,7 @@ document.addEventListener('alpine:init', () => {
   x-show="$store.tourModal.isOpen"
   x-transition.opacity
   x-cloak
-  class="backdrop-blur-sm fixed inset-0 z-[50] flex items-end sm:items-center justify-center bg-black/55 px-3 sm:px-4"
+  class="backdrop-blur-sm fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 px-3 sm:px-4"
   @keydown.escape.window="$store.tourModal.closeModal()"
   role="dialog"
   aria-modal="true"

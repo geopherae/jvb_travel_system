@@ -164,7 +164,7 @@ $applicantsJson = json_encode(
 <?php include '../components/reassign-visa-modal.php'; ?>
 
 <!-- Mobile Toggle -->
-<button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-30 bg-primary text-white rounded">
+<button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-20 bg-primary text-white rounded">>
   ☰
 </button>
 
@@ -175,8 +175,8 @@ $applicantsJson = json_encode(
 
   <div class="space-y-6">
 
-  <!-- Two-column grid for cards (force 2 columns) -->
-  <div class="grid grid-cols-2 gap-2 items-start">
+  <!-- Two-column grid for cards (responsive: 1 col mobile, 2 cols on medium+ screens) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-2 items-start">
     <!-- 👤 Client Info Dashboard -->
     <div class="h-full">
       <?php 

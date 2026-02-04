@@ -211,6 +211,18 @@ function renderNotificationList(container, data) {
     }
   }
 
+  // 📍 Position notification overlay relative to bell button
+  function positionNotificationOverlay() {
+    if (!bellBtn || !overlay) return;
+    
+    const bellRect = bellBtn.getBoundingClientRect();
+    const overlayWidth = 384; // w-96 = 24rem = 384px
+    
+    // Position below the bell button, aligned to the right
+    overlay.style.top = `${bellRect.bottom + 8}px`; // 8px gap (mt-2)
+    overlay.style.left = `${bellRect.right - overlayWidth}px`; // Align right edge
+  }
+
   // 🧠 Close overlay on outside click
   document.addEventListener('click', event => {
     if (!overlay || overlay.classList.contains('hidden')) return;
@@ -221,7 +233,25 @@ function renderNotificationList(container, data) {
   // 🚀 Init
   fetchNotifications();
   refreshBtn?.addEventListener('click', fetchNotifications);
-  bellBtn?.addEventListener('click', () => overlay?.classList.toggle('hidden'));
+  bellBtn?.addEventListener('click', () => {
+    overlay?.classList.toggle('hidden');
+    if (!overlay.classList.contains('hidden')) {
+      positionNotificationOverlay();
+    }
+  });
+
+  // 📍 Reposition on scroll or resize
+  window.addEventListener('scroll', () => {
+    if (!overlay.classList.contains('hidden')) {
+      positionNotificationOverlay();
+    }
+  }, true); // Use capture to catch all scroll events
+  
+  window.addEventListener('resize', () => {
+    if (!overlay.classList.contains('hidden')) {
+      positionNotificationOverlay();
+    }
+  });
 
   // 🔁 Polling (every 3 seconds for faster updates)
   setInterval(fetchNotifications, 3000);

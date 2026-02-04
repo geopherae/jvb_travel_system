@@ -104,36 +104,36 @@
         <!-- 🗂️ Right Column: Tabs -->
         <div class="sm:w-[50%] w-full rounded-lg bg-white">
           <!-- Tab Header -->
-          <div class="flex border-b">
+          <div class="flex border-b overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             <button type="button"
                     @click="tab = 'details'"
                     :class="tab === 'details'
-                      ? 'px-4 py-2 text-sm font-medium text-sky-600 border-b-2 border-sky-600'
-                      : 'px-4 py-2 text-sm font-medium text-slate-600 hover:text-sky-600'">
+                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
+                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
               Details
             </button>
 
             <button type="button"
                     @click="tab = 'itinerary'"
                     :class="tab === 'itinerary'
-                      ? 'px-4 py-2 text-sm font-medium text-sky-600 border-b-2 border-sky-600'
-                      : 'px-4 py-2 text-sm font-medium text-slate-600 hover:text-sky-600'">
+                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
+                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
               Itinerary
             </button>
 
             <button type="button"
                     @click="tab = 'inclusions'"
                     :class="tab === 'inclusions'
-                      ? 'px-4 py-2 text-sm font-medium text-sky-600 border-b-2 border-sky-600'
-                      : 'px-4 py-2 text-sm font-medium text-slate-600 hover:text-sky-600'">
+                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
+                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
               Inclusions
             </button>
 
             <button type="button"
                     @click="tab = 'exclusions'"
                     :class="tab === 'exclusions'
-                      ? 'px-4 py-2 text-sm font-medium text-sky-600 border-b-2 border-sky-600'
-                      : 'px-4 py-2 text-sm font-medium text-slate-600 hover:text-sky-600'">
+                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
+                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
               Exclusions
             </button>
           </div>

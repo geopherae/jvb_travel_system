@@ -98,7 +98,40 @@ if ($previousVisaPackageId === $visaPackageId) {
   exit();
 }
 
-// ✅ 7. Update or Create Visa Application
+// ✅ 7. Fetch requirements_json from the new visa package
+$fetchReqSql = "SELECT requirements_json FROM visa_packages WHERE id = ?";
+$fetchReqStmt = $conn->prepare($fetchReqSql);
+if (!$fetchReqStmt) {
+  http_response_code(500);
+  $_SESSION['modal_status'] = 'db_error';
+  error_log("Fetch requirements prepare failed for visa_package_id=$visaPackageId: " . $conn->error);
+  header("Location: ../admin/view_client.php?client_id=" . $clientId);
+  exit();
+}
+
+$fetchReqStmt->bind_param("i", $visaPackageId);
+if (!$fetchReqStmt->execute()) {
+  http_response_code(500);
+  $_SESSION['modal_status'] = 'db_error';
+  error_log("Fetch requirements execute failed for visa_package_id=$visaPackageId: " . $fetchReqStmt->error);
+  header("Location: ../admin/view_client.php?client_id=" . $clientId);
+  exit();
+}
+
+$fetchReqStmt->bind_result($requirementsJson);
+$fetchReqStmt->fetch();
+$fetchReqStmt->close();
+
+// Validate and use default if requirements_json is empty
+$requirementsJson = $requirementsJson ?: json_encode([], JSON_UNESCAPED_UNICODE);
+
+// Validate JSON
+if (json_decode($requirementsJson, true) === null && $requirementsJson !== '[]') {
+  error_log("[reassign_visa_package] Warning: Invalid requirements_json from visa_package $visaPackageId, using empty array");
+  $requirementsJson = json_encode([], JSON_UNESCAPED_UNICODE);
+}
+
+// ✅ 8. Update or Create Visa Application
 if ($previousVisaPackageId !== null) {
   // Update existing visa application
   $update = $conn->prepare("
@@ -133,7 +166,34 @@ if (!$updateSuccess) {
   exit();
 }
 
-// ✅ 8. Log Reassignment
+// ✅ 9. Update client_visa_requirements with new requirements_json
+// First, delete existing requirements for this client (for lead applicant only)
+$deleteReqSql = "DELETE FROM client_visa_requirements WHERE client_id = ? AND companion_id IS NULL";
+$deleteReqStmt = $conn->prepare($deleteReqSql);
+if ($deleteReqStmt) {
+  $deleteReqStmt->bind_param("i", $clientId);
+  $deleteReqStmt->execute();
+  $deleteReqStmt->close();
+}
+
+// Insert new requirements for this client (lead applicant)
+$insertReqSql = "INSERT INTO client_visa_requirements 
+  (client_id, companion_id, visa_type, requirements_json, created_at, updated_at) 
+  VALUES (?, NULL, NULL, ?, NOW(), NOW())";
+$insertReqStmt = $conn->prepare($insertReqSql);
+if (!$insertReqStmt) {
+  error_log("Insert requirements prepare failed for client_id=$clientId: " . $conn->error);
+} else {
+  $insertReqStmt->bind_param("is", $clientId, $requirementsJson);
+  if (!$insertReqStmt->execute()) {
+    error_log("Insert requirements execute failed for client_id=$clientId: " . $insertReqStmt->error);
+  } else {
+    error_log("[reassign_visa_package] Client $clientId: Visa requirements re-copied from package $visaPackageId");
+  }
+  $insertReqStmt->close();
+}
+
+// ✅ 10. Log Reassignment
 $actor_id = (int) ($_SESSION['admin_id'] ?? 0);
 $actor_role = 'admin';
 $action_type = 'reassign_visa_package';
@@ -194,7 +254,7 @@ $audit_stmt->bind_param(
 $audit_stmt->execute();
 $audit_stmt->close();
 
-// ✅ 9. Send Notification
+// ✅ 11. Send Notification
 $eventType = $previousVisaPackageId ? 'visa_package_reassigned' : 'visa_package_assigned';
 notify([
   'recipient_type' => 'client',
@@ -206,7 +266,7 @@ notify([
   ]
 ]);
 
-// ✅ 10. Set Success Message & Redirect
+// ✅ 12. Set Success Message & Redirect
 $_SESSION['modal_status'] = 'success';
 $_SESSION['message'] = $previousVisaPackageId 
   ? "Visa package reassigned successfully!"

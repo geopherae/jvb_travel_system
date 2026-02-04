@@ -54,7 +54,7 @@ $currentPackageId = $client['assigned_package_id'] ?? null;
   x-show="$store.modals.reassign" 
   x-cloak 
   x-transition
-  class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
 >
   <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 max-w-md w-full mx-4 border border-gray-200">
     <h3 class="text-xl font-bold text-sky-800 mb-4" x-text="hasPackages ? 'Reassign Tour Package' : 'Assign Tour Package'"></h3>

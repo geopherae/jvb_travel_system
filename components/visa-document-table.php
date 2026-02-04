@@ -61,12 +61,12 @@ try {
       <?php foreach ($applicantBundles as $idx => $applicant): ?>
         <div x-show="currentIdx === <?= $idx ?>" x-transition class="border border-gray-200 rounded-lg overflow-hidden">
           <!-- Applicant Header -->
-          <div class="px-4 py-4 bg-gradient-to-r from-sky-50 to-blue-50 border-b border-gray-200 flex items-center justify-between">
-            <p class="text-base tracking-wide text-sky-700 font-semibold">Primary Requirements for:</p>
+          <div class="px-3 sm:px-4 py-3 sm:py-4 bg-gradient-to-r from-sky-50 to-blue-50 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <p class="text-sm sm:text-base tracking-wide text-sky-700 font-semibold">Primary Requirements for:</p>
             <template x-if="applicantMeta.length > 1 || (accessType === 'group' && isClient)">
               <select x-model.number="currentIdx"
                       @change="currentIdx = Number($event.target.value)"
-                      class="px-4 py-2.5 border-2 border-sky-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 text-sm bg-white text-gray-800 font-medium appearance-none cursor-pointer hover:border-sky-400 transition-all w-72"
+                      class="px-3 sm:px-4 py-2.5 border-2 border-sky-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 text-xs sm:text-sm bg-white text-gray-800 font-medium appearance-none cursor-pointer hover:border-sky-400 transition-all w-full md:w-72"
                       style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%230369a1%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3e%3cpolyline points=%226 9 12 15 18 9%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em; padding-right: 2.75rem;">
                 <!-- Lead Guest Section -->
                 <optgroup label="Lead Guest">
@@ -127,11 +127,11 @@ try {
                       <?php endif; ?>
                       
                       <!-- Main content -->
-                        <div class="p-6 w-full transition-colors duration-150 ease-in-out cursor-pointer relative <?= $isRejected ? 'bg-red-50' : 'bg-white' ?>"
+                        <div class="p-4 sm:p-6 w-full transition-colors duration-150 ease-in-out cursor-pointer relative <?= $isRejected ? 'bg-red-50' : 'bg-white' ?>"
                           title="<?= !$item['submission'] ? 'Click to upload requirement' : 'Click to view document' ?>"
                           @click="<?php if ($item['submission']): ?>openViewer('<?= htmlspecialchars($docPath) ?>', '<?= htmlspecialchars($item['submission']['file_name']) ?>', '<?= htmlspecialchars($item['requirement_name']) ?>', '<?= htmlspecialchars($item['submission']['mime_type']) ?>', '<?= htmlspecialchars($item['submission']['status']) ?>', '<?= htmlspecialchars($item['submission']['admin_comments'] ?? '') ?>', '<?= htmlspecialchars($item['submission']['uploaded_at'] ?? '') ?>', '<?= htmlspecialchars($item['submission']['approved_at'] ?? '') ?>', '<?= htmlspecialchars($item['submission']['updated_by'] ?? '') ?>', '<?= htmlspecialchars($item['submission']['id'] ?? $item['submission']['submission_id'] ?? '') ?>')<?php else: ?>openUploadDocument('<?= htmlspecialchars($item['requirement_id']) ?>', '<?= htmlspecialchars($item['requirement_name']) ?>', '<?= htmlspecialchars($item['description'] ?? '') ?>')<?php endif; ?>">
                         
-                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 sm:gap-4">
                       <div class="flex-1">
                         <div class="flex items-start justify-between gap-3">
                           <div class="pr-2">
@@ -157,7 +157,7 @@ try {
                         <?php endif; ?>
                       </div>
 
-                      <div class="flex flex-col items-end gap-4 md:w-56">
+                      <div class="flex flex-col items-end gap-2 sm:gap-4 md:w-56">
                         <span class="px-2 md:px-3 py-1 text-xs font-semibold rounded-full <?= getStatusClass($item['status']); ?>">
                           <?= htmlspecialchars($item['status']) ?>
                         </span>

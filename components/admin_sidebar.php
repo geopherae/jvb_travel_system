@@ -38,7 +38,7 @@ $navLinks = [
 ?>
 <!-- Mobile Toggle -->
 <button @click="sidebarOpen = !sidebarOpen"
-        class="w-10 h-10 lg:hidden fixed top-4 left-4 z-60 bg-white p-2 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-brand"
+        class="w-10 h-10 lg:hidden fixed top-4 left-4 z-41 bg-white p-2 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-brand"
         aria-label="Toggle Sidebar">
   <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
@@ -46,7 +46,7 @@ $navLinks = [
 </button>
 
 <!-- Sidebar -->
-<aside class="fixed top-0 left-0 w-64 h-screen flex flex-col bg-white border-r border-neutral-200 z-60 transform transition-transform duration-300 ease-in-out"
+<aside class="fixed top-0 left-0 w-64 h-screen flex flex-col bg-white border-r border-neutral-200 z-40 transform transition-transform duration-300 ease-in-out"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
        @click="sidebarOpen = false">
 

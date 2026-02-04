@@ -50,7 +50,7 @@ $durationText = ($day && $night)
     </div>
 
     <!-- Dropdown Menu -->
-    <div class="relative z-[60] shrink-0">
+    <div class="relative z-50 shrink-0">
       <button @click.stop="toggleMenu()"
               class="text-slate-500 hover:text-slate-800 p-1.5 rounded-full hover:bg-slate-100 transition">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">

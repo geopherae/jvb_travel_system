@@ -134,46 +134,39 @@ $alpineData = [
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="font-sans text-gray-800 bg-gray-100 h-screen flex flex-col overflow-hidden">
-
-    <button @click="sidebarOpen = !sidebarOpen"
-            class="fixed top-4 left-4 z-50 p-3 bg-sky-600 text-white rounded-full shadow-lg md:hidden">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
-    </button>
+<body class="font-sans text-gray-800 bg-gray-100 h-screen flex flex-col overflow-hidden" x-data="{ sidebarOpen: false, isMobile: window.innerWidth < 768 }" @resize.window="isMobile = window.innerWidth < 768">
 
     <?php include $projectRoot . '/components/admin_sidebar.php'; ?>
     <?php include $projectRoot . '/components/right-panel.php'; ?>
 
-    <main class="flex-1 flex flex-col md:ml-64 md:mr-80 pt-16 md:pt-6 md:px-6 md:pb-6 overflow-hidden"
+    <main class="flex-1 flex flex-col md:ml-64 md:mr-80 pt-4 md:pt-6 px-0 md:px-6 pb-0 md:pb-6 overflow-hidden"
           x-data="messageApp()"
           x-init="
-              sidebarOpen = false;
-              recipientId = <?= json_encode($selectedRecipientId) ?>;
-              threadId = <?= json_encode($selectedThreadId) ?>;
+              recipientId = isMobile ? null : <?= json_encode($selectedRecipientId) ?>;
+              threadId = isMobile ? null : <?= json_encode($selectedThreadId) ?>;
               messages = [];
               seenMessageIds = new Set();
               lastFetched = null;
               $nextTick(() => {
-                  if (recipientId) {
+                  if (recipientId && !isMobile) {
                       debounceFetchInitialMessages();
                   }
               });
           ">
 
         <div class="flex-1 flex flex-col md:flex-row max-w-full mx-auto w-full overflow-hidden md:rounded-2xl md:shadow-lg bg-white">
-            <!-- Client List (Sidebar on desktop, hidden/show on mobile) -->
-            <aside class="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col hidden md:flex"
-                   :class="{'!flex': sidebarOpen, 'hidden': !sidebarOpen}">
-                <div class="p-4 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-3">Messages</h2>
+            <!-- Client List (Sidebar on desktop, full screen default on mobile) -->
+            <aside class="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col"
+                   :class="{'hidden': isMobile && recipientId}"
+                   x-show="!isMobile || !recipientId">
+                <div class="p-4 md:p-4 border-b border-gray-200">
+                    <h2 class="text-xl md:text-xl font-semibold text-gray-800 mb-3">Messages</h2>
                     <!-- Search Input -->
                     <div class="relative">
                         <input type="text"
                                x-model="searchQuery"
                                placeholder="Search agents & clients..."
-                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                               class="w-full pl-10 pr-4 py-2.5 md:py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent touch-manipulation">
                         <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
@@ -195,7 +188,6 @@ $alpineData = [
                                 <button @click="
                                     recipientId = admin.id;
                                     recipientType = 'admin';
-                                    sidebarOpen = false;
                                     $nextTick(() => {
                                         threadId = null;
                                         messages = [];
@@ -204,23 +196,23 @@ $alpineData = [
                                         debounceFetchInitialMessages();
                                     });
                                 "
-                                        :class="recipientId === admin.id && recipientType === 'admin' ? 'bg-amber-50 border-r-4 border-amber-500' : 'hover:bg-gray-50'"
-                                        class="w-full text-left px-4 py-4 transition-colors flex items-center gap-4 relative">
+                                        :class="recipientId === admin.id && recipientType === 'admin' ? 'bg-amber-50 border-r-4 border-amber-500' : 'hover:bg-gray-50 active:bg-gray-100'"
+                                        class="w-full text-left px-4 py-3.5 md:py-4 transition-colors flex items-center gap-3 md:gap-4 relative touch-manipulation">
                                     <img :src="getRecipientDetails(admin.id, 'admin')?.avatar || '../images/default_client_profile.png'"
                                          alt="Avatar"
-                                         class="w-12 h-12 rounded-full object-cover flex-shrink-0">
+                                         class="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0">
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-2">
-                                            <p class="font-medium text-gray-900 truncate" x-text="admin.full_name"></p>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <p class="font-medium text-base md:text-base text-gray-900 truncate" x-text="admin.full_name"></p>
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
                                                   x-text="admin.role"></span>
                                             <template x-if="hasUnreadMessages(admin.id)">
                                                 <span class="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></span>
                                             </template>
                                         </div>
-                                        <p class="text-sm text-gray-500 truncate" x-text="getLastMessagePreview(admin.id, 'admin') || 'No messages yet'"></p>
+                                        <p class="text-sm md:text-sm text-gray-500 truncate" x-text="getLastMessagePreview(admin.id, 'admin') || 'No messages yet'"></p>
                                     </div>
-                                    <p class="text-xs text-gray-400 whitespace-nowrap" x-text="getLastMessageTime(admin.id)"></p>
+                                    <p class="text-xs text-gray-400 whitespace-nowrap self-start" x-text="getLastMessageTime(admin.id)"></p>
                                 </button>
                             </li>
                         </template>
@@ -245,7 +237,6 @@ $alpineData = [
                                 <button @click="
                                     recipientId = client.id;
                                     recipientType = 'client';
-                                    sidebarOpen = false;
                                     $nextTick(() => {
                                         threadId = null;
                                         messages = [];
@@ -254,14 +245,14 @@ $alpineData = [
                                         debounceFetchInitialMessages();
                                     });
                                 "
-                                        :class="recipientId === client.id && recipientType === 'client' ? 'bg-sky-50 border-r-4 border-sky-600' : 'hover:bg-gray-50'"
-                                        class="w-full text-left px-4 py-4 transition-colors flex items-center gap-4 relative">
+                                        :class="recipientId === client.id && recipientType === 'client' ? 'bg-sky-50 border-r-4 border-sky-600' : 'hover:bg-gray-50 active:bg-gray-100'"
+                                        class="w-full text-left px-4 py-3.5 md:py-4 transition-colors flex items-center gap-3 md:gap-4 relative touch-manipulation">
                                     <img :src="getRecipientDetails(client.id, 'client')?.avatar || '../images/default_client_profile.png'"
                                          alt="Avatar"
-                                         class="w-12 h-12 rounded-full object-cover flex-shrink-0">
+                                         class="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0">
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-2">
-                                            <p class="font-medium text-gray-900 truncate" x-text="client.full_name"></p>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <p class="font-medium text-base md:text-base text-gray-900 truncate" x-text="client.full_name"></p>
                                             <span x-show="isAssignedToMe(client.id)" 
                                                   class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-sky-100 text-sky-800">
                                                 Assigned
@@ -270,9 +261,9 @@ $alpineData = [
                                                 <span class="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></span>
                                             </template>
                                         </div>
-                                        <p class="text-sm text-gray-500 truncate" x-text="getLastMessagePreview(client.id, 'client') || 'No messages yet'"></p>
+                                        <p class="text-sm md:text-sm text-gray-500 truncate" x-text="getLastMessagePreview(client.id, 'client') || 'No messages yet'"></p>
                                     </div>
-                                    <p class="text-xs text-gray-400 whitespace-nowrap" x-text="getLastMessageTime(client.id)"></p>
+                                    <p class="text-xs text-gray-400 whitespace-nowrap self-start" x-text="getLastMessageTime(client.id)"></p>
                                 </button>
                             </li>
                         </template>
@@ -291,31 +282,34 @@ $alpineData = [
                 </div>
             </aside>
 
-            <!-- Chat Area (Full on mobile when no selection, hidden until selection) -->
-            <section class="flex-1 flex flex-col bg-sky-50" x-show="recipientId">
+            <!-- Chat Area (Full screen on mobile, split view on desktop) -->
+            <section class="flex-1 flex flex-col bg-sky-50 relative"
+                     :class="{'hidden': isMobile && !recipientId}"
+                     x-show="!isMobile || recipientId">
                 <?php include $projectRoot . '/components/chat_header.php'; ?>
 
                 <div id="messageContainer"
-                     class="flex-1 overflow-y-auto p-4 space-y-6 bg-gradient-to-b from-sky-50 to-white"
+                     class="flex-1 overflow-y-auto p-3 md:p-4 space-y-4 md:space-y-6 bg-gradient-to-b from-sky-50 to-white"
                      x-show="(messages && messages.length > 0) || !isLoading"
                      x-ref="messageContainer"
-                     @scroll="if ($refs.messageContainer.scrollTop < 100) loadMoreMessages()">
+                     @scroll="if ($refs.messageContainer.scrollTop < 100) loadMoreMessages()"
+                     style="-webkit-overflow-scrolling: touch;">
                     <template x-if="messages.length === 0">
-                        <div class="text-center text-gray-500 py-12 italic">
+                        <div class="text-center text-gray-500 py-8 md:py-12 italic text-sm md:text-base">
                             No messages yet. Start the conversation!
                         </div>
                     </template>
                     <template x-for="msg in messages" :key="msg.id">
-                        <div class="flex items-end gap-3 max-w-lg"
+                        <div class="flex items-end gap-2 md:gap-3 max-w-[85%] md:max-w-lg"
                              :class="msg.sender_id === userId ? 'ml-auto flex-row-reverse' : 'mr-auto flex-row'">
                             <img :src="msg.sender_photo || '../images/default_client_profile.png'"
                                  alt="Avatar"
-                                 class="w-8 h-8 rounded-full object-cover flex-shrink-0">
+                                 class="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover flex-shrink-0">
                             <div :class="msg.sender_id === userId
                                 ? 'bg-sky-600 text-white rounded-3xl rounded-br-md'
                                 : 'bg-white text-gray-800 rounded-3xl rounded-bl-md shadow-md'"
-                                 class="px-4 py-2.5 max-w-full">
-                                <p class="text-sm break-words" x-text="msg.message_text"></p>
+                                 class="px-3.5 md:px-4 py-2 md:py-2.5 max-w-full">
+                                <p class="text-sm md:text-sm break-words leading-relaxed" x-text="msg.message_text"></p>
                                 <p class="text-xs mt-1 opacity-70 text-right"
                                    x-text="new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})">
                                 </p>
@@ -328,17 +322,17 @@ $alpineData = [
                     Loading messages...
                 </div>
 
-                <div class="p-4 bg-white border-t border-gray-200">
-                    <form @submit.prevent="sendMessage()" class="flex gap-3">
+                <div class="p-3 md:p-4 bg-white border-t border-gray-200">
+                    <form @submit.prevent="sendMessage()" class="flex gap-2 md:gap-3">
                         <textarea x-model="newMessage"
                                   @keydown.enter="!$event.ctrlKey && (sendMessage(), $event.preventDefault())"
-                                  placeholder="Type your message... (Ctrl+Enter for new line)"
+                                  placeholder="Type your message..."
                                   rows="1"
-                                  class="flex-1 resize-none rounded-full border border-gray-300 px-5 py-3 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
+                                  class="flex-1 resize-none rounded-full border border-gray-300 px-4 md:px-5 py-2.5 md:py-3 text-base focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200 touch-manipulation"
                                   :disabled="isLoading || !recipientId"></textarea>
                         <button type="submit"
                                 :disabled="!canSendMessage || isLoading"
-                                class="px-6 py-3 bg-sky-600 hover:bg-sky-700 disabled:bg-gray-300 text-white font-medium rounded-full transition">
+                                class="px-5 md:px-6 py-2.5 md:py-3 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:bg-gray-300 text-white font-medium rounded-full transition-colors touch-manipulation text-sm md:text-base">
                             Send
                         </button>
                     </form>
@@ -360,8 +354,8 @@ $alpineData = [
     <script>
         window.initialData = <?= json_encode($alpineData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
     </script>
-    <script src="../includes/messages_poller.js?v=1.0.4"></script>
-    <script src="../assets/js/messages.js?v=1.0.4"></script>
+    <script src="../includes/messages_poller.js?v=1.0.1"></script>
+    <script src="../assets/js/messages.js?v=1.0.1"></script>
 </body>
 </html>
 

@@ -240,7 +240,7 @@ unset($_SESSION['modal_status']);
 <body x-data="adminSettingsController()" x-init="init()">
 
   <button @click="sidebarOpen = !sidebarOpen"
-          class="p-3 md:hidden absolute top-4 left-4 z-30 bg-sky-600 text-white rounded">
+          class="p-3 md:hidden absolute top-4 left-4 z-20 bg-sky-600 text-white rounded">>
     ☰
   </button>
 

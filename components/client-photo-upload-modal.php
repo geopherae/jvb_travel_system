@@ -1,7 +1,7 @@
 <div 
   x-show="uploadDay !== null" 
   x-transition 
-  class="fixed inset-0 z-[50] flex items-center justify-center backdrop-blur-sm bg-black/50"
+  class="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50"
 >
   <div 
     class="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto overflow-hidden p-4 space-y-4" 

@@ -32,7 +32,7 @@ if ($clientId) {
 ?>
 
 <div x-show="$store.reviewModal.show" x-cloak
-     class="fixed inset-0 z-10 bg-black bg-opacity-50 flex items-center justify-center backdrop-blur-sm"
+     class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center backdrop-blur-sm"
      x-transition
      role="dialog" aria-modal="true"
      @keydown.escape.window="$store.reviewModal.show = false"

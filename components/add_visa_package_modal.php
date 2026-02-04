@@ -4,7 +4,7 @@
   x-cloak
   x-transition.opacity
   x-data="visaPackageFormData()"
-  class="fixed inset-0 z-[55] flex items-end sm:items-center justify-center bg-black/55 px-3 sm:px-4 backdrop-blur-sm"
+  class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 px-3 sm:px-4 backdrop-blur-sm"
   @keydown.escape.window="$store.addVisaPackageModal.close()"
   @click.self="$store.addVisaPackageModal.close()"
 >

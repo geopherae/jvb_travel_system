@@ -207,7 +207,7 @@ try {
 
   <!-- Mobile Toggle -->
   <button @click="sidebarOpen = !sidebarOpen"
-          class="p-3 md:hidden absolute top-4 left-4 z-30 bg-primary text-white rounded">
+          class="p-3 md:hidden absolute top-4 left-4 z-20 bg-primary text-white rounded">>
     Menu
   </button>
 

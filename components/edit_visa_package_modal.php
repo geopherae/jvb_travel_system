@@ -5,7 +5,7 @@
   x-transition.opacity
   x-data="visaPackageFormData()"
   x-effect="loadFrom($store.editVisaPackageModal.packageData || {})"
-  class="fixed inset-0 z-[55] flex items-end sm:items-center justify-center bg-black/0 px-3 sm:px-4"
+  class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/0 px-3 sm:px-4"
   @keydown.escape.window="$store.editVisaPackageModal.close()"
   @click.self="$store.editVisaPackageModal.close()"
 >

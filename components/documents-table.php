@@ -276,7 +276,7 @@ if ($client_id) {
      x-transition:enter="transition ease-out duration-300"
      x-transition:leave="transition ease-in duration-200"
      x-cloak
-     class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-40 p-2 sm:p-4">
+     class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
   <div class="bg-white w-full max-w-5xl h-[95vh] sm:h-[90vh] rounded-lg shadow-lg flex flex-col sm:flex-row overflow-hidden"
        @keydown.window.escape="closeFileModal()"
        @click.self="closeFileModal()">

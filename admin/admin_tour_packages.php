@@ -309,7 +309,7 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
 <body class="font-poppins text-gray-800 overflow-hidden" x-data="{ sidebarOpen: false }" style="background: linear-gradient(to bottom, #e0f7ff 0%, white 10%, white 100%)">
 
 <!-- 📱 Mobile Menu Toggle -->
-<button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-30 bg-primary text-white rounded"> ☰ </button>
+<button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-20 bg-primary text-white rounded"> ☰ </button>
 
   <!--🧭 Sidebar + Right Panel -->
   <div>

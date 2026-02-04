@@ -53,7 +53,7 @@ $adminName = $_SESSION['first_name'] ?? 'Admin';
   <?php include '../components/status_alert.php'; ?>
 
   <!-- Mobile Toggle -->
-  <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-30 bg-sky-600 text-white rounded">
+  <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-20 bg-sky-600 text-white rounded">>
     ☰
   </button>
 

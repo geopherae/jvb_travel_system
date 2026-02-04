@@ -63,7 +63,7 @@ $visaClients = $visaClientsResult ? $visaClientsResult->fetch_all(MYSQLI_ASSOC) 
       style="background: linear-gradient(to bottom, #e0f7ff 0%, white 10%, white 100%);">
 
   <!-- Mobile Toggle -->
-  <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-30 bg-primary text-white rounded">
+  <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-20 bg-primary text-white rounded">
     ☰
   </button>
 

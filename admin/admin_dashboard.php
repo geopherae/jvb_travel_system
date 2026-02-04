@@ -146,7 +146,7 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
   <script src="../includes/admin-dashboard.js"></script>
 </head>
 
-<body class="font-poppins text-gray-800 overflow-hidden"
+<body class="font-poppins text-gray-800 overflow-hidden md:overflow-hidden"
       x-data="{  
         sidebarOpen: false,
         editClientModal: false,
@@ -203,7 +203,7 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
 
 
   <!-- Mobile Toggle -->
-  <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-30 bg-primary text-white rounded">
+  <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-20 bg-primary text-white rounded">
     ☰
   </button>
 
@@ -214,7 +214,7 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
   <?php include '../components/right-panel.php'; ?>
 
   <!-- Main Content -->
-  <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative z-0">
+  <main class="ml-0 lg:ml-64 lg:mr-80 min-h-screen md:h-screen overflow-y-auto p-4 pb-20 md:p-6 md:pb-6 space-y-6 relative z-0">
 
     <h2 class="text-xl font-bold">Admin Booking Dashboard</h2>
 

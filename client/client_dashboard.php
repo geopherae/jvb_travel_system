@@ -236,7 +236,7 @@ if ($agent_result) {
 }" class="bg-gray-50 font-poppins text-gray-800">
 
   <!-- Mobile Toggle -->
-  <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-30 bg-primary text-white rounded">
+  <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-20 bg-primary text-white rounded">
     ☰
   </button>
 

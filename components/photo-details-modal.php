@@ -120,7 +120,7 @@
 
 <!-- 🗑️ Delete Confirmation Modal (outside main modal) -->
 <template x-if="confirmDeletePhoto && selectedPhoto">
-  <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
     <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 space-y-4">
       <h3 class="text-lg font-semibold text-gray-900">Delete Photo?</h3>
       <p class="text-sm text-gray-600">

@@ -46,7 +46,7 @@ $itineraryData = $itineraryDays ?? [];
   x-show="showAssignedPackage"
   x-transition.opacity
   x-cloak
-  class="backdrop-blur-sm fixed inset-0 z-[99999] flex items-end sm:items-center justify-center bg-black/55 px-3 sm:px-4"
+  class="backdrop-blur-sm fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 px-3 sm:px-4"
   @keydown.escape.window="showAssignedPackage = false"
   role="dialog"
   aria-modal="true"
