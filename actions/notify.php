@@ -119,6 +119,32 @@ class NotificationManager {
                 'log_action'  => 'client_document_uploaded',
                 'expires_days' => 7
             ],
+            'client_uploaded_visa_document' => [
+                'category'    => 'admin_alert',
+                'title'       => 'New Visa Document Uploaded',
+                'message'     => "<strong>{client_name}</strong> uploaded <em>{requirement_name}</em> for visa application <strong>{visa_package_name}</strong>.",
+                'html'        => true,
+                'icon'        => '🛂',
+                'color'       => 'purple',
+                'priority'    => 'high',
+                'action_url'  => "/admin/client_visa_details.php?visa_app_id={visa_application_id}",
+                'action_text' => 'Review Document',
+                'log_action'  => 'client_visa_document_uploaded',
+                'expires_days' => 7
+            ],
+            'admin_uploaded_visa_document' => [
+                'category'    => 'document',
+                'title'       => 'Visa Document Added',
+                'message'     => "<strong>{requirement_name}</strong> has been uploaded and approved for your visa application.",
+                'html'        => true,
+                'icon'        => '✅',
+                'color'       => 'green',
+                'priority'    => 'normal',
+                'action_url'  => '/client/client_visa_dashboard.php',
+                'action_text' => 'View Visa Dashboard',
+                'log_action'  => 'admin_visa_document_uploaded',
+                'expires_days' => 30
+            ],
             
             // ═══════════════════════════════════════════════════════════════
             // BOOKING & PACKAGE NOTIFICATIONS

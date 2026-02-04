@@ -324,6 +324,7 @@ try {
   }
 
   // Log audit action
+  $actor = Auth\getActorContext();
   logClientOnboardingAudit(
     $conn,
     $clientId,
@@ -333,7 +334,8 @@ try {
       'requirement_id' => $requirementId,
       'requirement_name' => $requirementName,
       'companion_id' => $companionId
-    ]
+    ],
+    $actor
   );
 
   $uploaderName = 'Client';
@@ -343,6 +345,66 @@ try {
     $uploaderName = trim($firstName . ' ' . $lastName) ?: ($_SESSION['admin']['username'] ?? 'Admin');
   } else {
     $uploaderName = $_SESSION['client']['full_name'] ?? 'Client';
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Send Notifications
+  // ═══════════════════════════════════════════════════════════════════════════
+  require_once __DIR__ . '/notify.php';
+  $notifyManager = new NotificationManager($conn);
+
+  // Get client name for notifications
+  $clientStmt = $conn->prepare("SELECT full_name FROM clients WHERE id = ?");
+  $clientStmt->bind_param("i", $clientId);
+  $clientStmt->execute();
+  $clientResult = $clientStmt->get_result();
+  $clientName = $clientResult->fetch_assoc()['full_name'] ?? 'Client';
+  $clientStmt->close();
+
+  // Get visa package name
+  $visaPkgStmt = $conn->prepare("
+    SELECT vp.visa_package_name 
+    FROM client_visa_applications cva
+    JOIN visa_packages vp ON cva.visa_package_id = vp.id
+    WHERE cva.id = ?
+  ");
+  $visaPkgStmt->bind_param("i", $visaAppId);
+  $visaPkgStmt->execute();
+  $visaPkgResult = $visaPkgStmt->get_result();
+  $visaPackageName = $visaPkgResult->fetch_assoc()['visa_package_name'] ?? 'Visa Application';
+  $visaPkgStmt->close();
+
+  if ($isAdmin) {
+    // Admin uploaded → Notify client + document is already approved
+    $notifyManager->send([
+      'recipient_type' => 'client',
+      'recipient_id' => $clientId,
+      'event' => 'admin_uploaded_visa_document',
+      'context' => [
+        'client_id' => $clientId,
+        'requirement_name' => $requirementName,
+        'visa_application_id' => $visaAppId,
+        'visa_package_name' => $visaPackageName,
+        'uploaded_by' => $uploaderName
+      ]
+    ]);
+  } else {
+    // Client uploaded → Notify all admins
+    $adminStmt = $conn->query("SELECT id FROM admin_accounts WHERE is_active = 1");
+    while ($admin = $adminStmt->fetch_assoc()) {
+      $notifyManager->send([
+        'recipient_type' => 'admin',
+        'recipient_id' => $admin['id'],
+        'event' => 'client_uploaded_visa_document',
+        'context' => [
+          'client_id' => $clientId,
+          'client_name' => $clientName,
+          'requirement_name' => $requirementName,
+          'visa_application_id' => $visaAppId,
+          'visa_package_name' => $visaPackageName
+        ]
+      ]);
+    }
   }
 
   // Set session status for toast notification

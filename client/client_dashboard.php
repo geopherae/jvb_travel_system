@@ -4,14 +4,13 @@ require_once __DIR__ . '/../includes/auth.php';
 use function Auth\guard;
 guard('client');
 
+// 🚫 Prevent caching (must be before any output)
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+
 require_once __DIR__ . '/../actions/db.php';
 require_once __DIR__ . '/../includes/status-helpers.php';
 include __DIR__ . '/../components/status_alert.php';
-
-
-// 🚫 Prevent caching
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Pragma: no-cache");
 
 // 🧑 Get client ID from session
 $client_id = $_SESSION['client_id'] ?? null;

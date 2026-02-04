@@ -5,7 +5,6 @@ use function Auth\guard;
 guard('client');
 
 require_once __DIR__ . '/../actions/db.php';
-include __DIR__ . '/../components/status_alert.php';
 
 // 🚫 Prevent caching
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -90,6 +89,8 @@ if (!empty($visa_applications)) {
 
 <body x-data="{ sidebarOpen: false }" class="bg-gray-50 font-poppins text-gray-800">
 
+  <?php include __DIR__ . '/../components/status_alert.php'; ?>
+
   <!-- Mobile Toggle -->
   <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-30 bg-primary text-white rounded">
     ☰
@@ -110,6 +111,21 @@ if (!empty($visa_applications)) {
     <div class="flex-1 overflow-y-auto space-y-6">
 
       <h2 class="text-xl font-bold">Visa Processing Dashboard</h2>
+
+<?php
+// Fetch client details for welcome card
+if ($selectedVisaApp) {
+  $client_stmt = $conn->prepare("SELECT full_name FROM clients WHERE id = ?");
+  $client_stmt->bind_param("i", $client_id);
+  $client_stmt->execute();
+  $client = $client_stmt->get_result()->fetch_assoc();
+  $client_stmt->close();
+  
+  // Include visa welcome card
+  include __DIR__ . '/../components/visa-welcome-card.php';
+}
+?>
+
 
       <?php if (empty($visa_applications)): ?>
         <!-- No Visa Applications -->
@@ -143,29 +159,8 @@ if (!empty($visa_applications)) {
           </div>
         <?php endif; ?>
 
-        <!-- Selected Visa Application Details -->
+        <!-- Visa Document Table Component -->
         <?php if ($selectedVisaApp): ?>
-          <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h3 class="text-lg font-semibold text-gray-800"><?= htmlspecialchars($selectedVisaApp['country']) ?> Visa Application</h3>
-                <p class="text-sm text-gray-600 mt-1">
-                  Application Mode: <span class="font-medium"><?= ucfirst(htmlspecialchars($selectedVisaApp['application_mode'])) ?></span>
-                </p>
-                <p class="text-sm text-gray-600">
-                  Processing Time: <span class="font-medium"><?= htmlspecialchars($selectedVisaApp['processing_days']) ?> days</span>
-                </p>
-              </div>
-              <div class="text-right">
-                <p class="text-xs text-gray-500 mb-2">Status</p>
-                <span class="px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-700">
-                  <?= ucfirst(str_replace('_', ' ', htmlspecialchars($selectedVisaApp['status']))) ?>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Visa Document Table Component -->
           <div>
             <!-- Applicant Selector (Only for Group Applications or Group Access) -->
             <template x-if="$store.applicantSelector.totalApplicants > 1">

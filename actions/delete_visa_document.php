@@ -9,8 +9,14 @@ use function LogHelper\logClientOnboardingAudit;
 // Set JSON header before any output
 header('Content-Type: application/json');
 
-// Only admins can delete documents
-guard('admin');
+// Allow both admin and client access
+if (isset($_SESSION['admin']['id'])) {
+  guard('admin');
+  $isAdmin = true;
+} else {
+  guard('client');
+  $isAdmin = false;
+}
 
 $response = ['success' => false, 'message' => ''];
 
@@ -58,6 +64,14 @@ try {
     $clientId = $visaApp['client_id'];
     $visaStmt->close();
 
+    // Verify client can only delete their own documents
+    if (!$isAdmin) {
+        $sessionClientId = (int)$_SESSION['client_id'];
+        if ($clientId != $sessionClientId) {
+            throw new Exception('Unauthorized: You can only delete your own documents.');
+        }
+    }
+
     // Delete physical file if exists
     $filePath = __DIR__ . '/../' . ltrim($document['file_path'], '/');
     if (file_exists($filePath)) {
@@ -84,8 +98,8 @@ try {
         'file_name' => $document['file_name']
     ], $actor);
 
-        // Set session status for toast notification
-        $_SESSION['modal_status'] = 'document_deleted';
+    // Set session status for toast notification
+    $_SESSION['modal_status'] = 'document_deleted';
 
     $response['success'] = true;
     $response['message'] = 'Document deleted successfully.';
@@ -95,6 +109,5 @@ try {
     $response['message'] = ENV === 'development' ? $e->getMessage() : 'An error occurred while deleting the document.';
 }
 
-header('Content-Type: application/json');
 echo json_encode($response);
 ?>

@@ -83,6 +83,61 @@ try {
     }
     $stmt->close();
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Send Notification to Client
+    // ═══════════════════════════════════════════════════════════════════════════
+    if ($status === 'Approved' || $status === 'Rejected') {
+        require_once __DIR__ . '/notify.php';
+        $notifyManager = new NotificationManager($conn);
+
+        // Get client ID and requirement details from submission
+        $detailsStmt = $conn->prepare("
+            SELECT vds.requirement_name, vds.visa_application_id,
+                   cva.client_id, c.full_name as client_name,
+                   vp.visa_package_name
+            FROM visa_document_submissions vds
+            JOIN client_visa_applications cva ON vds.visa_application_id = cva.id
+            JOIN clients c ON cva.client_id = c.id
+            JOIN visa_packages vp ON cva.visa_package_id = vp.id
+            WHERE vds.id = ?
+        ");
+        $detailsStmt->bind_param('i', $submissionId);
+        $detailsStmt->execute();
+        $detailsResult = $detailsStmt->get_result();
+        
+        if ($detailsResult->num_rows > 0) {
+            $details = $detailsResult->fetch_assoc();
+            
+            if ($status === 'Approved') {
+                $notifyManager->send([
+                    'recipient_type' => 'client',
+                    'recipient_id' => $details['client_id'],
+                    'event' => 'document_approved',
+                    'context' => [
+                        'client_id' => $details['client_id'],
+                        'document_name' => $details['requirement_name'],
+                        'visa_package_name' => $details['visa_package_name'],
+                        'approved_by' => $adminName
+                    ]
+                ]);
+            } else if ($status === 'Rejected') {
+                $reason = !empty($adminComments) ? ' Reason: ' . $adminComments : '';
+                $notifyManager->send([
+                    'recipient_type' => 'client',
+                    'recipient_id' => $details['client_id'],
+                    'event' => 'document_rejected',
+                    'context' => [
+                        'client_id' => $details['client_id'],
+                        'document_name' => $details['requirement_name'],
+                        'reason' => $reason,
+                        'visa_package_name' => $details['visa_package_name']
+                    ]
+                ]);
+            }
+        }
+        $detailsStmt->close();
+    }
+
     // Log the action (optional - if you have audit logging)
     if (function_exists('LogHelper\logClientOnboardingAudit')) {
         require_once __DIR__ . '/../includes/log_helper.php';

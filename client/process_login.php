@@ -18,7 +18,8 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_to
 }
 
 // Sanitize and validate access code
-$access_code = filter_var(trim($_POST['access_code'] ?? ''), FILTER_SANITIZE_STRING);
+$access_code = trim($_POST['access_code'] ?? '');
+$access_code = htmlspecialchars($access_code, ENT_QUOTES, 'UTF-8'); // Safe sanitization
 if (empty($access_code)) {
     error_log("Empty access code provided");
     $_SESSION['login_error'] = "Access code is required.";
@@ -168,9 +169,11 @@ try {
     // If access_code exists in client_visa_companions, they're a group member
     if (VISA_PROCESSING_ENABLED) {
         $companionStmt = $conn->prepare("
-            SELECT id AS companion_id, client_id, full_name, email, access_code
-            FROM client_visa_companions
-            WHERE access_code = ?
+            SELECT c.id AS companion_id, c.visa_application_id, c.full_name, c.email, c.access_code,
+                   v.client_id
+            FROM client_visa_companions c
+            INNER JOIN client_visa_applications v ON c.visa_application_id = v.id
+            WHERE c.access_code = ?
         ");
         if (!$companionStmt) {
             throw new Exception("Companion query preparation failed: " . $conn->error);
@@ -186,17 +189,6 @@ try {
             // Generate session token for companion
             $new_token = bin2hex(random_bytes(32));
             $now = time();
-            $now_datetime = date('Y-m-d H:i:s', $now);
-
-            // Update companion record with session token
-            $updateCompanionStmt = $conn->prepare("
-                UPDATE client_visa_companions 
-                SET session_token = ?, last_activity = ? 
-                WHERE id = ?
-            ");
-            $updateCompanionStmt->bind_param("ssi", $new_token, $now_datetime, $companion['companion_id']);
-            $updateCompanionStmt->execute();
-            $updateCompanionStmt->close();
 
             session_regenerate_id(true);
 
