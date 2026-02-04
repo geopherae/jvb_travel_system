@@ -182,7 +182,24 @@ if ($emailCheck->num_rows > 0) {
 }
 $emailCheck->close();
 
-// Generate unique group access code for group applications (different from lead's code)
+// Generate unique group_code for group applications (saved in clients table for lead applicant)
+$groupCode = null;
+if ($applicationMode === 'group') {
+  // Extract first and last name for code generation
+  $nameParts = preg_split('/\s+/', trim($fullName));
+  if (count($nameParts) >= 2) {
+    // Use first 2 letters of first name + first 2 letters of last name
+    $firstInitials = strtoupper(substr($nameParts[0], 0, 2));
+    $lastInitials = strtoupper(substr($nameParts[count($nameParts) - 1], 0, 2));
+    $groupCode = $firstInitials . $lastInitials . '-' . rand(1000, 9999);
+  } else {
+    // Fallback: use first 4 letters of name if only one word
+    $groupCode = strtoupper(str_pad(substr($nameParts[0], 0, 4), 4, 'G')) . '-' . rand(1000, 9999);
+  }
+  error_log("[process_add_visa_client] Generated group_code for lead applicant: $groupCode (access_code: $accessCode)");
+}
+
+// Generate unique group access code for visa application (different from group_code)
 $groupAccessCode = null;
 if ($applicationMode === 'group') {
   // Generate group access code: XXXX-NNNN format
@@ -202,7 +219,7 @@ function createVisaClient(
   $photoName, $accessCode, $processingType,
   $passportNumber, $passportExpiry, $visaLeadApplicantStatus,
   $visaPackageId, $visaTypeSelected, $applicationMode = 'individual',
-  $financialSource = 'self_funded', $groupAccessCode = null
+  $financialSource = 'self_funded', $groupAccessCode = null, $groupCode = null
 ) {
   error_log("[createVisaClient] Starting with assignedAdminId=$assignedAdminId, fullName=$fullName, email=$email, visaPackageId=$visaPackageId");
   $status    = 'Awaiting Docs';
@@ -237,6 +254,13 @@ function createVisaClient(
     $clientPlaceholders[] = '?';
     $clientTypes .= 's';
     $clientValues[] = $financialSource;
+  }
+
+  if (columnExists($conn, 'clients', 'group_code') && $groupCode !== null) {
+    $clientColumns[] = 'group_code';
+    $clientPlaceholders[] = '?';
+    $clientTypes .= 's';
+    $clientValues[] = $groupCode;
   }
 
   $clientSql = "INSERT INTO clients (" . implode(', ', $clientColumns) . ") VALUES (" . implode(', ', $clientPlaceholders) . ")";
@@ -444,11 +468,11 @@ try {
     $photoName, $accessCode, $processingType,
     $passportNumber, $passportExpiry, $visaLeadApplicantStatus,
     $visaPackageId, $visaTypeSelected, $applicationMode,
-    $financialSource, $groupAccessCode
+    $financialSource, $groupAccessCode, $groupCode
   );
   $clientId = $result['clientId'];
   $visaApplicationId = $result['visaApplicationId'];
-  error_log("[process_add_visa_client] Client created successfully: id=$clientId, visaApplicationId=$visaApplicationId");
+  error_log("[process_add_visa_client] Client created successfully: id=$clientId, visaApplicationId=$visaApplicationId, group_code=$groupCode");
 } catch (Exception $e) {
   error_log("[process_add_visa_client] Exception during client creation: " . $e->getMessage());
   $_SESSION['form_errors'] = [$e->getMessage()];
@@ -494,20 +518,16 @@ if (!empty($groupMembers)) {
     
     // Insert companion directly into client_visa_companions table (companions don't get client records)
     if ($visaApplicationId) {
-      $companionSql = "INSERT INTO client_visa_companions (
-        visa_application_id, full_name, email, phone_number, access_code, relationship, applicant_status,
-        passport_number, passport_expiry, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-      
-      $companionStmt = $conn->prepare($companionSql);
-      if (!$companionStmt) {
-        continue;
-      }
-      
+      // Build dynamic INSERT to handle optional columns
+      $companionColumns = [
+        'visa_application_id', 'full_name', 'email', 'phone_number', 'access_code', 
+        'relationship', 'applicant_status', 'passport_number', 'passport_expiry', 
+        'created_at', 'updated_at'
+      ];
+      $companionPlaceholders = array_fill(0, count($companionColumns), '?');
+      $companionTypes = 'issssssssss';
       $nowTs = date('Y-m-d H:i:s');
-      
-      $bindResult = $companionStmt->bind_param(
-        "issssssssss",
+      $companionValues = [
         $visaApplicationId,
         $memberName,
         $memberEmail,
@@ -519,14 +539,39 @@ if (!empty($groupMembers)) {
         $memberPassportExpiry,
         $nowTs,
         $nowTs
-      );
+      ];
       
+      // Add financial_source if column exists
+      if (columnExists($conn, 'client_visa_companions', 'financial_source') && $memberFinancialSource !== null) {
+        $companionColumns[] = 'financial_source';
+        $companionPlaceholders[] = '?';
+        $companionTypes .= 's';
+        $companionValues[] = $memberFinancialSource;
+      }
+      
+      $companionSql = "INSERT INTO client_visa_companions (" . implode(', ', $companionColumns) . ") VALUES (" . implode(', ', $companionPlaceholders) . ")";
+      
+      $companionStmt = $conn->prepare($companionSql);
+      if (!$companionStmt) {
+        error_log("[process_add_visa_client] Companion prepare failed: " . $conn->error);
+        continue;
+      }
+      
+      // Build bind_param array
+      $bindParams = [&$companionTypes];
+      foreach ($companionValues as $index => $value) {
+        $bindParams[] = &$companionValues[$index];
+      }
+      
+      $bindResult = call_user_func_array([$companionStmt, 'bind_param'], $bindParams);
       if (!$bindResult) {
+        error_log("[process_add_visa_client] Companion bind failed: " . $companionStmt->error);
         $companionStmt->close();
         continue;
       }
       
       if (!$companionStmt->execute()) {
+        error_log("[process_add_visa_client] Companion execute failed: " . $companionStmt->error . " | SQL: " . $companionSql);
         $companionStmt->close();
         continue;
       }

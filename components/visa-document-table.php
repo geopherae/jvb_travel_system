@@ -63,7 +63,7 @@ try {
           <!-- Applicant Header -->
           <div class="px-4 py-4 bg-gradient-to-r from-sky-50 to-blue-50 border-b border-gray-200 flex items-center justify-between">
             <p class="text-base tracking-wide text-sky-700 font-semibold">Primary Requirements for:</p>
-            <template x-if="applicantMeta.length > 1">
+            <template x-if="applicantMeta.length > 1 || (accessType === 'group' && isClient)">
               <select x-model.number="currentIdx"
                       @change="currentIdx = Number($event.target.value)"
                       class="px-4 py-2.5 border-2 border-sky-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 text-sm bg-white text-gray-800 font-medium appearance-none cursor-pointer hover:border-sky-400 transition-all w-72"

@@ -161,43 +161,14 @@ if ($selectedVisaApp) {
 
         <!-- Visa Document Table Component -->
         <?php if ($selectedVisaApp): ?>
-          <div>
-            <!-- Applicant Selector (Only for Group Applications or Group Access) -->
-            <template x-if="$store.applicantSelector.totalApplicants > 1">
-              <div class="flex items-center justify-between gap-4 p-4 bg-sky-100 rounded-lg border border-sky-200 mb-6">
-                <label class="text-sm font-semibold text-gray-700">Select Applicant:</label>
-                <select 
-                  x-model.number="$store.applicantSelector.currentIdx"
-                  @change="$store.applicantSelector.currentIdx = Number($event.target.value)"
-                  class="px-4 py-2.5 border-2 border-sky-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 text-sm bg-white text-gray-800 font-medium appearance-none cursor-pointer hover:border-sky-400 transition-all w-72"
-                  style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%220369a1%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3e%3cpolyline points=%226 9 12 15 18 9%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em; padding-right: 2.75rem;">
-                  
-                  <!-- Lead Guest Section -->
-                  <optgroup label="Lead Guest">
-                    <option value="0" x-text="$store.applicantSelector.applicants[0]?.name || 'Lead Applicant'"></option>
-                  </optgroup>
-
-                  <!-- Companions Section -->
-                  <template x-if="$store.applicantSelector.applicants.length > 1">
-                    <optgroup label="Companions">
-                      <template x-for="(applicant, idx) in $store.applicantSelector.applicants.slice(1)" :key="idx + 1">
-                        <option :value="idx + 1" x-text="applicant.name"></option>
-                      </template>
-                    </optgroup>
-                  </template>
-                </select>
-              </div>
-            </template>
-
-            <?php 
-              // Pass visa application ID to the component
-              $visa_application_id = (int)$selectedVisaApp['id'];
-              $application_mode = $selectedVisaApp['application_mode'];
-              
-              // Include the visa document table component
-              include __DIR__ . '/../components/visa-document-table.php';
-            ?>
-          </div>
+          <?php 
+            // Pass visa application ID to the component
+            $visa_application_id = (int)$selectedVisaApp['id'];
+            $application_mode = $selectedVisaApp['application_mode'];
+            
+            // Include the visa document table component
+            include __DIR__ . '/../components/visa-document-table.php';
+          ?>
         <?php endif; ?>
       <?php endif; ?>
 

@@ -29,7 +29,33 @@ if (!$visaAppId) {
   throw new Exception('No visa application specified.');
 }
 
+// ============================================================================
+// DATABASE QUERIES (EARLY FETCH FOR ACCESS CONTROL)
+// ============================================================================
+
+// Fetch visa application early to determine application_mode
+$appStmt = $conn->prepare("
+  SELECT id, visa_package_id, application_mode, client_id
+  FROM client_visa_applications
+  WHERE id = ?
+");
+$appStmt->bind_param("i", $visaAppId);
+$appStmt->execute();
+$visaApp = $appStmt->get_result()->fetch_assoc();
+$appStmt->close();
+
+if (!$visaApp) {
+  throw new Exception('Visa application not found.');
+}
+
+$visaPackageId = $visaApp['visa_package_id'];
+$appMode = $appMode ?? $visaApp['application_mode'];
+$clientId = $visaApp['client_id'];
+
 // Determine client's access type (individual vs group)
+// Group access is only enabled if:
+// 1. Application mode is 'Group', AND
+// 2. User logged in with the group_access_code (indicated by session variable)
 $clientAccessType = 'individual';
 $currentClientId = null;
 $currentCompanionId = null;
@@ -38,13 +64,12 @@ if ($isClient) {
   if (!empty($_SESSION['is_companion']) && !empty($_SESSION['companion_id'])) {
     $currentCompanionId = $_SESSION['companion_id'];
     $currentClientId = $_SESSION['client_id'];
-    $clientAccessType = 'individual';
   } else {
     $currentClientId = $_SESSION['client_id'];
-    $clientAccessType = 'individual';
   }
   
-  if (!empty($_SESSION['group_access_enabled'])) {
+  // Only grant group access if logged in with group_access_code
+  if (!empty($_SESSION['group_access_enabled']) && strtolower($appMode) === 'group') {
     $clientAccessType = 'group';
   }
 }
@@ -180,27 +205,8 @@ function buildSectionBlocks($grouped, $templates) {
 }
 
 // ============================================================================
-// DATABASE QUERIES
+// DATABASE QUERIES (CONTINUED)
 // ============================================================================
-
-// Fetch visa application
-$appStmt = $conn->prepare("
-  SELECT id, visa_package_id, application_mode, client_id
-  FROM client_visa_applications
-  WHERE id = ?
-");
-$appStmt->bind_param("i", $visaAppId);
-$appStmt->execute();
-$visaApp = $appStmt->get_result()->fetch_assoc();
-$appStmt->close();
-
-if (!$visaApp) {
-  throw new Exception('Visa application not found.');
-}
-
-$visaPackageId = $visaApp['visa_package_id'];
-$appMode = $appMode ?? $visaApp['application_mode'];
-$clientId = $visaApp['client_id'];
 
 // 🆕 Fetch visa requirements from client_visa_requirements table (instead of visa_packages)
 // This ensures we use the client/companion-specific copy of requirements
