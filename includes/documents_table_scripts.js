@@ -283,6 +283,10 @@ function visaDocumentTable(el) {
     },
     async saveChanges() {
       try {
+        if (!this.viewer.submissionId) {
+          alert('Submission ID is required to update document status.');
+          return;
+        }
         const formData = new FormData();
         formData.append('submission_id', this.viewer.submissionId);
         formData.append('status', this.viewer.status);

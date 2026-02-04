@@ -110,7 +110,110 @@ $top3 = array_slice(
   <!-- ⚙️ Alpine.js v3 -->
   <script src="https://unpkg.com/alpinejs" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="../includes/admin-dashboard.js"></script>
 <script src="../includes/tour_packages_global_scope.js?v=20260118-1"></script>
+  <script>
+    // Initialize archived tour packages modal store
+    document.addEventListener('alpine:init', () => {
+      if (!Alpine.store('archivedTourModal')) {
+        Alpine.store('archivedTourModal', {
+          isOpen: false,
+          loading: false,
+          packages: [],
+          
+          async open() {
+            this.isOpen = true;
+            this.loading = true;
+            await this.fetchPackages();
+            this.loading = false;
+          },
+          
+          close() {
+            this.isOpen = false;
+            this.packages = [];
+          },
+          
+          async fetchPackages() {
+            try {
+              const response = await fetch('../actions/get_archived_tour_packages.php');
+              const text = await response.text();
+              
+              // Try to parse as JSON
+              let data;
+              try {
+                data = JSON.parse(text);
+              } catch (e) {
+                console.error('Invalid JSON response:', text);
+                this.packages = [];
+                window.showToast('Server returned invalid response. Check console for details.', 'error');
+                return;
+              }
+              
+              if (data.success) {
+                this.packages = data.packages || [];
+              } else {
+                console.error('API Error:', data.message);
+                this.packages = [];
+                // Don't show error toast if it's just empty packages
+                if (data.message && !data.message.includes('archived packages')) {
+                  window.showToast(data.message, 'error');
+                }
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              this.packages = [];
+              window.showToast('An error occurred while loading packages.', 'error');
+            }
+          },
+          
+          async unarchive(packageId) {
+            if (!confirm('Are you sure you want to unarchive this package?')) return;
+            try {
+              const formData = new FormData();
+              formData.append('package_id', packageId);
+              const response = await fetch('../actions/unarchive_tour_package.php', {
+                method: 'POST',
+                body: formData
+              });
+              const data = await response.json();
+              if (data.success) {
+                window.showToast(data.message || 'Package unarchived successfully!', 'success');
+                await this.fetchPackages();
+                setTimeout(() => window.location.reload(), 1500);
+              } else {
+                window.showToast(data.message || 'Failed to unarchive package.', 'error');
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              window.showToast('An error occurred. Please try again.', 'error');
+            }
+          },
+          
+          async deletePermananently(packageId, packageName) {
+            if (!confirm(`⚠️ PERMANENT DELETE\n\nAre you sure you want to permanently delete "${packageName}"?\n\nThis action cannot be undone!`)) return;
+            try {
+              const formData = new FormData();
+              formData.append('package_id', packageId);
+              const response = await fetch('../actions/permanently_delete_tour_package.php', {
+                method: 'POST',
+                body: formData
+              });
+              const data = await response.json();
+              if (data.success) {
+                window.showToast(data.message || 'Package permanently deleted!', 'success');
+                await this.fetchPackages();
+              } else {
+                window.showToast(data.message || 'Failed to delete package.', 'error');
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              window.showToast('An error occurred. Please try again.', 'error');
+            }
+          }
+        });
+      }
+    });
+  </script>
   <script>
     window.tourFormData = function () {
   return {
@@ -366,7 +469,16 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
     </p>
   </div>
 <?php endif; ?>
-      </div>
+<!-- View Archived Packages Button -->
+<div class="pb-4 mt-6 text-center">
+  <button @click="$store.archivedTourModal.open()" 
+          class="inline-flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 transition">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+    </svg>
+    View Archived Packages
+  </button>
+</div>      </div>
     </main>
   </div>
   
@@ -385,6 +497,9 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
 
 <!-- 👁️ Tour View Modal (include once, Alpine will control it) -->
 <?php include __DIR__ . '/../components/tour_modal.php'; ?>
+
+<!-- 📦 Archived Tour Packages Modal -->
+<?php include __DIR__ . '/../components/archived_tour_packages_modal.php'; ?>
 
 </body>
 </html>

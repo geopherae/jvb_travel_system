@@ -395,18 +395,38 @@ window.visaCompanionFormData = function (companion = {}) {
 /**
  * Toast/Notification Helper
  */
+if (typeof window.showToast !== 'function') {
+  window.showToast = function (message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container') || (() => {
+      const container = document.createElement('div');
+      container.id = 'toast-container';
+      container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+      document.body.appendChild(container);
+      return container;
+    })();
+
+    const typeClasses = {
+      success: 'bg-green-100 text-green-800 border border-green-300',
+      error: 'bg-red-100 text-red-800 border border-red-300',
+      warning: 'bg-yellow-100 text-yellow-800 border border-yellow-300',
+      info: 'bg-blue-100 text-blue-800 border border-blue-300'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `px-4 py-3 rounded-lg shadow-lg border ${typeClasses[type] || typeClasses.info}`;
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s ease-in-out';
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
+  };
+}
+
 window.visaShowToast = function (message, type = 'success') {
-  const toast = document.createElement('div');
-  const bgColor = type === 'error' ? 'bg-red-100 border border-red-300 text-red-800' : 'bg-green-100 border border-green-300 text-green-800';
-  
-  toast.className = `fixed bottom-6 right-6 z-50 px-4 py-3 max-w-sm w-full rounded-lg shadow-lg ${bgColor}`;
-  toast.innerHTML = `<p class="text-sm font-medium">${message}</p>`;
-  
-  document.body.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.remove();
-  }, 4000);
+  window.showToast(message, type);
 };
 
 console.log('[visa_global_scope.js] Loaded successfully');

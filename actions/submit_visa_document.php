@@ -41,6 +41,35 @@ try {
     exit;
   }
 
+  // Ensure visa_document_submissions.id is AUTO_INCREMENT (fixes id=0 inserts)
+  $autoIncStmt = $conn->prepare("
+    SELECT EXTRA
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'visa_document_submissions'
+      AND COLUMN_NAME = 'id'
+    LIMIT 1
+  ");
+  if ($autoIncStmt) {
+    $autoIncStmt->execute();
+    $autoIncResult = $autoIncStmt->get_result()->fetch_assoc();
+    $autoIncStmt->close();
+
+    $extra = strtolower($autoIncResult['EXTRA'] ?? '');
+    if (strpos($extra, 'auto_increment') === false) {
+      $conn->query("ALTER TABLE visa_document_submissions MODIFY id int(10) UNSIGNED NOT NULL AUTO_INCREMENT");
+    }
+  }
+
+  // Repair existing rows with id=0 after ensuring AUTO_INCREMENT
+  $zeroIdResult = $conn->query("SELECT COUNT(*) AS total FROM visa_document_submissions WHERE id = 0");
+  if ($zeroIdResult) {
+    $zeroIdCount = (int)($zeroIdResult->fetch_assoc()['total'] ?? 0);
+    if ($zeroIdCount > 0) {
+      $conn->query("UPDATE visa_document_submissions SET id = NULL WHERE id = 0");
+    }
+  }
+
   $file = $_FILES['document_file'];
   $allowedMimes = ['application/pdf', 'image/jpeg', 'image/png'];
   $maxFileSize = 10 * 1024 * 1024; // 10MB

@@ -103,6 +103,7 @@ document.addEventListener('alpine:init', () => {
 
 Alpine.data('tourFormData', (tour = {}) => ({
   // Base Properties
+  id: tour.id || 0,
   packageName: tour.name || '',
   description: tour.description || '',
   price: tour.price || 0,

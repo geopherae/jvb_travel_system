@@ -154,10 +154,17 @@ $todayDay  = getTodayItineraryDay($start, $end);
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script src="../includes/global-toast.js" defer></script>
   <script src="../assets/js/modals.js" defer></script>
   <script src="../includes/gallery-scope.js" defer></script>
   <!--<script src="../assets/js/clientOverviewScope.js" defer></script>-->
-  <style>[x-cloak] { display: none !important; }</style>
+  <style>[x-cloak] { display: none !important; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+  </style>
 </head>
 
 <body class="text-gray-800 font-sans" x-data="{ sidebarOpen: false, ...clientViewScope() }" x-init="initClientView()">
@@ -340,15 +347,9 @@ include __DIR__ . '/../components/unassign-modal.php';
       },
 
       showToast(message, level = 'success') {
-        const toast = document.createElement('div');
-        toast.className = `fixed bottom-6 right-6 z-50 px-4 py-3 max-w-sm w-full rounded-lg shadow-lg ${
-          level === 'error'
-            ? 'bg-red-100 border border-red-300 text-red-800'
-            : 'bg-green-100 border border-green-300 text-green-800'
-        }`;
-        toast.innerHTML = `<p class="text-sm font-medium">${message}</p>`;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+        if (typeof window.showToast === 'function') {
+          window.showToast(message, level);
+        }
       },
 
       initClientView() {

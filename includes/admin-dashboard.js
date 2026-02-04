@@ -1,12 +1,34 @@
 // Admin Dashboard JavaScript Utilities
 
-function showToast(message) {
-  const toast = document.createElement("div");
+function showToast(message, type = 'success') {
+  const toastContainer = document.getElementById('toast-container') || (() => {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+    document.body.appendChild(container);
+    return container;
+  })();
+
+  const typeClasses = {
+    success: 'bg-green-100 text-green-800 border border-green-300',
+    error: 'bg-red-100 text-red-800 border border-red-300',
+    warning: 'bg-yellow-100 text-yellow-800 border border-yellow-300',
+    info: 'bg-blue-100 text-blue-800 border border-blue-300'
+  };
+
+  const toast = document.createElement('div');
+  toast.className = `px-4 py-3 rounded-lg shadow-lg border ${typeClasses[type] || typeClasses.info}`;
   toast.textContent = message;
-  toast.className = "fixed bottom-4 right-4 bg-sky-600 text-white px-4 py-2 rounded shadow-lg text-sm z-50";
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 4000);
+  toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s ease-in-out';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
 }
+
+window.showToast = showToast;
 
 function showLoadingSpinner() {
   if (document.getElementById("reload-spinner")) return;

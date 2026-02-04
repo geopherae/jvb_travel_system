@@ -179,6 +179,7 @@ if ($agent_result) {
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs" defer></script>
+  <script src="../includes/global-toast.js" defer></script>
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 

@@ -264,7 +264,12 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
     }));
   });
 
-  function showToast(message) {
+  function showToast(message, type = 'success') {
+    if (typeof window.showToast === 'function') {
+      window.showToast(message, type);
+      return;
+    }
+
     const toast = document.createElement("div");
     toast.textContent = message;
     toast.className = "fixed bottom-4 right-4 bg-sky-600 text-white px-4 py-2 rounded shadow-lg text-sm z-50";

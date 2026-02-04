@@ -18,7 +18,7 @@ $decodeJson = function ($json) {
 };
 
 try {
-    $stmt = $conn->prepare("SELECT id, visa_cover_image, country, processing_days, visa_package_description, inclusions_json, requirements_json, visa_types_json, is_active, created_at, updated_at FROM visa_packages WHERE is_active <> 0 ORDER BY country ASC");
+    $stmt = $conn->prepare("SELECT id, visa_cover_image, visa_package_name, country, processing_days, visa_package_description, inclusions_json, requirements_json, visa_types_json, is_active, created_at, updated_at FROM visa_packages WHERE is_active <> 0 ORDER BY country ASC");
     if (!$stmt) {
         throw new Exception('Failed to prepare statement: ' . $conn->error);
     }
@@ -31,12 +31,22 @@ try {
         $requirements  = $decodeJson($row['requirements_json'] ?? '[]');
         $visaTypes     = $decodeJson($row['visa_types_json'] ?? '[]');
 
+        $coverFile = trim($row['visa_cover_image'] ?? '');
+        $coverUrl  = $coverFile !== ''
+          ? '../uploads/visa_packages_banners/' . ltrim($coverFile, '/\\')
+          : '../images/default_visa_cover.jpg';
+
         $visaPackages[] = [
           'id'                => (int) ($row['id'] ?? 0),
           'visa_cover_image'  => $row['visa_cover_image'] ?? '',
+          'cover_url'         => $coverUrl,
+          'visa_package_name' => $row['visa_package_name'] ?? 'Unnamed Package',
           'country'           => $row['country'] ?? 'Unknown Country',
           'processing_days'   => (int) ($row['processing_days'] ?? 0),
           'description'       => $row['visa_package_description'] ?? 'No description available.',
+          'inclusions'        => $inclusions,
+          'requirements'      => $requirements,
+          'visa_types'        => $visaTypes,
           'inclusion_count'   => is_array($inclusions) ? count($inclusions) : 0,
           'requirement_count' => is_array($requirements) ? count($requirements) : 0,
           'visa_type_count'   => is_array($visaTypes) ? count($visaTypes) : 0,
@@ -63,6 +73,132 @@ try {
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs" defer></script>
   <script src="../includes/admin-dashboard.js"></script>
+  <script>
+    document.addEventListener('alpine:init', () => {
+      if (!Alpine.store('visaPackageModal')) {
+        Alpine.store('visaPackageModal', {
+          isOpen: false,
+          tab: 'inclusions',
+          activePackage: null,
+          open(pkg) {
+            this.activePackage = pkg;
+            this.tab = 'inclusions';
+            this.isOpen = true;
+          },
+          close() {
+            this.isOpen = false;
+            this.activePackage = null;
+          },
+          async archivePackage() {
+            if (!this.activePackage?.id) {
+              window.showToast('Missing package ID.', 'error');
+              return;
+            }
+
+            try {
+              const formData = new FormData();
+              formData.append('package_id', this.activePackage.id);
+
+              const response = await fetch('../actions/process_archive_visa_package.php', {
+                method: 'POST',
+                body: formData
+              });
+
+              const data = await response.json();
+
+              if (response.ok && data.success) {
+                this.close();
+                setTimeout(() => {
+                  window.showToast(data.message || 'Package archived.', 'success');
+                }, 200);
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1700);
+              } else {
+                window.showToast(data.message || 'Failed to archive package.', 'error');
+              }
+            } catch (error) {
+              console.error('Archive error:', error);
+              window.showToast('An error occurred. Please try again.', 'error');
+            }
+          }
+        });
+      }
+      
+      if (!Alpine.store('archivedVisaModal')) {
+        Alpine.store('archivedVisaModal', {
+          isOpen: false,
+          loading: false,
+          packages: [],
+          async open() {
+            this.isOpen = true;
+            this.loading = true;
+            await this.fetchPackages();
+            this.loading = false;
+          },
+          close() {
+            this.isOpen = false;
+            this.packages = [];
+          },
+          async fetchPackages() {
+            try {
+              const response = await fetch('../actions/get_archived_visa_packages.php');
+              const data = await response.json();
+              if (data.success) {
+                this.packages = data.packages || [];
+              } else {
+                console.error('API Error:', data.message);
+                this.packages = [];
+                // Don't show error toast if it's just empty packages
+                if (data.message && !data.message.includes('archived packages')) {
+                  window.showToast(data.message, 'error');
+                }
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              this.packages = [];
+              window.showToast('An error occurred while loading packages.', 'error');
+            }
+          },
+          async unarchive(packageId) {
+            if (!confirm('Are you sure you want to unarchive this visa package?')) return;
+            try {
+              const formData = new FormData();
+              formData.append('package_id', packageId);
+              const response = await fetch('../actions/unarchive_visa_package.php', { method: 'POST', body: formData });
+              const data = await response.json();
+              if (data.success) {
+                window.showToast(data.message || 'Package unarchived!', 'success');
+                await this.fetchPackages();
+                setTimeout(() => window.location.reload(), 1500);
+              } else {
+                window.showToast(data.message || 'Failed to unarchive.', 'error');
+              }
+            } catch (error) {
+              window.showToast('An error occurred.', 'error');
+            }
+          },
+          async deletePermananently(packageId, packageName) {
+            if (!confirm(`⚠️ PERMANENT DELETE\n\nAre you sure you want to permanently delete "${packageName}"?\n\nThis action cannot be undone!`)) return;
+            try {
+              const formData = new FormData();
+              formData.append('package_id', packageId);
+              const response = await fetch('../actions/permanently_delete_visa_package.php', { method: 'POST', body: formData });
+              const data = await response.json();
+              if (data.success) {
+                window.showToast(data.message || 'Package deleted!', 'success');
+                await this.fetchPackages();
+              } else {
+                window.showToast(data.message || 'Failed to delete.', 'error');
+              }
+            } catch (error) {
+              window.showToast('An error occurred.', 'error');
+            }
+          }
+        });
+      }
+    });
+  </script>
 </head>
 
 <body class="font-poppins text-gray-800 overflow-hidden"
@@ -82,7 +218,7 @@ try {
   <?php include '../components/right-panel.php'; ?>
 
   <!-- Main Content -->
-    <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative z-0">
+    <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative z-0" x-data="{ searchName: '', filterDestination: '' }">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
         <h2 class="text-xl font-bold text-gray-900">Visa Packages</h2>
@@ -90,7 +226,8 @@ try {
       </div>
       <div class="flex flex-wrap gap-2 items-center">
         <a href="#"
-           class="disabled inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-sky-600 border border-transparent rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition">
+           @click.prevent="$store.addVisaPackageModal.open()"
+           class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-sky-600 border border-transparent rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition">
           Add New Visa Package
         </a>
       </div>
@@ -117,7 +254,7 @@ try {
               class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
             >
               <option value="">All Destinations</option>
-              <template x-for="country in Object.keys(window.AIRPORTS)" :key="country">
+              <template x-for="country in Object.keys(window.AIRPORTS || {})" :key="country">
                 <optgroup :label="country">
                   <template x-for="(airportName, code) in window.AIRPORTS[country]" :key="code">
                     <option :value="code" x-text="code + ' - ' + airportName"></option>
@@ -158,16 +295,13 @@ try {
     <?php else: ?>
       <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden divide-y divide-gray-100">
         <?php foreach ($visaPackages as $visaPackage): ?>
-          <?php
-            $coverFile = trim($visaPackage['visa_cover_image'] ?? '');
-            $coverUrl  = $coverFile !== ''
-              ? '../images/visa_packages_banners/' . ltrim($coverFile, '/\\')
-              : '';
-          ?>
-          <div class="flex items-start gap-4 p-4 hover:bg-sky-50 transition">
+          <div
+            class="flex items-start gap-4 p-4 hover:bg-sky-50 transition cursor-pointer"
+            @click="$store.visaPackageModal.open(<?= htmlspecialchars(json_encode($visaPackage), ENT_QUOTES, 'UTF-8') ?>)"
+          >
             <div class="w-16 h-16 rounded-lg bg-slate-100 overflow-hidden flex items-center justify-center border border-gray-100">
-              <?php if ($coverUrl !== ''): ?>
-                <img src="<?= htmlspecialchars($coverUrl) ?>"
+              <?php if (($visaPackage['cover_url'] ?? '') !== ''): ?>
+                <img src="<?= htmlspecialchars($visaPackage['cover_url']) ?>"
                      alt="Cover for <?= htmlspecialchars($visaPackage['country']) ?>"
                      class="w-full h-full object-cover" />
               <?php else: ?>
@@ -181,7 +315,7 @@ try {
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <div class="text-xs text-slate-500">ID #<?= $visaPackage['id'] ?></div>
-                  <h3 class="text-base font-semibold text-sky-900 truncate"><?= htmlspecialchars($visaPackage['country']) ?></h3>
+                  <h3 class="text-base font-semibold text-sky-900 truncate"><?= htmlspecialchars($visaPackage['visa_package_name']) ?></h3>
                   <p class="text-sm text-slate-600 line-clamp-2 mt-1">
                     <?= htmlspecialchars($visaPackage['description']) ?>
                   </p>
@@ -194,8 +328,25 @@ try {
           </div>
         <?php endforeach; ?>
       </div>
+
+      <!-- View Archived Packages Button -->
+      <div class="pb-4 mt-4 text-center">
+        <button @click="$store.archivedVisaModal.open()" 
+                class="inline-flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+          View Archived Packages
+        </button>
+      </div>
     <?php endif; ?>
   </main>
+
+  <!-- Visa Package Modal -->
+  <?php include __DIR__ . '/../components/visa_package_modal.php'; ?>
+
+  <!-- Archived Visa Packages Modal -->
+  <?php include __DIR__ . '/../components/archived_visa_packages_modal.php'; ?>
 
 </body>
 </html>

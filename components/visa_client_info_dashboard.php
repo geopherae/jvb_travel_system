@@ -204,7 +204,7 @@ window.visaClientCard = window.visaClientCard || function(el) {
   <!-- Background: Blurred Avatar -->
   <div class="absolute inset-0">
     <div class="absolute inset-0 bg-cover bg-center blur-sm" :style="`background-image: url('${current.avatar || ''}')`"></div>
-    <div class="absolute inset-0 bg-gradient-to-br from-sky-900/85 via-sky-700/80 to-sky-900/85 backdrop-blur-sm"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-slate-700/80 to-slate-900/85 backdrop-blur-sm"></div>
   </div>
 
   <!-- Decorative elements -->

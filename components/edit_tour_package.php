@@ -26,7 +26,7 @@
       <form method="POST" action="../actions/update_tour_package.php" enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden">
 
         <!-- Hidden package ID (required for update) -->
-        <input type="hidden" name="package_id" :value="$store.editTourModal.tourData?.id">
+        <input type="hidden" name="package_id" :value="id">
 
         <div class="flex flex-col lg:flex-row gap-6 flex-1 overflow-y-auto px-6 pb-8">
 

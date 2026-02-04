@@ -48,16 +48,6 @@ if ($client_id) {
   x-data="documentsTable()" 
   class="bg-white p-4 sm:p-6 rounded-md shadow border border-gray-200">
 
-  <!-- ✅ Success Toast -->
-  <div x-show="toast.visible" x-transition x-cloak
-       class="fixed inset-0 flex items-start justify-center z-50 bg-black bg-opacity-15 px-4"
-       role="alert">
-    <div class="mt-10 bg-green-100 border border-green-400 text-green-700 px-4 sm:px-6 py-3 sm:py-4 rounded shadow-lg max-w-md w-full">
-      <strong class="font-bold">Success!</strong>
-      <p class="block mt-2 text-sm" x-text="toast.message"></p>
-    </div>
-  </div>
-
   <!-- 📄 Header -->
   <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
     <h3 class="text-base sm:text-lg font-semibold text-gray-800 tracking-tight flex items-center gap-2">
@@ -283,12 +273,13 @@ if ($client_id) {
 
 <!-- 📄 File Viewer Modal -->
 <div x-show="modals.viewer"
-     x-transition
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:leave="transition ease-in duration-200"
      x-cloak
-     class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+     class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-40 p-2 sm:p-4">
   <div class="bg-white w-full max-w-5xl h-[95vh] sm:h-[90vh] rounded-lg shadow-lg flex flex-col sm:flex-row overflow-hidden"
        @keydown.window.escape="closeFileModal()"
-       @click.outside="closeFileModal()">
+       @click.self="closeFileModal()">
 
     <!-- 🖼️ Top/Left Panel: File Preview -->
     <div class="w-full sm:w-2/3 bg-gray-100 p-3 sm:p-6 flex items-center justify-center overflow-hidden relative flex-shrink-0 h-1/4 sm:h-full">
@@ -659,10 +650,6 @@ function documentsTable() {
             upload: false,
             viewer: false,
         },
-        toast: {
-            visible: false,
-            message: '',
-        },
         confirmAction: {
             visible: false,
             type: '',
@@ -730,25 +717,32 @@ function documentsTable() {
 
             this.submitDocumentChangesLoading = true;
 
+            const formData = {
+                id: this.fileViewer.id,
+                file_name: this.fileViewer.name,
+                document_type: this.fileViewer.type,
+                document_status: this.fileViewer.status,
+                admin_comments: this.fileViewer.adminComments
+            };
+            
+            console.log('Submitting document changes:', formData);
+
             fetch('../actions/update_client_document.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({
-                    id: this.fileViewer.id,
-                    file_name: this.fileViewer.name,
-                    document_type: this.fileViewer.type,
-                    document_status: this.fileViewer.status,
-                    admin_comments: this.fileViewer.adminComments
-                })
+                body: new URLSearchParams(formData)
             })
             .then(async response => {
                 const data = await response.json();
                 if (data.success) {
-                    this.toast.message = 'Document changes saved!';
-                    this.toast.visible = true;
+                    // Close modal immediately
                     this.modals.viewer = false;
+                    
+                    // Show success toast using global function
+                    window.showToast('Document changes saved!', 'success');
+                    
+                    // Refresh table after delay
                     setTimeout(() => {
-                        this.toast.visible = false;
                         fetch('../components/documents-table.php?client_id=<?= htmlspecialchars($client_id) ?>')
                             .then(res => res.text())
                             .then(html => {
@@ -764,15 +758,11 @@ function documentsTable() {
                             });
                     }, 1500);
                 } else {
-                    this.toast.message = data.error || 'Update failed.';
-                    this.toast.visible = true;
-                    setTimeout(() => this.toast.visible = false, 2000);
+                    window.showToast(data.error || 'Update failed.', 'error');
                 }
             })
             .catch(() => {
-                this.toast.message = 'Network error.';
-                this.toast.visible = true;
-                setTimeout(() => this.toast.visible = false, 2000);
+                window.showToast('Network error.', 'error');
             })
             .finally(() => {
                 this.submitDocumentChangesLoading = false;
@@ -816,20 +806,16 @@ function documentsTable() {
                 body: body
             })
             .then(async response => {
-                const text = await response.text();
-                this.toast.message = text || 'An error occurred.';
-                this.toast.visible = true;
-                this.confirmAction.visible = false;
-                this.confirmAction.reason = '';
-                setTimeout(() => {
-                    this.toast.visible = false;
-                    window.location.reload();
-                }, 1800);
+              const text = await response.text();
+              window.showToast(text || 'An error occurred.', response.ok ? 'success' : 'error');
+              this.confirmAction.visible = false;
+              this.confirmAction.reason = '';
+              setTimeout(() => {
+                window.location.reload();
+              }, 1800);
             })
             .catch(() => {
-                this.toast.message = 'Network error.';
-                this.toast.visible = true;
-                setTimeout(() => this.toast.visible = false, 1800);
+              window.showToast('Network error.', 'error');
             });
         },
 

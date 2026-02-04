@@ -81,7 +81,7 @@ $statusDisplay = ucfirst(str_replace('_', ' ', $appStatus));
   />
 
   <!-- Background overlay with semi-transparent dark gradient -->
-  <div class="absolute inset-0 bg-gradient-to-br from-sky-900/85 via-sky-800/80 to-blue-900/85 backdrop-blur-sm"></div>
+  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-slate-700/80 to-slate-900/85 backdrop-blur-sm"></div>
   
   <!-- Decorative elements -->
   <div class="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 bg-white/5 rounded-full -mr-8 -mt-8 sm:-mr-12 sm:-mt-12"></div>
