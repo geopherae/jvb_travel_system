@@ -52,15 +52,14 @@ include_once __DIR__ . '/../includes/unread-notification-check.php';
 
   </div>
 </aside>
-
-<!-- 🔽 Notification Overlay -->
+<!-- 🔽 Notification Overlay (outside aside for proper z-index stacking) -->
 <div id="notification-overlay"
-     class="hidden absolute top-16 right-6 w-96 min-h-[8rem] max-h-[calc(4*theme(spacing.20))] overflow-y-auto bg-white rounded-2xl shadow-md z-50">
+     class="hidden fixed w-96 min-h-[8rem] max-h-80 overflow-y-auto bg-white rounded-2xl shadow-lg border border-gray-200"
+     style="z-index: 45;">
   <div id="notification-overlay-list" class="p-2 space-y-3">
     <p class="text-sm text-gray-500">Loading notifications...</p>
   </div>
 </div>
-
-<!-- 📦 Scripts -->
+<!--  Scripts -->
 <script src="../includes/utils.js"></script>
 <script src="../includes/notifications.js"></script>
