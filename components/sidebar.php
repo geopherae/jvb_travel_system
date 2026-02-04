@@ -84,7 +84,7 @@ foreach ($allNavLinks as $label => $meta) {
   </button>
 
   <!-- Sidebar -->
-  <aside class="fixed top-0 left-0 w-64 h-screen flex flex-col bg-white border-r border-neutral-200 z-40 transform transition-transform duration-300 ease-in-out"
+  <aside class="fixed top-0 left-0 w-64 h-screen flex flex-col bg-white border-r border-neutral-200 z-60 transform transition-transform duration-300 ease-in-out"
          :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
 
     <!-- Header -->
