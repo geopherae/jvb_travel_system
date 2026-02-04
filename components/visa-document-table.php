@@ -44,11 +44,13 @@ try {
         </p>
       <?php endif; ?>
     </div>
+    <?php if ($isAdmin): ?>
     <button @click="openAddRequirement()"
             class="w-full sm:w-auto bg-sky-500 text-white px-4 py-2 rounded hover:bg-sky-600 active:bg-sky-700 transition text-sm font-medium touch-manipulation"
             :title="'Add requirement for: ' + (applicantMeta[currentIdx]?.name || 'Unknown')">
       Add Requirement
     </button>
+    <?php endif; ?>
   </div>
 
   <!-- 📋 Table Wrapper -->
@@ -102,10 +104,10 @@ try {
                   ?>
                   <!-- Admin hover-reveal wrapper (slide only on left edge hover) -->
                   <div class="overflow-hidden"
-                       @mouseenter="hoverRowId = '<?= htmlspecialchars($item['requirement_id']) ?>'"
-                       @mouseleave="hoverRowId = null">
+                       <?php if ($isAdmin): ?>@mouseenter="hoverRowId = '<?= htmlspecialchars($item['requirement_id']) ?>'"
+                       @mouseleave="hoverRowId = null"<?php endif; ?>>
                     <div class="flex transition-transform duration-200 ease-in-out delay-200" 
-                         :style="hoverRowId === '<?= htmlspecialchars($item['requirement_id']) ?>' ? 'transform: translateX(48px)' : 'transform: translateX(0)'">
+                         <?php if ($isAdmin): ?>:style="hoverRowId === '<?= htmlspecialchars($item['requirement_id']) ?>' ? 'transform: translateX(48px)' : 'transform: translateX(0)'"<?php endif; ?>>
                       <!-- Left trigger zone (admin only) -->
                       <?php if ($isAdmin): ?>
                         <div class="absolute left-0 top-0 bottom-0 w-12 cursor-pointer z-10"
