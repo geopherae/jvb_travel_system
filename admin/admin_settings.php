@@ -34,8 +34,8 @@ if (!empty($admin['admin_profile'])) {
 }
 $bio = $profileJson['bio'] ?? '';
 
-// ✅ Determine if current user is a full admin
-$isFullAdmin = ($admin['role'] ?? '') === 'admin';
+// ✅ Determine if current user is a full admin (admin or superadmin)
+$isFullAdmin = in_array($admin['role'] ?? '', ['admin', 'superadmin']);
 
 // ✅ Fetch all admin users (using 'id' as primary key)
 $sql = "SELECT id, first_name, last_name, username, email, admin_photo, role 
