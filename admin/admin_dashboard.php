@@ -228,34 +228,8 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
 
   </main>
 
-<!-- Add Client Modal -->
-<div x-show="showAddClientModal"
-     x-cloak
-     class="backdrop-blur-sm fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-     x-transition>
-  
-  <div class="bg-white p-6 rounded-lg shadow max-w-2xl w-full max-h-[90vh] overflow-y-auto relative"
-       @click.away="showAddClientModal = false"
-       x-transition>
-
-    <!-- Close Button -->
-    <button type="button"
-            @click="showAddClientModal = false"
-            class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold">
-      &times;
-    </button>
-
-    <!-- Modal Header -->
-    <div class="bacspace-y-1 mb-4 border-b border-gray-100 pb-2">
-      <h2 class="text-xl font-semibold text-gray-800">Add New Guest</h2>
-    </div>
-
-    <!-- Add Client Form -->
-    <?php include '../components/add_client_form.php'; ?>
-    <?php include '../components/status_alert.php'; ?>
-
-  </div>
-</div>
+<!-- Add Client Modal (complete modal structure in component) -->
+<?php include '../components/add_client_form.php'; ?>
 
 
 <!-- Alpine.js toggle -->
