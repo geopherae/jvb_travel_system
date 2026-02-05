@@ -251,6 +251,12 @@ class Chat implements MessageComponentInterface
     {
         $this->ensureConnection();
 
+        $userType = trim($userType);
+        $recipientType = trim($recipientType);
+        if (!in_array($userType, ['admin', 'client'], true) || !in_array($recipientType, ['admin', 'client'], true)) {
+            throw new Exception("Invalid user/recipient type for thread creation: {$userType} -> {$recipientType}");
+        }
+
         $sql = "
             SELECT id FROM threads 
             WHERE (

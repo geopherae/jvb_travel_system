@@ -11,6 +11,8 @@ if (basename($_SERVER['SCRIPT_FILENAME']) === basename(__FILE__) && ($_SERVER['R
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+session_start();
+
 header('Content-Type: application/json');
 
 try {
@@ -19,6 +21,25 @@ try {
 
     if (!isset($conn) || !$conn instanceof mysqli) {
         throw new Exception('Database connection failed.');
+    }
+
+    // Refresh last_activity for current session user (keeps online status while page is open)
+    if (!empty($_SESSION['admin']['id'])) {
+        $currentAdminId = (int)$_SESSION['admin']['id'];
+        $updateStmt = $conn->prepare("UPDATE admin_accounts SET last_activity = NOW() WHERE id = ?");
+        if ($updateStmt) {
+            $updateStmt->bind_param('i', $currentAdminId);
+            $updateStmt->execute();
+            $updateStmt->close();
+        }
+    } elseif (!empty($_SESSION['client_id'])) {
+        $currentClientId = (int)$_SESSION['client_id'];
+        $updateStmt = $conn->prepare("UPDATE clients SET last_activity = NOW() WHERE id = ?");
+        if ($updateStmt) {
+            $updateStmt->bind_param('i', $currentClientId);
+            $updateStmt->execute();
+            $updateStmt->close();
+        }
     }
 
     // 3-minute threshold for "online" status

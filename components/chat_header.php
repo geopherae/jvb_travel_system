@@ -24,7 +24,7 @@
            alt="Recipient Avatar"
            class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
       <template x-if="isUserOnline(recipientId, recipientType)">
-        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
+        <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-600 rounded-full border-2 border-white"></span>
       </template>
     </div>
 
@@ -35,7 +35,8 @@
       <p class="text-xs text-gray-500"
          x-show="recipientType === 'client' && selectedUser?.status"
          x-text="selectedUser?.status"></p>
-      <p class="text-xs text-amber-600"
+      <p class="font-semibold text-xs"
+         :class="isUserOnline(recipientId, 'admin') ? 'text-green-600' : 'text-slate-400'"
          x-show="recipientType === 'admin'"
          x-text="isUserOnline(recipientId, 'admin') ? 'Online' : 'Offline'"></p>
     </div>

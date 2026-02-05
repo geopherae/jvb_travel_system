@@ -198,20 +198,26 @@ $alpineData = [
                                 "
                                         :class="recipientId === admin.id && recipientType === 'admin' ? 'bg-amber-50 border-r-4 border-amber-500' : 'hover:bg-gray-50 active:bg-gray-100'"
                                         class="w-full text-left px-4 py-3.5 md:py-4 transition-colors flex items-center gap-3 md:gap-4 relative touch-manipulation">
-                                    <img :src="getRecipientDetails(admin.id, 'admin')?.avatar || '../images/default_client_profile.png'"
-                                         alt="Avatar"
-                                         class="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0">
+                                    <div class="relative flex-shrink-0">
+                                        <img :src="getRecipientDetails(admin.id, 'admin')?.avatar || '../images/default_client_profile.png'"
+                                             alt="Avatar"
+                                             class="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover">
+                                        <template x-if="isUserOnline(admin.id, 'admin')">
+                                            <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-600 rounded-full border-2 border-white"></span>
+                                        </template>
+                                    </div>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 flex-wrap">
-                                            <span x-show="isUserOnline(admin.id, 'admin')" class="w-2.5 h-2.5 bg-green-500 rounded-full inline-block flex-shrink-0"></span>
                                             <p class="font-medium text-base md:text-base text-gray-900 truncate" x-text="admin.full_name"></p>
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
                                                   x-text="admin.role"></span>
                                             <template x-if="hasUnreadMessages(admin.id)">
-                                                <span class="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></span>
+                                                <span class="w-3 h-3 bg-red-500 rounded-full flex-shrink-0"></span>
                                             </template>
                                         </div>
-                                        <p class="text-sm md:text-sm text-gray-500 truncate" x-text="getLastMessagePreview(admin.id, 'admin') || 'No messages yet'"></p>
+                                        <p class="text-sm md:text-sm text-gray-500 truncate" 
+                                           :class="hasUnreadMessages(admin.id) ? 'font-semibold' : 'font-normal'"
+                                           x-text="getLastMessagePreview(admin.id, 'admin') || 'No messages yet'"></p>
                                     </div>
                                     <p class="text-xs text-gray-400 whitespace-nowrap self-start" x-text="getLastMessageTime(admin.id)"></p>
                                 </button>
@@ -248,22 +254,28 @@ $alpineData = [
                                 "
                                         :class="recipientId === client.id && recipientType === 'client' ? 'bg-sky-50 border-r-4 border-sky-600' : 'hover:bg-gray-50 active:bg-gray-100'"
                                         class="w-full text-left px-4 py-3.5 md:py-4 transition-colors flex items-center gap-3 md:gap-4 relative touch-manipulation">
-                                    <img :src="getRecipientDetails(client.id, 'client')?.avatar || '../images/default_client_profile.png'"
-                                         alt="Avatar"
-                                         class="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0">
+                                    <div class="relative flex-shrink-0">
+                                        <img :src="getRecipientDetails(client.id, 'client')?.avatar || '../images/default_client_profile.png'"
+                                             alt="Avatar"
+                                             class="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover">
+                                        <template x-if="isUserOnline(client.id, 'client')">
+                                            <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-600 rounded-full border-2 border-white"></span>
+                                        </template>
+                                    </div>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 flex-wrap">
-                                            <span x-show="isUserOnline(client.id, 'client')" class="w-2.5 h-2.5 bg-green-500 rounded-full inline-block flex-shrink-0"></span>
                                             <p class="font-medium text-base md:text-base text-gray-900 truncate" x-text="client.full_name"></p>
                                             <span x-show="isAssignedToMe(client.id)" 
                                                   class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-sky-100 text-sky-800">
                                                 Assigned
                                             </span>
                                             <template x-if="hasUnreadMessages(client.id)">
-                                                <span class="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></span>
+                                                <span class="w-3 h-3 bg-red-500 rounded-full flex-shrink-0"></span>
                                             </template>
                                         </div>
-                                        <p class="text-sm md:text-sm text-gray-500 truncate" x-text="getLastMessagePreview(client.id, 'client') || 'No messages yet'"></p>
+                                        <p class="text-sm md:text-sm text-gray-500 truncate" 
+                                           :class="hasUnreadMessages(client.id) ? 'font-semibold' : 'font-normal'"
+                                           x-text="getLastMessagePreview(client.id, 'client') || 'No messages yet'"></p>
                                     </div>
                                     <p class="text-xs text-gray-400 whitespace-nowrap self-start" x-text="getLastMessageTime(client.id)"></p>
                                 </button>
@@ -285,13 +297,13 @@ $alpineData = [
             </aside>
 
             <!-- Chat Area (Full screen on mobile, split view on desktop) -->
-            <section class="flex-1 flex flex-col bg-sky-50 relative"
+            <section class="flex-1 flex flex-col bg-sky-50 relative min-h-0"
                      :class="{'hidden': isMobile && !recipientId}"
                      x-show="!isMobile || recipientId">
                 <?php include $projectRoot . '/components/chat_header.php'; ?>
 
-                <div id="messageContainer"
-                     class="flex-1 overflow-y-auto p-3 md:p-4 space-y-4 md:space-y-6 bg-gradient-to-b from-sky-50 to-white"
+                 <div id="messageContainer"
+                     class="flex-1 min-h-0 overflow-y-auto p-3 md:p-4 space-y-4 md:space-y-6 bg-gradient-to-b from-sky-50 to-white"
                      x-show="(messages && messages.length > 0) || !isLoading"
                      x-ref="messageContainer"
                      @scroll="if ($refs.messageContainer.scrollTop < 100) loadMoreMessages()"
@@ -324,7 +336,7 @@ $alpineData = [
                     Loading messages...
                 </div>
 
-                <div class="p-3 md:p-4 bg-white border-t border-gray-200">
+                <div class="p-3 md:p-4 bg-white border-t border-gray-200 sticky bottom-0">
                     <form @submit.prevent="sendMessage()" class="flex gap-2 md:gap-3">
                         <textarea x-model="newMessage"
                                   @keydown.enter="!$event.ctrlKey && (sendMessage(), $event.preventDefault())"

@@ -80,6 +80,7 @@ async function pollMessages() {
                 messageApp.messages = [...(messageApp.messages || []), ...validMessages];
                 validMessages.forEach(msg => messageApp.seenMessageIds.add(msg.id));
                 messageApp.lastFetched = validMessages[validMessages.length - 1].created_at;
+                
                 // Reset interval on activity when visible
                 if (!document.hidden) {
                     pollingIntervalMs = 2000;
@@ -134,8 +135,8 @@ function updateSidebarUnreadIndicator() {
     })
     .then(res => res.json())
     .then(data => {
-        // Find the Messages link in sidebar - it contains 'messages.php' in the href
-        const messagesLinks = document.querySelectorAll('a[href*="messages.php"]');
+        // Find the Messages link in sidebar - it contains 'messages.php' or 'messages_client.php' in the href
+        const messagesLinks = document.querySelectorAll('a[href*="messages.php"], a[href*="messages_client.php"]');
         
         messagesLinks.forEach(link => {
             const redDot = link.querySelector('span.bg-red-500');

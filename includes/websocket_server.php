@@ -210,6 +210,12 @@ class Chat implements MessageComponentInterface
 
     private function resolveOrCreateThread(int $userId, string $userType, int $recipientId, string $recipientType): int
     {
+        $userType = trim($userType);
+        $recipientType = trim($recipientType);
+        if (!in_array($userType, ['admin', 'client'], true) || !in_array($recipientType, ['admin', 'client'], true)) {
+            throw new Exception("Invalid user/recipient type for thread creation: {$userType} -> {$recipientType}");
+        }
+
         $sql = "
             SELECT id FROM threads 
             WHERE (

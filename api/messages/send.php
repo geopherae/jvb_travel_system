@@ -79,10 +79,10 @@ if ($missingParams) {
 
 // Sanitize and validate input
 $userId       = filter_var($input['user_id'], FILTER_VALIDATE_INT);
-$userType     = filter_var($input['user_type'], FILTER_SANITIZE_STRING);
+$userType     = trim((string)($input['user_type'] ?? ''));
 $recipientId  = filter_var($input['recipient_id'], FILTER_VALIDATE_INT);
-$recipientType= filter_var($input['recipient_type'], FILTER_SANITIZE_STRING);
-$messageText  = filter_var($input['message_text'], FILTER_SANITIZE_STRING);
+$recipientType= trim((string)($input['recipient_type'] ?? ''));
+$messageText  = trim((string)($input['message_text'] ?? ''));
 $threadId     = isset($input['thread_id']) ? filter_var($input['thread_id'], FILTER_VALIDATE_INT) : null;
 
 if ($userId === false || $recipientId === false || !$userType || !$recipientType || !$messageText) {

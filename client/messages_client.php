@@ -136,7 +136,7 @@ $alpineData = [
 <body class="font-sans text-gray-800 bg-gray-100 h-screen flex flex-col overflow-hidden" x-data="{ sidebarOpen: false }">
 
     <button @click="sidebarOpen = !sidebarOpen"
-            class="fixed top-4 left-4 z-20 p-3 bg-sky-600 text-white rounded-full shadow-lg md:hidden">
+            class="fixed top-4 left-4 z-50 p-3 bg-sky-600 text-white rounded-full shadow-lg md:hidden">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
@@ -162,11 +162,11 @@ $alpineData = [
 
         <!-- Single Chat Interface -->
         <div class="flex-1 flex flex-col max-w-full mx-auto w-full overflow-hidden md:rounded-2xl md:shadow-lg bg-white">
-            <section class="flex-1 flex flex-col bg-sky-50">
+            <section class="flex-1 flex flex-col bg-sky-50 relative min-h-0">
                 <?php include $projectRoot . '/components/chat_header.php'; ?>
 
-                <div id="messageContainer"
-                     class="flex-1 overflow-y-auto p-4 space-y-6 bg-gradient-to-b from-sky-50 to-white"
+                 <div id="messageContainer"
+                     class="flex-1 min-h-0 overflow-y-auto p-4 space-y-6 bg-gradient-to-b from-sky-50 to-white"
                      x-show="(messages && messages.length > 0) || !isLoading"
                      x-ref="messageContainer">
                     <template x-if="messages.length === 0">
@@ -205,7 +205,7 @@ $alpineData = [
                     Loading messages...
                 </div>
 
-                <div class="p-4 bg-white border-t border-gray-200">
+                <div class="p-4 bg-white border-t border-gray-200 sticky bottom-0">
                     <form @submit.prevent="sendMessage()" class="flex gap-3">
                         <textarea x-model="newMessage"
                                   @keydown.enter="!$event.ctrlKey && (sendMessage(), $event.preventDefault())"

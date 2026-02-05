@@ -68,7 +68,7 @@ try {
         ");
         
         if ($unreadStmt) {
-            $unreadStmt->bind_param('iisii', $threadId, $otherPersonId, $otherPersonType, $userId, $userType);
+            $unreadStmt->bind_param('iisis', $threadId, $otherPersonId, $otherPersonType, $userId, $userType);
             $unreadStmt->execute();
             $unreadStmt->bind_result($unreadCount);
             $unreadStmt->fetch();

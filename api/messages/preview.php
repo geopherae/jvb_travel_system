@@ -101,6 +101,16 @@ while ($thread = $result->fetch_assoc()) {
     $lastMsg = $msgResult->fetch_assoc();
     $msgStmt->close();
     
+    // Skip threads with no messages
+    if (!$lastMsg || empty($lastMsg['message_text'])) {
+        continue;
+    }
+    
+    // Validate recipient_type
+    if (!in_array($recipientType, ['client', 'admin'], true)) {
+        continue;
+    }
+    
     // Determine if the message was sent by current user or recipient
     $sentByCurrentUser = false;
     if ($lastMsg) {

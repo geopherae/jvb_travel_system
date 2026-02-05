@@ -60,28 +60,9 @@ try {
     $stmt->close();
 
     if (!$threadId) {
-        // Use INSERT IGNORE to avoid duplicate key errors
-        $stmt = $conn->prepare("INSERT IGNORE INTO threads (user_id, user_type, recipient_id, recipient_type, created_at) VALUES (?, ?, ?, ?, NOW())");
-        $stmt->bind_param('issi', $userId, $userType, $recipientId, $recipientType);
-        
-        if ($stmt->execute() && $stmt->affected_rows > 0) {
-            $threadId = $conn->insert_id;
-        } else {
-            // Thread was already created, fetch it again
-            $stmt2 = $conn->prepare("
-                SELECT id FROM threads 
-                WHERE (user_id = ? AND user_type = ? AND recipient_id = ? AND recipient_type = ?) 
-                   OR (user_id = ? AND user_type = ? AND recipient_id = ? AND recipient_type = ?)
-                LIMIT 1
-            ");
-            $stmt2->bind_param('isisisis', $userId, $userType, $recipientId, $recipientType, $recipientId, $recipientType, $userId, $userType);
-            $stmt2->execute();
-            $stmt2->bind_result($threadId);
-            $stmt2->fetch();
-            $stmt2->close();
-        }
-        
-        $stmt->close();
+        // Do not create threads on fetch; return empty if no thread exists yet
+        echo json_encode([]);
+        exit;
     }
 
     // Fetch messages (delta via since timestamp or since_id)
