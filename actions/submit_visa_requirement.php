@@ -127,15 +127,9 @@ try {
     $submission_id = $conn->insert_id;
     $submissionStmt->close();
 
-    // Update application status to 'awaiting_docs' if still in draft
-    $statusStmt = $conn->prepare("
-        UPDATE client_visa_applications 
-        SET status = 'awaiting_docs'
-        WHERE id = ? AND status = 'draft'
-    ");
-    $statusStmt->bind_param("i", $application_id);
-    $statusStmt->execute();
-    $statusStmt->close();
+    // Recalculate application status based on document submissions
+    require_once __DIR__ . '/../includes/visa_status_helper.php';
+    \VisaStatusHelper\recalculateVisaApplicationStatus($conn, $application_id);
 
     // Log action
     require_once __DIR__ . '/../../includes/log_helper.php';

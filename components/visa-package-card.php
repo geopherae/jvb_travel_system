@@ -13,16 +13,18 @@ if (!$client_id) {
   exit();
 }
 
-// 🧭 Fetch client + visa application + visa package details
+// 🧭 Fetch client + latest visa application + visa package details
 $query = $conn->prepare("
   SELECT 
     c.id, c.visa_application_id,
     cva.id AS app_id, cva.visa_package_id, cva.application_mode, cva.status, cva.group_access_code,
     vp.country, vp.visa_package_name, vp.processing_days, vp.visa_cover_image, vp.requirements_json
   FROM clients c
-  LEFT JOIN client_visa_applications cva ON c.visa_application_id = cva.id
+  LEFT JOIN client_visa_applications cva ON cva.client_id = c.id
   LEFT JOIN visa_packages vp ON cva.visa_package_id = vp.id
   WHERE c.id = ?
+  ORDER BY cva.created_at DESC
+  LIMIT 1
 ");
 $query->bind_param("i", $client_id);
 $query->execute();
@@ -58,16 +60,13 @@ if ($hasVisaPackage) {
 
 // 📊 Application Status
 $statusColors = [
-  'draft' => 'bg-gray-500/90 text-white',
-  'awaiting_docs' => 'bg-amber-500/90 text-white',
-  'under_review' => 'bg-blue-500/90 text-white',
-  'approved_for_submission' => 'bg-green-500/90 text-white',
-  'booking' => 'bg-purple-500/90 text-white',
-  'rejected' => 'bg-red-500/90 text-white',
+  'Awaiting Docs' => 'text-amber-100 border-amber-200/40',
+  'Rejected' => 'text-red-100 border-red-200/40',
+  'Complete' => 'text-emerald-100 border-emerald-200/40',
 ];
-$appStatus = $client['status'] ?? 'draft';
+$appStatus = $client['status'] ?? 'Awaiting Docs';
 $statusClass = $statusColors[$appStatus] ?? 'bg-gray-500/90 text-white';
-$statusDisplay = ucfirst(str_replace('_', ' ', $appStatus));
+$statusDisplay = htmlspecialchars($appStatus);
 ?>
 
 <!-- 🛂 Visa Package Card - WOW Factor Design -->
@@ -172,7 +171,7 @@ $statusDisplay = ucfirst(str_replace('_', ' ', $appStatus));
           <span class="text-xs font-medium">Status</span>
         </div>
         <?php if ($hasVisaPackage): ?>
-          <span class="inline-block px-3 py-1 rounded-full border border-white/20 text-xs sm:text-sm font-semibold shadow-md <?= $statusClass ?>">
+          <span class="inline-flex items-center px-3 py-1 rounded-full border bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold shadow-sm ring-1 ring-white/10 <?= $statusClass ?>">
             <?= htmlspecialchars($statusDisplay) ?>
           </span>
         <?php else: ?>

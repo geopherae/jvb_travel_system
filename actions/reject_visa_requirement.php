@@ -16,6 +16,7 @@ if (basename($_SERVER['SCRIPT_FILENAME']) === basename(__FILE__)) exit('Access d
 
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../includes/visa_status_helper.php';
 require_once __DIR__ . '/../includes/visa_document_handler.php';
 
 use function Auth\getActorContext;
@@ -94,6 +95,9 @@ try {
     $updateStmt->bind_param("sisi", $now, $admin_id, $admin_comments, $submission_id);
     $updateStmt->execute();
     $updateStmt->close();
+
+    // Recalculate application status
+    \VisaStatusHelper\recalculateVisaApplicationStatus($conn, (int)$submission['visa_application_id']);
 
     // Log action
     require_once __DIR__ . '/../../includes/log_helper.php';

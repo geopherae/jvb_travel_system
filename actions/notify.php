@@ -244,6 +244,19 @@ class NotificationManager {
                 'log_action'  => 'visa_package_reassigned',
                 'expires_days' => 30
             ],
+            'visa_application_complete' => [
+                'category'    => 'visa',
+                'title'       => 'Visa Application Complete! 🎉',
+                'message'     => "Congratulations! All required documents for your <strong>{visa_package_name}</strong> visa application have been approved. Our team will upload the visa documents once available.",
+                'html'        => true,
+                'icon'        => '✅',
+                'color'       => 'green',
+                'priority'    => 'high',
+                'action_url'  => '/client/client_visa_dashboard.php',
+                'action_text' => 'View Application',
+                'log_action'  => 'visa_application_complete',
+                'expires_days' => 90
+            ],
             
             // ═══════════════════════════════════════════════════════════════
             // PHOTO NOTIFICATIONS

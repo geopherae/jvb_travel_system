@@ -66,7 +66,7 @@
           </button>
         </template>
         <template x-if="confirmAction.type !== 'delete_requirement'">
-          <button @click="deleteDocumentConfirmed(confirmAction.documentId)"
+          <button @click="deleteDocumentConfirmed(confirmAction.documentId, confirmAction.type === 'delete_actual_visa' ? 'actual_visa' : 'requirement')"
                   class="flex-1 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md bg-red-700 hover:bg-red-600 hover:shadow-lg">
             Delete
           </button>

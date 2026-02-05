@@ -35,7 +35,7 @@ if (!$visaAppId) {
 
 // Fetch visa application early to determine application_mode
 $appStmt = $conn->prepare("
-  SELECT id, visa_package_id, application_mode, client_id
+  SELECT id, visa_package_id, application_mode, client_id, status
   FROM client_visa_applications
   WHERE id = ?
 ");
@@ -51,6 +51,7 @@ if (!$visaApp) {
 $visaPackageId = $visaApp['visa_package_id'];
 $appMode = $appMode ?? $visaApp['application_mode'];
 $clientId = $visaApp['client_id'];
+$visaApplicationStatus = $visa_application_status ?? $visaApp['status']; // Get status from parameter or database
 
 // Determine client's access type (individual vs group)
 // Group access is only enabled if:
@@ -386,6 +387,33 @@ foreach ($companions as $idx => $companion) {
     'visa_type' => $companionVisaType,
     'sections' => buildSectionBlocks($companionGrouped, $sectionTemplates),
   ];
+}
+
+// ============================================================================
+// FETCH ACTUAL VISA DOCUMENTS (if status is Complete)
+// ============================================================================
+
+$actualVisaDocuments = [];
+if ($visaApplicationStatus === 'Complete') {
+  $actualVisaStmt = $conn->prepare("
+    SELECT 
+      cavd.id,
+      cavd.file_name,
+      cavd.file_path,
+      cavd.file_size,
+      cavd.mime_type,
+      cavd.uploaded_at,
+      cavd.notes,
+      aa.first_name AS uploaded_by_name
+    FROM client_actual_visa_documents cavd
+    LEFT JOIN admin_accounts aa ON cavd.uploaded_by = aa.id
+    WHERE cavd.visa_application_id = ?
+    ORDER BY cavd.uploaded_at DESC
+  ");
+  $actualVisaStmt->bind_param("i", $visaAppId);
+  $actualVisaStmt->execute();
+  $actualVisaDocuments = $actualVisaStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  $actualVisaStmt->close();
 }
 
 // ============================================================================

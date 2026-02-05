@@ -58,14 +58,12 @@ $greetingGradient = 'from-sky-300 via-cyan-200 to-blue-200';
         <?= $greeting ?>, <span class="bg-gradient-to-r <?= $greetingGradient ?> bg-clip-text text-transparent"><?= htmlspecialchars($client ? ($client['full_name'] ?? 'Traveler') : ($_SESSION['full_name'] ?? 'Traveler')) ?></span>!
       </h1>
       <p class="text-base md:text-lg mt-1 text-white/90 leading-relaxed">
-        <?php if ($selectedVisaApp && in_array(strtolower($status), ['approved', 'approved_for_submission', 'booking'])): ?>
-          Great news! Your visa application is progressing well. Keep an eye on your documents.
-        <?php elseif ($selectedVisaApp && in_array(strtolower($status), ['awaiting_docs', 'draft'])): ?>
-          Let's get your visa application started. Upload your documents to begin the process.
-        <?php elseif ($selectedVisaApp && strtolower($status) === 'under_review'): ?>
-          Your documents are being reviewed. We'll notify you once there's an update.
-        <?php elseif ($selectedVisaApp && in_array(strtolower($status), ['rejected', 'cancelled'])): ?>
-          Your application needs attention. Please check the details below.
+        <?php if ($selectedVisaApp && strtolower($status) === 'complete'): ?>
+          Excellent! Your visa application is complete. All documents have been approved.
+        <?php elseif ($selectedVisaApp && strtolower($status) === 'awaiting docs'): ?>
+          Let's keep moving! Upload your documents to complete the visa process.
+        <?php elseif ($selectedVisaApp && strtolower($status) === 'rejected'): ?>
+          Your application needs attention. Some documents were rejected. Please review and resubmit.
         <?php else: ?>
           Track your visa application progress and manage your documents here.
         <?php endif; ?>
@@ -84,19 +82,17 @@ $greetingGradient = 'from-sky-300 via-cyan-200 to-blue-200';
           </div>
           <span class="px-4 py-1 text-xs font-medium rounded-full <?php
             $statusLower = strtolower($status);
-            if (in_array($statusLower, ['draft', 'awaiting_docs'])) {
+            if (strtolower($statusLower) === 'awaiting docs') {
               echo 'bg-amber-100 text-amber-700';
-            } elseif (in_array($statusLower, ['under_review', 'submitted'])) {
-              echo 'bg-sky-100 text-sky-700';
-            } elseif (in_array($statusLower, ['approved', 'approved_for_submission', 'booking'])) {
+            } elseif (strtolower($statusLower) === 'complete') {
               echo 'bg-emerald-100 text-emerald-700';
-            } elseif (in_array($statusLower, ['rejected', 'cancelled'])) {
+            } elseif (strtolower($statusLower) === 'rejected') {
               echo 'bg-red-100 text-red-700';
             } else {
               echo 'bg-gray-100 text-gray-700';
             }
           ?>">
-            <?= ucfirst(str_replace('_', ' ', htmlspecialchars($status))) ?>
+            <?= htmlspecialchars($status) ?>
           </span>
         </div>
 

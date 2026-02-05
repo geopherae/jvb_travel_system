@@ -16,6 +16,7 @@ if (basename($_SERVER['SCRIPT_FILENAME']) === basename(__FILE__)) exit('Access d
 
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../includes/visa_status_helper.php';
 
 use function Auth\getActorContext;
 
@@ -46,9 +47,16 @@ if (!$submission_id) {
 }
 
 try {
-    // Verify submission exists
+    // Verify submission exists and get details for notification
     $submissionStmt = $conn->prepare("
-        SELECT id, visa_application_id FROM visa_document_submissions WHERE id = ?
+        SELECT vds.id, vds.visa_application_id, vds.requirement_name,
+               cva.client_id, c.full_name as client_name,
+               vp.visa_package_name
+        FROM visa_document_submissions vds
+        JOIN client_visa_applications cva ON vds.visa_application_id = cva.id
+        JOIN clients c ON cva.client_id = c.id
+        JOIN visa_packages vp ON cva.visa_package_id = vp.id
+        WHERE vds.id = ?
     ");
     $submissionStmt->bind_param("i", $submission_id);
     $submissionStmt->execute();
@@ -76,6 +84,24 @@ try {
     $updateStmt->bind_param("sisi", $now, $admin_id, $admin_comments, $submission_id);
     $updateStmt->execute();
     $updateStmt->close();
+
+    // Send notification to client
+    require_once __DIR__ . '/notify.php';
+    $notifyManager = new NotificationManager($conn);
+    $notifyManager->send([
+        'recipient_type' => 'client',
+        'recipient_id' => $submission['client_id'],
+        'event' => 'document_approved',
+        'context' => [
+            'client_id' => $submission['client_id'],
+            'document_name' => $submission['requirement_name'],
+            'visa_package_name' => $submission['visa_package_name'],
+            'approved_by' => $actor['full_name'] ?? 'Admin'
+        ]
+    ]);
+
+    // Recalculate application status
+    \VisaStatusHelper\recalculateVisaApplicationStatus($conn, (int)$submission['visa_application_id']);
 
     // Log action
     require_once __DIR__ . '/../../includes/log_helper.php';

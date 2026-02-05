@@ -9,13 +9,15 @@ function visaDocumentTable(el) {
     modals: {
       viewer: false,
       addRequirement: false,
-      uploadDocument: false
+      uploadDocument: false,
+      uploadActualVisa: false
     },
     selectedRequirementId: '',
     selectedRequirementName: '',
     selectedRequirementDescription: '',
     selectedAddReqFileName: '',
     selectedUploadDocFileName: '',
+    actualVisaFileName: '',
     toast: {
       visible: false,
       message: '',
@@ -42,7 +44,8 @@ function visaDocumentTable(el) {
       approvedAt: '',
       updatedBy: '',
       submissionId: '',
-      zoom: 1
+      zoom: 1,
+      documentType: 'requirement' // 'requirement' or 'actual_visa'
     },
     applicantMeta: meta,
     applicantRequirements: applicantRequirements,
@@ -114,7 +117,7 @@ function visaDocumentTable(el) {
       const reqs = this.applicantRequirements[this.currentIdx];
       return Array.isArray(reqs) ? reqs : [];
     },
-    openViewer(path, fileName, requirement, mimeType, status, adminComments, uploadedAt = '', approvedAt = '', updatedBy = '', submissionId = '') {
+    openViewer(path, fileName, requirement, mimeType, status, adminComments, uploadedAt = '', approvedAt = '', updatedBy = '', submissionId = '', documentType = 'requirement') {
       this.viewer = {
         path,
         fileName,
@@ -126,7 +129,8 @@ function visaDocumentTable(el) {
         approvedAt,
         updatedBy,
         submissionId,
-        zoom: 1
+        zoom: 1,
+        documentType: documentType
       };
       this.modals.viewer = true;
     },
@@ -153,6 +157,11 @@ function visaDocumentTable(el) {
       this.selectedRequirementDescription = reqDescription || '';
       this.selectedUploadDocFileName = '';
       this.modals.uploadDocument = true;
+    },
+    openUploadActualVisa() {
+      // Open modal for uploading actual visa document
+      this.actualVisaFileName = '';
+      this.modals.uploadActualVisa = true;
     },
     openUpload(reqId, reqName) {
       // Deprecated - kept for backwards compatibility
@@ -182,19 +191,31 @@ function visaDocumentTable(el) {
     },
     async deleteDocument() {
       // Show styled confirmation modal instead of native confirm
+      // Check document type to determine delete action type
+      const deleteType = this.viewer.documentType === 'actual_visa' ? 'delete_actual_visa' : 'delete';
       this.confirmAction = {
         visible: true,
-        type: 'delete',
+        type: deleteType,
         documentId: this.viewer.submissionId,
         reason: ''
       };
     },
-    async deleteDocumentConfirmed(submissionId) {
+    async deleteDocumentConfirmed(submissionId, documentType = 'requirement') {
       try {
         const formData = new FormData();
-        formData.append('submission_id', submissionId);
+        
+        // Choose action URL and parameter based on document type
+        let actionUrl, paramName;
+        if (documentType === 'actual_visa') {
+          actionUrl = '../actions/delete_actual_visa_document.php';
+          paramName = 'document_id';
+        } else {
+          actionUrl = '../actions/delete_visa_document.php';
+          paramName = 'submission_id';
+        }
+        formData.append(paramName, submissionId);
 
-        const response = await fetch('../actions/delete_visa_document.php', {
+        const response = await fetch(actionUrl, {
           method: 'POST',
           body: formData
         });
@@ -397,6 +418,39 @@ function visaDocumentTable(el) {
       } catch (error) {
         console.error('Upload error:', error);
         alert('An error occurred while uploading the document.');
+      }
+    },
+    async handleUploadActualVisa(event) {
+      const form = event.target;
+      const formData = new FormData(form);
+      
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          this.modals.uploadActualVisa = false;
+          this.toast.message = result.message || 'Actual visa document uploaded successfully!';
+          this.toast.type = 'success';
+          this.toast.visible = true;
+          
+          setTimeout(() => {
+            this.toast.visible = false;
+            location.reload();
+          }, 2000);
+        } else {
+          alert('Upload failed: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Upload actual visa error:', error);
+        alert('An error occurred while uploading the actual visa document.');
       }
     },
     async handleUpload(event) {

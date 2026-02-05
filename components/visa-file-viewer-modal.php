@@ -49,8 +49,8 @@
         <label class="block text-sm font-medium text-gray-700 mb-1">Description:</label>
         <p class="text-sm text-gray-700 mb-4 leading-relaxed" x-text="viewer.requirement || 'N/A'"></p>
 
-        <!-- Status -->
-        <div class="mb-4">
+        <!-- Status (hidden for actual visa documents) -->
+        <div class="mb-4" x-show="viewer.documentType !== 'actual_visa'">
           <label class="block text-sm font-medium text-gray-700 mb-2">Status:</label>
           <select x-model="viewer.status"
                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
@@ -60,14 +60,20 @@
           </select>
         </div>
 
-        <!-- Admin Comments -->
-        <div class="mb-4">
+        <!-- Admin Comments (hidden for actual visa documents, shown as Notes) -->
+        <div class="mb-4" x-show="viewer.documentType !== 'actual_visa'">
           <label class="block text-sm font-medium text-gray-700 mb-1">Admin Comments:</label>
           <textarea
               x-model="viewer.adminComments"
               class="w-full h-24 sm:h-28 text-sm border border-gray-300 rounded px-3 py-2 resize-none overflow-y-auto bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
               placeholder="Add comments about this document...">
           </textarea>
+        </div>
+
+        <!-- Notes display for actual visa documents (read-only) -->
+        <div class="mb-4" x-show="viewer.documentType === 'actual_visa'">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Notes:</label>
+          <p class="text-sm text-gray-700 p-3 bg-gray-50 rounded border border-gray-200 min-h-[6rem]" x-text="viewer.adminComments || 'No notes added'"></p>
         </div>
 
         <!-- Links stacked vertically -->
@@ -78,7 +84,9 @@
             Open in Full Screen
           </a>
           
-          <button @click="deleteDocument()"
+          <!-- Delete File button - only shown to admins -->
+          <button x-show="!isClient"
+                  @click="deleteDocument()"
                   class="block text-sm text-red-600 hover:text-red-700 hover:underline touch-manipulation">
             Delete File
           </button>
@@ -111,14 +119,15 @@
                 class="flex-1 bg-white border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 text-sm font-semibold px-4 py-2.5 rounded-lg transition-all duration-200 touch-manipulation">
           Close
         </button>
-        <button @click="saveChanges()"
+        <!-- Hide Save Changes button for actual visa documents -->
+        <button x-show="viewer.documentType !== 'actual_visa'" @click="saveChanges()"
                 :disabled="!viewer.submissionId"
                 :class="!viewer.submissionId ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white'"
                 class="flex-1 text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-all duration-200 touch-manipulation">
           Save Changes
         </button>
       </div>
-      <p x-show="!viewer.submissionId"
+      <p x-show="!viewer.submissionId && viewer.documentType !== 'actual_visa'"
          class="mt-2 text-xs text-red-600">
         Submission ID is required to update status.
       </p>

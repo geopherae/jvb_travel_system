@@ -19,14 +19,9 @@ $page = ($isAjaxReload || $isCleanReload) ? 1 : (isset($_GET['page']) ? max(1, (
 if (!function_exists('getVisaStatusPriority')) {
   function getVisaStatusPriority($status) {
     $order = [
-      'booking' => 8,
-      'approved_for_submission' => 7,
-      'under_review' => 6,
-      'awaiting_docs' => 5,
-      'resubmit_docs' => 4,
-      'draft' => 3,
+      'complete' => 8,
+      'awaiting docs' => 5,
       'rejected' => 2,
-      'cancelled' => 1
     ];
     return $order[strtolower(trim($status))] ?? 0;
   }
@@ -37,14 +32,9 @@ if (!function_exists('getVisaStatusBadgeClass')) {
   function getVisaStatusBadgeClass($status) {
     $status = strtolower(trim($status));
     $classes = [
-      'booking' => 'bg-green-100 text-green-800',
-      'approved_for_submission' => 'bg-blue-100 text-blue-800',
-      'under_review' => 'bg-purple-100 text-purple-800',
-      'awaiting_docs' => 'bg-yellow-100 text-yellow-800',
-      'resubmit_docs' => 'bg-orange-100 text-orange-800',
-      'draft' => 'bg-gray-100 text-gray-600',
-      'rejected' => 'bg-red-100 text-red-800',
-      'cancelled' => 'bg-red-200 text-red-900'
+      'complete' => 'bg-green-100 text-green-800 border-green-300',
+      'awaiting docs' => 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      'rejected' => 'bg-red-100 text-red-800 border-red-300',
     ];
     return $classes[$status] ?? 'bg-gray-100 text-gray-600';
   }
@@ -176,7 +166,7 @@ error_log("DEBUG: visa-clients-table.php - Total visa clients: $totalClients, Pa
           : '../images/default_client_profile.png';
         $visaPackageCountry = $client['visa_package_country'] ?? '—';
         $appliedDate = $client['applied_date'] ?? '—';
-        $statusText = trim($client['visa_status'] ?? '') ?: 'draft';
+        $statusText = trim($client['visa_status'] ?? '') ?: 'Awaiting Docs';
       ?>
       <tr 
         class="text-gray-700 hover:text-sky-600 transition-colors odd:bg-white even:bg-sky-50"

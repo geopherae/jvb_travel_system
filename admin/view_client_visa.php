@@ -96,13 +96,11 @@ $profileImg = !empty($client['client_profile_photo'])
   ? '../uploads/client_profiles/' . rawurlencode($client['client_profile_photo'])
   : $default_avatar;
 
-// ✅ Status colors
+// ✅ Status colors for new auto-calculated statuses
 $statusColors = [
-  'draft' => 'bg-gray-100 text-gray-700',
-  'awaiting_docs' => 'bg-yellow-100 text-yellow-700',
-  'under_review' => 'bg-blue-100 text-blue-700',
-  'approved_for_submission' => 'bg-green-100 text-green-700',
-  'booking' => 'bg-purple-100 text-purple-700',
+  'Awaiting Docs' => 'bg-yellow-100 text-yellow-700 border-yellow-300',
+  'Rejected' => 'bg-red-100 text-red-700 border-red-300',
+  'Complete' => 'bg-green-100 text-green-700 border-green-300',
 ];
 
 // ✅ Build applicant list for dropdown/store (lead + companions)
@@ -210,6 +208,7 @@ $applicantsJson = json_encode(
         $app = $visa_applications[0];
         $visa_application_id = $app['id'];
         $application_mode = $app['application_mode'];
+        $visa_application_status = $app['status']; // Pass status to component
         include '../components/visa-document-table.php'; 
       }
     ?>

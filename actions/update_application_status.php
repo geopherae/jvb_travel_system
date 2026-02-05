@@ -1,16 +1,22 @@
 <?php
 /**
- * Update Visa Application Status Action
+ * DEPRECATED: Update Visa Application Status Action
  * 
- * Admin action to update visa application status.
- * Moves application through workflow: draft → awaiting_docs → under_review → approved_for_submission → booking
+ * ⚠️ THIS ENDPOINT IS NO LONGER USED
  * 
- * POST Parameters:
- *   - application_id (int): Visa application ID
- *   - new_status (string): New status (draft, awaiting_docs, under_review, approved_for_submission, booking, rejected)
- *   - notes (string, optional): Status change notes
+ * Visa application statuses are now automatically calculated and updated based on document submission states:
+ * - 'Awaiting Docs': Initial state or mixed document statuses
+ * - 'Rejected': ALL required documents have been rejected
+ * - 'Complete': ALL required documents have been approved
  * 
- * Response: JSON with success status
+ * Status updates are triggered automatically in:
+ * - actions/approve_visa_requirement.php (when approving documents)
+ * - actions/reject_visa_requirement.php (when rejecting documents)
+ * - actions/submit_visa_document.php (when submitting documents)
+ * 
+ * See includes/visa_status_helper.php for the recalculation logic.
+ * 
+ * This file is kept for backward compatibility and to prevent 404 errors on legacy requests.
  */
 
 if (basename($_SERVER['SCRIPT_FILENAME']) === basename(__FILE__)) exit('Access denied.');
@@ -33,99 +39,11 @@ if ($actor['role'] !== 'superadmin' && $actor['role'] !== 'admin') {
     exit;
 }
 
-// Validate input
-$application_id = filter_var($_POST['application_id'] ?? null, FILTER_VALIDATE_INT);
-$new_status = trim($_POST['new_status'] ?? '');
-$notes = trim($_POST['notes'] ?? '');
+// Return deprecation notice
+http_response_code(410); // Gone
+echo json_encode([
+    'success' => false,
+    'message' => 'This endpoint is deprecated. Visa application statuses are now automatically calculated based on document submission states.',
+    'more_info' => 'See includes/visa_status_helper.php for status calculation logic'
+]);
 
-if (!$application_id) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Missing required field: application_id'
-    ]);
-    exit;
-}
-
-$valid_statuses = ['draft', 'awaiting_docs', 'under_review', 'approved_for_submission', 'booking', 'rejected'];
-if (!in_array($new_status, $valid_statuses)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid status: ' . $new_status
-    ]);
-    exit;
-}
-
-try {
-    // Verify application exists and get current status
-    $appStmt = $conn->prepare("
-        SELECT id, client_id, status FROM client_visa_applications WHERE id = ?
-    ");
-    $appStmt->bind_param("i", $application_id);
-    $appStmt->execute();
-    $appResult = $appStmt->get_result();
-    
-    if ($appResult->num_rows === 0) {
-        throw new Exception('Visa application not found');
-    }
-    
-    $application = $appResult->fetch_assoc();
-    $appStmt->close();
-
-    $old_status = $application['status'];
-
-    // Update application status
-    $updateStmt = $conn->prepare("
-        UPDATE client_visa_applications 
-        SET status = ?
-        WHERE id = ?
-    ");
-    $updateStmt->bind_param("si", $new_status, $application_id);
-    $updateStmt->execute();
-    $updateStmt->close();
-
-    // If moving to 'booking' status, update clients.status to 'Confirmed'
-    if ($new_status === 'booking') {
-        $clientStmt = $conn->prepare("
-            UPDATE clients 
-            SET status = 'Confirmed'
-            WHERE id = ?
-        ");
-        $clientStmt->bind_param("i", $application['client_id']);
-        $clientStmt->execute();
-        $clientStmt->close();
-    }
-
-    // Log action
-    require_once __DIR__ . '/../../includes/log_helper.php';
-    LogHelper\logClientOnboardingAudit(
-        $conn,
-        $application['client_id'],
-        'visa_application_status_updated',
-        [
-            'application_id' => $application_id,
-            'old_status' => $old_status,
-            'new_status' => $new_status,
-            'notes' => $notes
-        ],
-        $actor,
-        'Medium',
-        'visa_processing'
-    );
-
-    echo json_encode([
-        'success' => true,
-        'message' => "Application status updated from '$old_status' to '$new_status'"
-    ]);
-
-} catch (Exception $e) {
-    error_log("[visa_actions/update_application_status] Error: " . $e->getMessage());
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => defined('ENV') && ENV === 'development' 
-            ? $e->getMessage() 
-            : 'Failed to update application status'
-    ]);
-}

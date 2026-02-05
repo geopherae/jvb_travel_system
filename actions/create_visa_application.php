@@ -71,7 +71,7 @@ try {
     // Create visa application
     $applicationStmt = $conn->prepare("
         INSERT INTO client_visa_applications (client_id, visa_package_id, visa_type_selected, applicant_status, status)
-        VALUES (?, ?, ?, ?, 'draft')
+        VALUES (?, ?, ?, ?, 'Awaiting Docs')
     ");
     $applicationStmt->bind_param("iiss", $client_id, $visa_package_id, $visa_type_selected, $applicant_status);
     $applicationStmt->execute();

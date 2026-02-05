@@ -342,7 +342,7 @@ function createVisaClient(
 
     $visaAppSql = "INSERT INTO client_visa_applications (
       $visaAppColumns, status, created_at, updated_at
-    ) VALUES ($visaAppPlaceholders, 'draft', ?, ?)";
+    ) VALUES ($visaAppPlaceholders, 'Awaiting Docs', ?, ?)";;
     
     error_log("[createVisaClient] Preparing SQL: " . $visaAppSql);
     error_log("[createVisaClient] Bind types: $bindTypes, Values: " . json_encode($bindValues));

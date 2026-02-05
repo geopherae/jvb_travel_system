@@ -95,7 +95,31 @@ function manualClientTableReload(options = {}) {
     });
 }
 
+function manualVisaTableReload(options = {}) {
+  const silent = options.silent || false;
+
+  fetch("../actions/reload_visa_clients.php?_=" + new Date().getTime())
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+      return res.text();
+    })
+    .then(html => {
+      const container = document.getElementById("visa-clients-table-container");
+      if (container) {
+        container.innerHTML = html;
+        const rows = container.querySelectorAll("tbody tr").length;
+        if (!silent) showToast(`🔄 Visa table refreshed. ${rows} clients loaded.`);
+      } else if (!silent) {
+        showToast("⚠️ Visa table container not found.");
+      }
+    })
+    .catch(err => {
+      if (!silent) showToast("⚠️ Visa refresh failed: " + err.message);
+    });
+}
+
 let isCheckingStatus = false;
+let isCheckingVisaStatus = false;
 
 function runStatusCheck() {
   if (isCheckingStatus) return;
@@ -146,7 +170,42 @@ function runStatusCheck() {
     });
 }
 
+function runVisaStatusCheck() {
+  if (isCheckingVisaStatus) return;
+  isCheckingVisaStatus = true;
+
+  fetch("../actions/run_visa_status_check.php?_=" + new Date().getTime(), {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      if (data.cached) {
+        isCheckingVisaStatus = false;
+        return;
+      }
+
+      if (data.count > 0) {
+        manualVisaTableReload({ silent: true });
+      }
+
+      isCheckingVisaStatus = false;
+    })
+    .catch(err => {
+      showToast("⚠️ Visa status check failed: " + err.message);
+      isCheckingVisaStatus = false;
+    });
+}
+
 // Auto-run status check on page load
 document.addEventListener("DOMContentLoaded", () => {
   runStatusCheck();
+  runVisaStatusCheck();
+
+  setInterval(() => {
+    runStatusCheck();
+    runVisaStatusCheck();
+  }, 10000);
 });
