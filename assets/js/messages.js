@@ -25,6 +25,7 @@ document.addEventListener('alpine:init', () => {
             seenMessageIds: new Set(),
             fetchTimeout: null,
             unreadConversations: {},
+            onlineUsers: { admins: [], clients: [] },
 
             init() {
                 // Load last selected recipient from localStorage
@@ -419,6 +420,20 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 return null;
+            },
+
+            isUserOnline(userId, userType) {
+                if (!userId || !userType) return false;
+                
+                if (userType === 'admin') {
+                    return this.onlineUsers.admins.includes(Number(userId));
+                }
+                
+                if (userType === 'client') {
+                    return this.onlineUsers.clients.includes(Number(userId));
+                }
+                
+                return false;
             }
         };
     });

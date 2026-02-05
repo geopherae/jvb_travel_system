@@ -6,8 +6,10 @@ let pollingIntervalMs = 2000;
 let previewRefreshInterval = null;
 let lastPreviewRefresh = 0;
 let navIndicatorInterval = null;
+let onlineUsersInterval = null;
 const PREVIEW_REFRESH_MS = 5000;
 const NAV_INDICATOR_CHECK_MS = 5000; // Check Messages navbutton every 5 seconds
+const ONLINE_USERS_CHECK_MS = 15000; // Check online users every 15 seconds
 
 async function pollMessages() {
     const maxRetries = 10;
@@ -197,6 +199,54 @@ function startPreviewRefresh() {
     }, PREVIEW_REFRESH_MS);
 }
 
+async function fetchOnlineUsers() {
+    const messageAppElement = document.querySelector('[x-data^="messageApp"]');
+    const messageApp = messageAppElement ? Alpine.$data(messageAppElement) : null;
+    
+    if (!messageApp) return;
+
+    try {
+        const response = await fetch('../api/presence/fetch_online_users.php', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success && Array.isArray(data.online_admins) && Array.isArray(data.online_clients)) {
+            messageApp.onlineUsers = {
+                admins: data.online_admins,
+                clients: data.online_clients
+            };
+            console.debug('[messageApp] Online users updated:', messageApp.onlineUsers);
+        }
+    } catch (err) {
+        console.debug('[messageApp] Error fetching online users:', err);
+    }
+}
+
+function startOnlineUsersCheck() {
+    if (onlineUsersInterval) {
+        clearInterval(onlineUsersInterval);
+    }
+    // Fetch immediately on start
+    fetchOnlineUsers();
+    // Then poll every 15 seconds
+    onlineUsersInterval = setInterval(fetchOnlineUsers, ONLINE_USERS_CHECK_MS);
+}
+
+function stopOnlineUsersCheck() {
+    if (onlineUsersInterval) {
+        clearInterval(onlineUsersInterval);
+        onlineUsersInterval = null;
+    }
+}
+
 function startPolling() {
     if (pollingInterval) {
         clearInterval(pollingInterval);
@@ -206,6 +256,7 @@ function startPolling() {
     restartPollingInterval();
     startPreviewRefresh();
     startNavIndicatorCheck();
+    startOnlineUsersCheck();
     // Update sidebar indicator immediately
     updateSidebarUnreadIndicator();
     console.log('Message polling started');
@@ -221,6 +272,7 @@ function stopPolling() {
         previewRefreshInterval = null;
     }
     stopNavIndicatorCheck();
+    stopOnlineUsersCheck();
     console.log('Message polling stopped');
 }
 

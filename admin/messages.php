@@ -203,6 +203,7 @@ $alpineData = [
                                          class="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0">
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 flex-wrap">
+                                            <span x-show="isUserOnline(admin.id, 'admin')" class="w-2.5 h-2.5 bg-green-500 rounded-full inline-block flex-shrink-0"></span>
                                             <p class="font-medium text-base md:text-base text-gray-900 truncate" x-text="admin.full_name"></p>
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
                                                   x-text="admin.role"></span>
@@ -252,6 +253,7 @@ $alpineData = [
                                          class="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0">
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 flex-wrap">
+                                            <span x-show="isUserOnline(client.id, 'client')" class="w-2.5 h-2.5 bg-green-500 rounded-full inline-block flex-shrink-0"></span>
                                             <p class="font-medium text-base md:text-base text-gray-900 truncate" x-text="client.full_name"></p>
                                             <span x-show="isAssignedToMe(client.id)" 
                                                   class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-sky-100 text-sky-800">

@@ -23,7 +23,7 @@
       <img :src="selectedUser?.avatar || '../images/default_client_profile.png'"
            alt="Recipient Avatar"
            class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
-      <template x-if="recipientType === 'client' && selectedUser?.status?.toLowerCase() === 'active'">
+      <template x-if="isUserOnline(recipientId, recipientType)">
         <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
       </template>
     </div>
@@ -36,8 +36,8 @@
          x-show="recipientType === 'client' && selectedUser?.status"
          x-text="selectedUser?.status"></p>
       <p class="text-xs text-amber-600"
-         x-show="recipientType === 'admin' && selectedUser?.status"
-         x-text="`Agent • ` + (selectedUser?.status || 'Online')"></p>
+         x-show="recipientType === 'admin'"
+         x-text="isUserOnline(recipientId, 'admin') ? 'Online' : 'Offline'"></p>
     </div>
   </div>
 
