@@ -6,6 +6,7 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/image_compression_helper.php';
 require_once __DIR__ . '/../includes/log_helper.php';
+require_once __DIR__ . '/../includes/visa_status_helper.php';
 
 
 use function Auth\guard;
@@ -174,7 +175,7 @@ try {
 
   $visaPackageId = $pkgData['visa_package_id'];
 
-  // Get requirement name from package
+  // Get requirement name from package requirements_json
   $reqStmt = $conn->prepare("
     SELECT requirements_json FROM visa_packages WHERE id = ?
   ");
@@ -184,13 +185,48 @@ try {
   $reqData = $reqResult->fetch_assoc();
   $reqStmt->close();
 
-  $requirementName = 'Unknown Requirement';
+  $requirementName = null;
   $requirements = json_decode($reqData['requirements_json'] ?? '[]', true) ?? [];
   foreach ($requirements as $req) {
     if (($req['id'] ?? '') === $requirementId) {
-      $requirementName = $req['name'] ?? 'Unknown';
+      $requirementName = $req['name'] ?? null;
       break;
     }
+  }
+
+  // If not found in package, check client's custom requirements
+  if ($requirementName === null) {
+    $clientReqStmt = $conn->prepare("
+      SELECT requirements_json FROM client_visa_requirements 
+      WHERE client_id = ? AND " . ($companionId ? "companion_id = ?" : "companion_id IS NULL")
+    );
+    
+    if ($companionId) {
+      $clientReqStmt->bind_param("ii", $clientId, $companionId);
+    } else {
+      $clientReqStmt->bind_param("i", $clientId);
+    }
+    
+    $clientReqStmt->execute();
+    $clientReqResult = $clientReqStmt->get_result();
+    
+    if ($clientReqResult->num_rows > 0) {
+      $clientReqData = $clientReqResult->fetch_assoc();
+      $clientRequirements = json_decode($clientReqData['requirements_json'] ?? '[]', true) ?? [];
+      
+      foreach ($clientRequirements as $req) {
+        if (($req['id'] ?? '') === $requirementId) {
+          $requirementName = $req['name'] ?? null;
+          break;
+        }
+      }
+    }
+    $clientReqStmt->close();
+  }
+
+  // Final fallback
+  if ($requirementName === null) {
+    $requirementName = 'Unknown Requirement';
   }
 
   // Handle admin editable requirement fields (from top button upload modal)
@@ -322,6 +358,9 @@ try {
     $insertStmt->execute();
     $insertStmt->close();
   }
+
+  // Recalculate application status after document submission
+  \VisaStatusHelper\recalculateVisaApplicationStatus($conn, $visaAppId);
 
   // Log audit action
   $actor = Auth\getActorContext();
