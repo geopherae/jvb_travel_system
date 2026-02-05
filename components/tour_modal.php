@@ -40,7 +40,7 @@ document.addEventListener('alpine:init', () => {
 >
   <!-- Modal Container -->
   <div
-    class="relative bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-[100vw] sm:max-w-5xl transition-all duration-300 max-h-[calc(100vh-24px)] sm:max-h-[95vh] flex flex-col overflow-hidden"
+    class="relative bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-[100vw] sm:max-w-5xl transition-all duration-300 max-h-none sm:max-h-[95vh] flex flex-col overflow-hidden overflow-y-auto"
     @click.away="$store.tourModal.closeModal()"
     x-transition.opacity
   >
@@ -53,7 +53,7 @@ document.addEventListener('alpine:init', () => {
       ×
     </button>
 
-    <div class="w-full flex-1 overflow-y-auto flex flex-col sm:flex-row gap-2 sm:gap-4 p-4 sm:p-6 pb-20 sm:pb-6">
+    <div class="w-full flex-1 overflow-y-auto flex flex-col sm:flex-row gap-2 sm:gap-4 p-4 sm:p-6 pb-16 sm:pb-6">
       <!-- Left Column -->
 <div class="sm:max-w-[55%] flex-1 flex flex-col">
   <img

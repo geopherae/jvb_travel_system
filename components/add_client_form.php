@@ -116,7 +116,7 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showAddClientModal = false"></div>
 
     <!-- Modal panel -->
-    <div class="inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-0 sm:align-middle sm:max-w-4xl sm:w-full sm:max-h-[96vh]">
+    <div class="inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-0 sm:align-middle sm:max-w-5xl sm:w-full sm:max-h-[96vh]">
       <!-- Header -->
       <div class="bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3 sm:px-6">
         <div class="p-2 flex items-center justify-between">

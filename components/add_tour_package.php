@@ -1,13 +1,13 @@
 <!-- ➕ Add Tour Package Modal -->
-<div x-data="tourFormData()" x-effect="days >= 2 ? nights = days - 1 : nights = 0"  class="backdrop-blur-sm fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-3 sm:px-4">
-  <div class="align-right bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-5xl overflow-hidden transition-all max-h-[calc(100vh-24px)] sm:max-h-[95vh] flex flex-col">
+<div x-data="tourFormData()" x-effect="days >= 2 ? nights = days - 1 : nights = 0"  class="backdrop-blur-sm fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-2 sm:px-4 py-4 overflow-y-auto">
+  <div class="align-right bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full sm:max-w-5xl overflow-hidden transition-all max-h-none sm:max-h-[95vh] flex flex-col">
     
   <!-- 🧭 Modal Header -->
-  <div class="flex items-center justify-between px-6 pt-6 pb-4">
-  <h2 class="text-xl font-bold text-sky-700">Add New Tour Package</h2>
+  <div class="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex-shrink-0">
+  <h2 class="text-lg sm:text-xl font-bold text-sky-700">Add New Tour Package</h2>
   <button id="closeAddModal"
           type="button"
-          class="text-slate-500 hover:text-red-500 text-xl font-bold">
+          class="text-slate-500 hover:text-red-500 text-xl font-bold flex-shrink-0 ml-2">
     ×
   </button>
 </div>
@@ -15,10 +15,10 @@
 
     <form method="POST" action="../actions/add_tour_package.php" enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden">
       <!-- 🧩 Modal Body -->
-      <div class="flex flex-col sm:flex-row gap-6 flex-1 overflow-y-auto px-6 pb-8">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-6 flex-1 overflow-y-auto px-4 sm:px-6 pb-4 sm:pb-8">
 
 <!-- Left Column: Image + Live Preview -->
-<div class="sm:w-[50%] w-full flex flex-col bg-white rounded-lg shadow-sm overflow-hidden"
+<div class="sm:w-[50%] w-full flex flex-col bg-white rounded-lg shadow-sm overflow-hidden min-h-0"
      x-data="{ 
        fileName: '',
        imageError: '',
@@ -49,7 +49,7 @@
   <div class="relative">
     <img :src="previewUrl || '../images/default_trip_cover.jpg'" 
          :alt="fileName || 'Default Cover Image'"
-         class="w-full h-52 sm:h-64 object-cover rounded-t-lg sm:rounded-lg sm:shadow"
+         class="w-full h-40 sm:h-64 object-cover rounded-t-lg sm:rounded-lg sm:shadow"
          @error="$el.src = '../images/default_trip_cover.jpg'" />
 
     <!-- Upload Button -->
@@ -102,57 +102,59 @@
 </div>
 
         <!-- 🗂️ Right Column: Tabs -->
-        <div class="sm:w-[50%] w-full rounded-lg bg-white">
+        <div class="sm:w-[50%] w-full rounded-lg bg-white flex flex-col min-h-0">
           <!-- Tab Header -->
-          <div class="flex border-b overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <div class="flex border-b overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex-shrink-0">
             <button type="button"
                     @click="tab = 'details'"
                     :class="tab === 'details'
-                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
-                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
+                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
+                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
               Details
             </button>
 
             <button type="button"
                     @click="tab = 'itinerary'"
                     :class="tab === 'itinerary'
-                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
-                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
+                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
+                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
               Itinerary
             </button>
 
             <button type="button"
                     @click="tab = 'inclusions'"
                     :class="tab === 'inclusions'
-                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
-                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
+                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
+                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
               Inclusions
             </button>
 
             <button type="button"
                     @click="tab = 'exclusions'"
                     :class="tab === 'exclusions'
-                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
-                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
+                      ? 'flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-sky-600 border-b-2 border-sky-600 whitespace-nowrap'
+                      : 'flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 whitespace-nowrap'">
               Exclusions
             </button>
           </div>
 
           <!-- Tab Content -->
-          <div x-show="tab === 'details'" x-cloak>
-            <?php include '../components/tabs/package-details.php'; ?>
-          </div>
+          <div class="flex-1 overflow-y-auto min-h-0">
+            <div x-show="tab === 'details'" x-cloak>
+              <?php include '../components/tabs/package-details.php'; ?>
+            </div>
 
-          <div x-show="tab === 'itinerary'" x-cloak>
-            <?php include '../components/tabs/itinerary-builder.php'; ?>
-          </div>
+            <div x-show="tab === 'itinerary'" x-cloak>
+              <?php include '../components/tabs/itinerary-builder.php'; ?>
+            </div>
 
-          <div x-show="tab === 'inclusions'" x-cloak>
-           <?php include '../components/tabs/inclusions-builder.php'; ?>
-          </div>
+            <div x-show="tab === 'inclusions'" x-cloak>
+             <?php include '../components/tabs/inclusions-builder.php'; ?>
+            </div>
 
-          <div x-show="tab === 'exclusions'" x-cloak>
-           <?php include '../components/tabs/exclusions-builder.php'; ?>
+            <div x-show="tab === 'exclusions'" x-cloak>
+             <?php include '../components/tabs/exclusions-builder.php'; ?>
+            </div>
           </div>
         </div>
       </div>
@@ -173,9 +175,9 @@
       <input type="hidden" name="requires_visa" :value="requiresVisa ? 1 : 0">
 
       <!-- ✅ Footer Actions -->
-            <div class="mt-auto pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-end gap-3 sm:gap-6 px-6 pb-4 sticky bottom-0 bg-white">
+            <div class="mt-auto pt-3 sm:pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-end gap-2 sm:gap-6 px-4 sm:px-6 pb-3 sm:pb-4 flex-shrink-0 bg-white">
       <button type="button" id="cancelAddModal"
-              class="text-slate-500 hover:underline text-sm">
+              class="text-slate-500 hover:underline text-xs sm:text-sm">
         Cancel
       </button>
 
@@ -184,7 +186,7 @@
               :class="!packageName.trim() || !description.trim() || !origin || !destination || price <= 0 || days < 1
                       ? 'bg-slate-300 cursor-not-allowed text-slate-500'
                       : 'bg-sky-600 hover:bg-sky-700 text-white'"
-              class="text-sm px-6 py-2.5 rounded-lg font-medium transition shadow-sm w-full sm:w-auto">
+              class="text-xs sm:text-sm px-4 sm:px-6 py-2.5 rounded-lg font-medium transition shadow-sm w-full sm:w-auto">
         Save Package
       </button>
       </div>

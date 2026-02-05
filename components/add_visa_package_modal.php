@@ -4,18 +4,18 @@
   x-cloak
   x-transition.opacity
   x-data="visaPackageFormData()"
-  class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 px-3 sm:px-4 backdrop-blur-sm"
+  class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 px-2 sm:px-4 py-4 backdrop-blur-sm overflow-y-auto"
   @keydown.escape.window="$store.addVisaPackageModal.close()"
   @click.self="$store.addVisaPackageModal.close()"
 >
-    <div class="bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-5xl max-h-[calc(100vh-24px)] sm:max-h-[95vh] flex flex-col overflow-hidden transition-all">
+    <div class="bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full sm:max-w-5xl max-h-none sm:max-h-[95vh] flex flex-col overflow-hidden transition-all">
       <!-- Modal Header -->
-      <div class="flex items-center justify-between px-6 pt-6 pb-4">
-        <h2 class="text-xl font-bold text-sky-700">Add New Visa Package</h2>
+      <div class="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex-shrink-0">
+        <h2 class="text-lg sm:text-xl font-bold text-sky-700">Add New Visa Package</h2>
         <button
           type="button"
           @click="$store.addVisaPackageModal.close()"
-          class="text-slate-500 hover:text-red-500 text-2xl font-bold"
+          class="text-slate-500 hover:text-red-500 text-2xl font-bold flex-shrink-0 ml-2"
           aria-label="Close modal"
         >
           ×
@@ -25,20 +25,20 @@
       <form method="POST" action="../actions/process_add_visa_package.php" enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden"
             @submit="handleFormSubmit($event)">
         
-        <div class="flex flex-col lg:flex-row gap-6 flex-1 overflow-y-auto px-6 pb-8">
+        <div class="flex flex-col lg:flex-row gap-3 sm:gap-6 flex-1 overflow-y-auto px-4 sm:px-6 pb-4 sm:pb-8">
           <!-- Left Column: Image Upload + Live Preview -->
-          <div class="lg:w-1/2 w-full flex flex-col bg-white rounded-lg shadow-sm overflow-hidden">
+          <div class="lg:w-1/2 w-full flex flex-col bg-white rounded-lg shadow-sm overflow-hidden min-h-0">
             <div class="relative">
               <img
                 :src="previewUrl || '../images/default_visa_cover.jpg'"
                 alt="Visa Cover Preview"
-                class="w-full h-64 lg:h-60 object-cover"
+                class="w-full h-40 sm:h-64 object-cover"
               />
 
               <div class="absolute top-4 right-4">
                 <label
                   for="visa-cover-upload-add"
-                  class="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg text-sm cursor-pointer text-slate-700 font-medium shadow hover:bg-white transition"
+                  class="bg-white/90 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm cursor-pointer text-slate-700 font-medium shadow hover:bg-white transition"
                 >
                   Upload Cover
                 </label>
@@ -57,31 +57,32 @@
               Accepted formats: JPG, PNG · Max size: 3MB
             </div>
 
-            <div class="p-4 space-y-2">
-              <h3 class="text-xl font-semibold text-slate-800 leading-tight truncate" x-text="visaPackageName || 'Unnamed Package'"></h3>
+            <div class="p-3 sm:p-4 space-y-2">
+              <h3 class="text-lg sm:text-xl font-semibold text-slate-800 leading-tight truncate" x-text="visaPackageName || 'Unnamed Package'"></h3>
               <div class="flex flex-wrap items-center gap-2">
                 <span class="inline-block bg-purple-100 text-purple-800 font-semibold px-3 py-1 rounded-full text-xs" x-text="country || 'Country TBD'"></span>
                 <span class="inline-block bg-slate-100 text-slate-700 font-semibold px-3 py-1 rounded-full text-xs" x-text="(processingDays || 0) + ' Day' + ((processingDays || 0) != 1 ? 's' : '')"></span>
               </div>
-              <p class="text-sm text-slate-600 line-clamp-4" x-text="description || 'No description yet.'"></p>
+              <p class="text-xs sm:text-sm text-slate-600 line-clamp-4" x-text="description || 'No description yet.'"></p>
             </div>
           </div>
 
           <!-- Right Column: Tabs -->
-          <div class="lg:w-1/2 w-full" x-data="{ tab: 'details' }">
-            <div class="flex border-b">
-              <button type="button" @click="tab = 'details'" :class="tab === 'details' ? 'text-sky-600 border-b-2 border-sky-600' : 'text-slate-600 hover:text-sky-600'" class="px-5 py-3 text-sm font-medium transition">Details</button>
-              <button type="button" @click="tab = 'inclusions'" :class="tab === 'inclusions' ? 'text-sky-600 border-b-2 border-sky-600' : 'text-slate-600 hover:text-sky-600'" class="px-5 py-3 text-sm font-medium transition">Inclusions</button>
-              <button type="button" @click="tab = 'requirements'" :class="tab === 'requirements' ? 'text-sky-600 border-b-2 border-sky-600' : 'text-slate-600 hover:text-sky-600'" class="px-5 py-3 text-sm font-medium transition">Requirements</button>
-              <button type="button" @click="tab = 'visaTypes'" :class="tab === 'visaTypes' ? 'text-sky-600 border-b-2 border-sky-600' : 'text-slate-600 hover:text-sky-600'" class="px-5 py-3 text-sm font-medium transition">Visa Types</button>
+          <div class="lg:w-1/2 w-full flex flex-col min-h-0" x-data="{ tab: 'details' }">
+            <div class="flex border-b overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex-shrink-0">
+              <button type="button" @click="tab = 'details'" :class="tab === 'details' ? 'text-sky-600 border-b-2 border-sky-600' : 'text-slate-600 hover:text-sky-600'" class="flex-1 sm:flex-none px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-medium transition whitespace-nowrap">Details</button>
+              <button type="button" @click="tab = 'inclusions'" :class="tab === 'inclusions' ? 'text-sky-600 border-b-2 border-sky-600' : 'text-slate-600 hover:text-sky-600'" class="flex-1 sm:flex-none px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-medium transition whitespace-nowrap">Inclusions</button>
+              <button type="button" @click="tab = 'requirements'" :class="tab === 'requirements' ? 'text-sky-600 border-b-2 border-sky-600' : 'text-slate-600 hover:text-sky-600'" class="flex-1 sm:flex-none px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-medium transition whitespace-nowrap">Requirements</button>
+              <button type="button" @click="tab = 'visaTypes'" :class="tab === 'visaTypes' ? 'text-sky-600 border-b-2 border-sky-600' : 'text-slate-600 hover:text-sky-600'" class="flex-1 sm:flex-none px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-medium transition whitespace-nowrap">Visa Types</button>
             </div>
 
-            <div x-show="tab === 'details'" x-transition class="p-4 space-y-4">
+            <div class="flex-1 overflow-y-auto min-h-0">
+              <div x-show="tab === 'details'" x-transition class="p-3 sm:p-4 space-y-3 sm:space-y-4 text-sm">
               <label class="block">
                 <span class="text-xs font-medium text-slate-600">Visa Package Name <span class="text-red-500">*</span></span>
                 <input type="text" x-model="visaPackageName" class="w-full border px-3 py-2 rounded text-sm bg-white" placeholder="e.g. USA Tourist Visa" required />
               </label>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <label class="block">
                   <span class="text-xs font-medium text-slate-600">Country <span class="text-red-500">*</span></span>
                   <input type="text" x-model="country" class="w-full border px-3 py-2 rounded text-sm bg-white" placeholder="e.g. United States" required />
@@ -97,7 +98,7 @@
               </label>
             </div>
 
-            <div x-show="tab === 'inclusions'" x-transition class="p-4 space-y-4 max-h-[500px] overflow-y-auto text-sm">
+              <div x-show="tab === 'inclusions'" x-transition class="p-3 sm:p-4 space-y-3 sm:space-y-4 max-h-[500px] overflow-y-auto text-xs sm:text-sm">
               <template x-for="(item, index) in inclusions" :key="'inc-' + index">
                 <div class="border rounded-lg shadow-sm bg-slate-50 p-3">
                   <div class="flex items-center gap-2">
@@ -113,7 +114,7 @@
               <button type="button" @click="addInclusion()" class="text-sky-600 text-sm hover:underline">+ Add Inclusion</button>
             </div>
 
-            <div x-show="tab === 'requirements'" x-transition class="p-4 space-y-4 max-h-[500px] overflow-y-auto text-sm">
+            <div x-show="tab === 'requirements'" x-transition class="p-3 sm:p-4 space-y-3 sm:space-y-4 max-h-[500px] overflow-y-auto text-xs sm:text-sm">
               <p class="text-xs text-slate-500">
                 Conditional requirements are only applied when the applicant status matches the selection below.
               </p>
@@ -164,7 +165,7 @@
               <button type="button" @click="addRequirement()" class="text-sky-600 text-sm hover:underline">+ Add Requirement</button>
             </div>
 
-            <div x-show="tab === 'visaTypes'" x-transition class="p-4 space-y-4 max-h-[500px] overflow-y-auto text-sm">
+            <div x-show="tab === 'visaTypes'" x-transition class="p-3 sm:p-4 space-y-3 sm:space-y-4 max-h-[500px] overflow-y-auto text-xs sm:text-sm">
               <template x-for="(type, index) in visaTypes" :key="'type-' + index">
                 <div class="border rounded-lg shadow-sm bg-slate-50 p-3 space-y-2">
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -195,9 +196,9 @@
         <input type="hidden" name="requirements_json" :value="JSON.stringify(requirements)">
         <input type="hidden" name="visa_types_json" :value="JSON.stringify(visaTypes)">
 
-        <div class="mt-auto pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-end gap-3 sm:gap-4 px-6 pb-4 sticky bottom-0 bg-white">
-          <button type="button" @click="$store.addVisaPackageModal.close()" class="px-5 py-2 text-sm font-medium text-slate-600 hover:underline text-slate-800 transition">Cancel</button>
-          <button type="submit" :disabled="isSubmitting" class="bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm px-4 py-2 rounded transition" x-text="isSubmitting ? 'Creating...' : 'Create Package'"></button>
+        <div class="mt-auto pt-3 sm:pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-end gap-2 sm:gap-4 px-4 sm:px-6 pb-3 sm:pb-4 flex-shrink-0 bg-white">
+          <button type="button" @click="$store.addVisaPackageModal.close()" class="px-4 sm:px-5 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:underline text-slate-800 transition">Cancel</button>
+          <button type="submit" :disabled="isSubmitting" class="bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs sm:text-sm px-4 sm:px-5 py-2 rounded transition w-full sm:w-auto" x-text="isSubmitting ? 'Creating...' : 'Create Package'"></button>
         </div>
       </form>
     </div>

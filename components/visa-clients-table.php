@@ -133,7 +133,7 @@ error_log("DEBUG: visa-clients-table.php - Total visa clients: $totalClients, Pa
 <table class="w-full table-fixed text-xs md:text-sm text-left">
   <thead class="bg-blue-50 text-gray-500 font-medium text-center">
     <tr>
-      <th scope="col" class="p-2 md:p-3 w-[40%] max-w-[40%] text-left">Client Name</th>
+      <th scope="col" class="p-2 md:p-3 w-[40%] max-w-[35%] text-left">Client Name</th>
       <th scope="col" class="p-2 md:p-3 hidden sm:table-cell">Visa Package</th>
       <th scope="col" class="p-2 md:p-3 hidden md:table-cell">Applied Date</th>
       <th scope="col" class="p-2 md:p-3">
