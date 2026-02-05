@@ -78,16 +78,54 @@ if ($stmt) {
 
 // Default to first client
 $selectedRecipientId = $clients[0]['id'] ?? null;
+$selectedRecipientType = 'client';
 $selectedThreadId = null;
 
-if ($selectedRecipientId) {
+// If thread_id is provided, resolve the other participant for deep-linking
+$threadIdParam = isset($_GET['thread_id']) ? (int)$_GET['thread_id'] : 0;
+if ($threadIdParam > 0) {
     $stmt = $conn->prepare("
-        SELECT id FROM threads 
-        WHERE (user_id = ? AND user_type = 'admin' AND recipient_id = ? AND recipient_type = 'client')
-           OR (user_id = ? AND user_type = 'client' AND recipient_id = ? AND recipient_type = 'admin')
+        SELECT id, user_id, user_type, recipient_id, recipient_type
+        FROM threads
+        WHERE id = ?
+          AND (
+            (user_id = ? AND user_type = 'admin')
+            OR (recipient_id = ? AND recipient_type = 'admin')
+          )
         LIMIT 1
     ");
-    $stmt->bind_param('iiii', $adminId, $selectedRecipientId, $selectedRecipientId, $adminId);
+    if ($stmt) {
+        $stmt->bind_param('iii', $threadIdParam, $adminId, $adminId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $selectedThreadId = (int)$row['id'];
+            $threadUserId = (int)$row['user_id'];
+            $threadUserType = (string)$row['user_type'];
+            $threadRecipientId = (int)$row['recipient_id'];
+            $threadRecipientType = (string)$row['recipient_type'];
+
+            if ($threadUserId === $adminId && $threadUserType === 'admin') {
+                $selectedRecipientId = $threadRecipientId;
+                $selectedRecipientType = strtolower($threadRecipientType);
+            } else {
+                $selectedRecipientId = $threadUserId;
+                $selectedRecipientType = strtolower($threadUserType);
+            }
+        }
+        $stmt->close();
+    }
+}
+
+// Fallback: resolve thread for default client
+if ($selectedRecipientId && !$selectedThreadId) {
+    $stmt = $conn->prepare("
+        SELECT id FROM threads 
+        WHERE (user_id = ? AND user_type = 'admin' AND recipient_id = ? AND recipient_type = ?)
+           OR (user_id = ? AND user_type = ? AND recipient_id = ? AND recipient_type = 'admin')
+        LIMIT 1
+    ");
+    $stmt->bind_param('iisisi', $adminId, $selectedRecipientId, $selectedRecipientType, $selectedRecipientId, $selectedRecipientType, $adminId);
     $stmt->execute();
     $stmt->bind_result($selectedThreadId);
     $stmt->fetch();
@@ -116,7 +154,7 @@ $alpineData = [
     'isAdmin' => true,
     'userId' => $adminId,
     'userType' => 'admin',
-    'recipientType' => 'client',
+    'recipientType' => $selectedRecipientType,
     'initialRecipientId' => $selectedRecipientId,
     'initialThreadId' => $selectedThreadId,
     'clients' => $clients,
@@ -189,10 +227,12 @@ $alpineData = [
                                     recipientId = admin.id;
                                     recipientType = 'admin';
                                     $nextTick(() => {
-                                        threadId = null;
+                                        const preview = messagePreviews[admin.id];
+                                        threadId = preview && preview.recipient_type === 'admin' ? preview.thread_id : null;
                                         messages = [];
                                         seenMessageIds.clear();
                                         lastFetched = null;
+                                        updateThreadUrl();
                                         debounceFetchInitialMessages();
                                     });
                                 "
@@ -245,10 +285,12 @@ $alpineData = [
                                     recipientId = client.id;
                                     recipientType = 'client';
                                     $nextTick(() => {
-                                        threadId = null;
+                                        const preview = messagePreviews[client.id];
+                                        threadId = preview && preview.recipient_type === 'client' ? preview.thread_id : null;
                                         messages = [];
                                         seenMessageIds.clear();
                                         lastFetched = null;
+                                        updateThreadUrl();
                                         debounceFetchInitialMessages();
                                     });
                                 "

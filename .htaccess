@@ -31,9 +31,3 @@
 
 # Prevent directory listing
 Options -Indexes
-
-# Enable mod_rewrite
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /jvb_travel_system/
-</IfModule>

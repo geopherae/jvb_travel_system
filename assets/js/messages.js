@@ -109,6 +109,7 @@ document.addEventListener('alpine:init', () => {
                         if (enriched.length > 0) {
                             this.threadId = enriched[0].thread_id;
                             this.lastFetched = enriched[enriched.length - 1].created_at;
+                            this.updateThreadUrl();
                         }
 
                         this.$nextTick(() => this.scrollToBottom());
@@ -160,6 +161,11 @@ document.addEventListener('alpine:init', () => {
                         // Add the message to the list
                         this.messages.push(result);
                         this.scrollToBottom();
+
+                        if (!this.threadId && result.thread_id) {
+                            this.threadId = result.thread_id;
+                            this.updateThreadUrl();
+                        }
                         
                         // Refresh message previews to update the sidebar
                         this.fetchMessagePreviews();
@@ -373,6 +379,22 @@ document.addEventListener('alpine:init', () => {
                 } catch (err) {
                     console.error('[messageApp] Failed to load message previews:', err);
                 }
+            },
+
+            updateThreadUrl() {
+                if (!this.recipientId || !this.recipientType) return;
+
+                const params = new URLSearchParams(window.location.search);
+                params.set('recipient_id', String(this.recipientId));
+                params.set('recipient_type', String(this.recipientType));
+                if (this.threadId) {
+                    params.set('thread_id', String(this.threadId));
+                } else {
+                    params.delete('thread_id');
+                }
+
+                const newUrl = `${window.location.pathname}?${params.toString()}`;
+                window.history.replaceState({}, '', newUrl);
             },
 
             getAvatarUrl(msg) {

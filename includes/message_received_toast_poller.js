@@ -46,6 +46,13 @@ function saveShownMessageIds() {
 }
 
 /**
+ * Detect if device is mobile (viewport width < 768px, Tailwind's md breakpoint)
+ */
+function isMobileDevice() {
+  return window.innerWidth < 768;
+}
+
+/**
  * Don't show toasts on messaging pages (but show on visa dashboard)
  */
 function isOnMessagingPage() {
@@ -70,9 +77,16 @@ function truncateToThreeLines(text, maxCharsPerLine = 60) {
 }
 
 /**
- * Show batched toast for messages
+ * Show batched toast for messages (skip on mobile devices)
  */
 function showBatchedToast() {
+  // Don't show toasts on mobile devices
+  if (isMobileDevice()) {
+    pendingToastMessages = [];
+    toastBatchTimer = null;
+    return;
+  }
+
   if (pendingToastMessages.length === 0) return;
   
   // Only show first message in batch, but note there might be more
