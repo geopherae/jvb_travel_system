@@ -143,6 +143,8 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
   <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs" defer></script>
+  <script src="../includes/global-toast.js" defer></script>
+  <script src="../includes/message_received_toast_poller.js" defer></script>
   <script src="../includes/admin-dashboard.js"></script>
 </head>
 

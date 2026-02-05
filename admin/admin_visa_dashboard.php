@@ -58,6 +58,8 @@ $visaClients = $visaClientsResult ? $visaClientsResult->fetch_all(MYSQLI_ASSOC) 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs" defer></script>
   <script src="../includes/admin-dashboard.js"></script>
+    <script src="../includes/global-toast.js" defer></script>
+    <script src="../includes/message_received_toast_poller.js" defer></script>
 </head>
 
 <body class="font-poppins text-gray-800 overflow-hidden"

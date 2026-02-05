@@ -179,6 +179,7 @@ if ($agent_result) {
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs" defer></script>
   <script src="../includes/global-toast.js" defer></script>
+  <script src="../includes/message_received_toast_poller.js" defer></script>
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 

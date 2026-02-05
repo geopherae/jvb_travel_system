@@ -136,6 +136,8 @@ $applicantsJson = json_encode(
   <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="../includes/global-toast.js" defer></script>
+    <script src="../includes/message_received_toast_poller.js" defer></script>
   <script>
     document.addEventListener('alpine:init', () => {
       Alpine.store('modals', {

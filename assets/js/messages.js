@@ -163,6 +163,13 @@ document.addEventListener('alpine:init', () => {
                         
                         // Refresh message previews to update the sidebar
                         this.fetchMessagePreviews();
+
+                        // Play sent message alert sound
+                        const audioElement = new Audio('../assets/alert_message_sent.mp3');
+                        audioElement.volume = 0.5;
+                        audioElement.play().catch(err => {
+                            console.debug('Sent audio play failed:', err);
+                        });
                     }
 
                     this.newMessage = '';
@@ -343,8 +350,6 @@ document.addEventListener('alpine:init', () => {
                     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 
                     const data = await response.json();
-
-                    console.debug('[messageApp] Received preview data:', data);
 
                     if (Array.isArray(data)) {
                         this.messagePreviews = data.reduce((acc, p) => {

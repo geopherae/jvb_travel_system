@@ -75,6 +75,8 @@ if (!empty($visa_applications)) {
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs" defer></script>
+  <script src="../includes/global-toast.js" defer></script>
+  <script src="../includes/message_received_toast_poller.js" defer></script>
   <style>[x-cloak] { display: none !important; }</style>
   <script>
     document.addEventListener('alpine:init', () => {

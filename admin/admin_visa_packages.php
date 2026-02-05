@@ -73,6 +73,8 @@ try {
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs" defer></script>
   <script src="../includes/admin-dashboard.js"></script>
+    <script src="../includes/global-toast.js" defer></script>
+    <script src="../includes/message_received_toast_poller.js" defer></script>
   <script>
     document.addEventListener('alpine:init', () => {
       if (!Alpine.store('visaPackageModal')) {

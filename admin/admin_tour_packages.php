@@ -112,6 +112,8 @@ $top3 = array_slice(
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="../includes/admin-dashboard.js"></script>
 <script src="../includes/tour_packages_global_scope.js?v=20260118-1"></script>
+  <script src="../includes/global-toast.js" defer></script>
+  <script src="../includes/message_received_toast_poller.js" defer></script>
   <script>
     // Initialize archived tour packages modal store
     document.addEventListener('alpine:init', () => {
