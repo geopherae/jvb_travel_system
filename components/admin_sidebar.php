@@ -59,7 +59,7 @@ $navLinks = [
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 px-4 pt-6 space-y-4 text-[1rem]">
+    <nav class="flex-1 px-4 pt-5 space-y-3 text-[1rem]">
       <?php foreach ($navLinks as $label => $meta): ?>
         <?php
           $isActive = in_array($activePage, $meta['match'] ?? [$meta['url']]);
@@ -74,9 +74,9 @@ $navLinks = [
         ?>
         <a href="<?= $href ?>"
            <?= $isDisabled ? 'title="Feature coming soon!" onclick="event.preventDefault();" aria-disabled="true"' : '' ?>
-           class="block px-4 py-3 rounded-lg transition-all
+           class="block px-3 py-2.5 rounded-lg transition-all
            <?= $linkClasses ?>">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5">
             <?= getIconSvg($meta['icon']) ?>
             <span><?= htmlspecialchars($label) ?></span>
           </div>

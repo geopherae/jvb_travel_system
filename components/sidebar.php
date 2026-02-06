@@ -96,15 +96,15 @@ foreach ($allNavLinks as $label => $meta) {
     </div>
 
     <!-- Navigation Links -->
-    <nav class="flex-1 px-4 pt-6 space-y-4 text-[1rem]">
+    <nav class="flex-1 px-4 pt-5 space-y-3 text-[1rem]">
       <?php foreach ($navLinks as $label => $meta): ?>
         <?php $isActive = in_array($activePage, $meta['match'] ?? [$meta['url']]); ?>
         <a href="<?= $meta['url'] ?>"
-           class="block px-4 py-3 rounded-[8px] transition-all
+           class="block px-3 py-2.5 rounded-[8px] transition-all
            <?= $isActive
                ? 'bg-sky-500 text-white font-semibold shadow'
                : 'hover:bg-sky-100 hover:text-brand text-neutral-700' ?>">
-          <div class="flex items-center space-x-2">
+          <div class="flex items-center space-x-1.5">
             <?= getIconSvg($meta['icon']) ?>
             <span><?= htmlspecialchars($label) ?></span>
           </div>
