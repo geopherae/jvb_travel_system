@@ -174,7 +174,7 @@ function runVisaStatusCheck() {
   if (isCheckingVisaStatus) return;
   isCheckingVisaStatus = true;
 
-  fetch("../actions/run_visa_status_check.php?_=" + new Date().getTime(), {
+  fetch("../actions/run_visa_status_check.php?_=" + new Date().getTime() + "&version=1.0.2&force=1", {
     headers: { 'X-Requested-With': 'XMLHttpRequest' }
   })
     .then(res => {
