@@ -139,4 +139,4 @@ foreach ($allNavLinks as $label => $meta) {
 </div>
 
 <!-- Sidebar Unread Indicator Script -->
-<script src="../includes/sidebar_unread_indicator.js?v=1.0.2"></script>
+<script src="../includes/sidebar_unread_indicator.js?v=1.0.5"></script>

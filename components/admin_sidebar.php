@@ -23,7 +23,7 @@ $navLinks = [
     'disabled' => !VISA_PROCESSING_ENABLED
   ],
   'Messages' => [
-    'url' => '../admin/messages.php?v=1.0.2',
+    'url' => '../admin/messages.php?v=1.0.5',
     'icon' => 'messages',
     'match' => ['messages.php']
   ],
@@ -107,4 +107,4 @@ $navLinks = [
   </aside>
 
 <!-- Sidebar Unread Indicator Script -->
-<script src="../includes/sidebar_unread_indicator.js?v=1.0.2"></script>
+<script src="../includes/sidebar_unread_indicator.js?v=1.0.5"></script>
