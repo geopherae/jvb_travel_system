@@ -242,7 +242,8 @@ document.addEventListener('alpine:init', () => {
             },
 
             getLastMessagePreview(recipientId, recipientType) {
-                const preview = this.messagePreviews[recipientId];
+                const key = `${recipientType}_${recipientId}`;
+                const preview = this.messagePreviews[key];
                 
                 if (!preview) {
                     console.debug('[messageApp] No preview for recipient', recipientId);
@@ -279,8 +280,9 @@ document.addEventListener('alpine:init', () => {
                     : fullText;
             },
 
-            getLastMessageTime(recipientId) {
-                const preview = this.messagePreviews[recipientId];
+            getLastMessageTime(recipientId, recipientType) {
+                const key = `${recipientType}_${recipientId}`;
+                const preview = this.messagePreviews[key];
                 if (!preview?.created_at) return '';
                 
                 const date = new Date(preview.created_at);
@@ -305,8 +307,9 @@ document.addEventListener('alpine:init', () => {
                 return client?.assigned_admin_id === this.userId;
             },
 
-            hasUnreadMessages(recipientId) {
-                return !!this.unreadConversations[recipientId];
+            hasUnreadMessages(recipientId, recipientType) {
+                const key = `${recipientType}_${recipientId}`;
+                return !!this.unreadConversations[key];
             },
 
             async fetchUnreadConversations() {
@@ -325,7 +328,9 @@ document.addEventListener('alpine:init', () => {
 
                     if (Array.isArray(data)) {
                         this.unreadConversations = data.reduce((acc, item) => {
-                            acc[item.recipient_id] = item.unread_count;
+                            // Use composite key to prevent collision
+                            const key = `${item.recipient_type}_${item.recipient_id}`;
+                            acc[key] = item.unread_count;
                             return acc;
                         }, {});
                     }
@@ -359,7 +364,9 @@ document.addEventListener('alpine:init', () => {
 
                     if (Array.isArray(data)) {
                         this.messagePreviews = data.reduce((acc, p) => {
-                            acc[p.recipient_id] = {
+                            // Use composite key to prevent collision between admin 3 and client 3
+                            const key = `${p.recipient_type}_${p.recipient_id}`;
+                            acc[key] = {
                                 thread_id: p.thread_id,
                                 recipient_id: p.recipient_id,
                                 recipient_type: p.recipient_type,

@@ -227,7 +227,8 @@ $alpineData = [
                                     recipientId = admin.id;
                                     recipientType = 'admin';
                                     $nextTick(() => {
-                                        const preview = messagePreviews[admin.id];
+                                        const key = 'admin_' + admin.id;
+                                        const preview = messagePreviews[key];
                                         threadId = preview && preview.recipient_type === 'admin' ? preview.thread_id : null;
                                         messages = [];
                                         seenMessageIds.clear();
@@ -251,15 +252,15 @@ $alpineData = [
                                             <p class="font-medium text-base md:text-base text-gray-900 truncate" x-text="admin.full_name"></p>
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
                                                   x-text="admin.role"></span>
-                                            <template x-if="hasUnreadMessages(admin.id)">
+                                            <template x-if="hasUnreadMessages(admin.id, 'admin')">
                                                 <span class="w-3 h-3 bg-red-500 rounded-full flex-shrink-0"></span>
                                             </template>
                                         </div>
                                         <p class="text-sm md:text-sm text-gray-500 truncate" 
-                                           :class="hasUnreadMessages(admin.id) ? 'font-semibold' : 'font-normal'"
+                                           :class="hasUnreadMessages(admin.id, 'admin') ? 'font-semibold' : 'font-normal'"
                                            x-text="getLastMessagePreview(admin.id, 'admin') || 'No messages yet'"></p>
                                     </div>
-                                    <p class="text-xs text-gray-400 whitespace-nowrap self-start" x-text="getLastMessageTime(admin.id)"></p>
+                                    <p class="text-xs text-gray-400 whitespace-nowrap self-start" x-text="getLastMessageTime(admin.id, 'admin')"></p>
                                 </button>
                             </li>
                         </template>
@@ -285,7 +286,8 @@ $alpineData = [
                                     recipientId = client.id;
                                     recipientType = 'client';
                                     $nextTick(() => {
-                                        const preview = messagePreviews[client.id];
+                                        const key = 'client_' + client.id;
+                                        const preview = messagePreviews[key];
                                         threadId = preview && preview.recipient_type === 'client' ? preview.thread_id : null;
                                         messages = [];
                                         seenMessageIds.clear();
@@ -311,15 +313,15 @@ $alpineData = [
                                                   class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-sky-100 text-sky-800">
                                                 Assigned
                                             </span>
-                                            <template x-if="hasUnreadMessages(client.id)">
+                                            <template x-if="hasUnreadMessages(client.id, 'client')">
                                                 <span class="w-3 h-3 bg-red-500 rounded-full flex-shrink-0"></span>
                                             </template>
                                         </div>
                                         <p class="text-sm md:text-sm text-gray-500 truncate" 
-                                           :class="hasUnreadMessages(client.id) ? 'font-semibold' : 'font-normal'"
+                                           :class="hasUnreadMessages(client.id, 'client') ? 'font-semibold' : 'font-normal'"
                                            x-text="getLastMessagePreview(client.id, 'client') || 'No messages yet'"></p>
                                     </div>
-                                    <p class="text-xs text-gray-400 whitespace-nowrap self-start" x-text="getLastMessageTime(client.id)"></p>
+                                    <p class="text-xs text-gray-400 whitespace-nowrap self-start" x-text="getLastMessageTime(client.id, 'client')"></p>
                                 </button>
                             </li>
                         </template>

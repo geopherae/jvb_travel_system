@@ -77,6 +77,7 @@ try {
             if ($unreadCount > 0) {
                 $unreadConversations[] = [
                     'recipient_id' => $otherPersonId,
+                    'recipient_type' => $otherPersonType,
                     'unread_count' => $unreadCount
                 ];
             }

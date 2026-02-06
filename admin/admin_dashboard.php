@@ -153,6 +153,8 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
         sidebarOpen: false,
         editClientModal: false,
         showAddClientModal: false,
+        showUpdatesModal: false,
+        currentUpdatePage: 0,
         step: 1,
         fullName: '',
         email: '',
@@ -218,7 +220,17 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
   <!-- Main Content -->
   <main class="ml-0 lg:ml-64 lg:mr-80 min-h-screen md:h-screen overflow-y-auto p-4 pb-20 md:p-6 md:pb-6 space-y-6 relative z-0">
 
-    <h2 class="text-xl font-bold">Admin Booking Dashboard</h2>
+    <div class="flex items-center justify-between">
+      <h2 class="text-xl font-bold">Admin Booking Dashboard</h2>
+      <button @click="showUpdatesModal = true" class="relative px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all animate-pulse hover:animate-none" style="box-shadow: 0 0 25px rgba(16, 227, 100, 0.6);">
+        <span class="flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          What's New
+        </span>
+      </button>
+    </div>
 
     <!-- Welcome Card -->
     <?php include '../components/welcome-card.php'; ?>
@@ -230,6 +242,9 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
 
 <!-- Add Client Modal (complete modal structure in component) -->
 <?php include '../components/add_client_form.php'; ?>
+
+<!-- System Updates Modal -->
+<?php include '../components/system_updates_modal.php'; ?>
 
 
 <!-- Alpine.js toggle -->

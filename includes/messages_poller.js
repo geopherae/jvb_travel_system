@@ -206,6 +206,11 @@ async function fetchOnlineUsers() {
     
     if (!messageApp) return;
 
+    // Ensure onlineUsers property exists
+    if (!messageApp.onlineUsers || typeof messageApp.onlineUsers !== 'object') {
+        messageApp.onlineUsers = { admins: [], clients: [] };
+    }
+
     try {
         const response = await fetch('../api/presence/fetch_online_users.php', {
             method: 'POST',
@@ -220,11 +225,12 @@ async function fetchOnlineUsers() {
         const data = await response.json();
 
         if (data.success && Array.isArray(data.online_admins) && Array.isArray(data.online_clients)) {
-            messageApp.onlineUsers = {
-                admins: data.online_admins,
-                clients: data.online_clients
-            };
-            console.debug('[messageApp] Online users updated:', messageApp.onlineUsers);
+            // Use safer assignment for Alpine reactive properties
+            if (messageApp.onlineUsers && typeof messageApp.onlineUsers === 'object') {
+                messageApp.onlineUsers.admins = data.online_admins;
+                messageApp.onlineUsers.clients = data.online_clients;
+                console.debug('[messageApp] Online users updated:', messageApp.onlineUsers);
+            }
         }
     } catch (err) {
         console.debug('[messageApp] Error fetching online users:', err);
