@@ -7,28 +7,28 @@ require_once __DIR__ . '/../includes/feature_flags.php';
 
 $navLinks = [
   'Booking Dashboard' => [
-    'url' => 'admin_dashboard.php',
+    'url' => '../admin/admin_dashboard.php',
     'icon' => 'chart-bar',
     'match' => ['admin_dashboard.php', 'view_client.php', 'admin_manual.php']
   ],
   'Manage Packages' => [
-    'url' => VISA_PROCESSING_ENABLED ? 'admin_packages.php' : 'admin_tour_packages.php',
+    'url' => VISA_PROCESSING_ENABLED ? '../admin/admin_packages.php' : '../admin/admin_tour_packages.php',
     'icon' => 'chart-bar',
     'match' => ['admin_packages.php', 'admin_tour_packages.php', 'admin_visa_packages.php']
   ],
   'Visa Processing' => [
-    'url' => VISA_PROCESSING_ENABLED ? 'admin_visa_dashboard.php' : '',
+    'url' => VISA_PROCESSING_ENABLED ? '../admin/admin_visa_dashboard.php' : '',
     'icon' => 'itinerary',
     'match' => ['admin_visa_dashboard.php', 'view_client_visa.php'],
     'disabled' => !VISA_PROCESSING_ENABLED
   ],
   'Messages' => [
-    'url' => 'messages.php?v=1.0.2',
+    'url' => '../admin/messages.php?v=1.0.2',
     'icon' => 'messages',
     'match' => ['messages.php']
   ],
   'Client Reviews' => [
-    'url' => 'admin_testimonials.php',
+    'url' => '../admin/admin_testimonials.php',
     'icon' => 'star',
     'match' => ['admin_testimonials.php']
   ],
