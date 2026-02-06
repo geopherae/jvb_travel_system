@@ -125,7 +125,7 @@ function runStatusCheck() {
   if (isCheckingStatus) return;
   isCheckingStatus = true;
 
-  fetch("../actions/run_status_check.php?_=" + new Date().getTime(), {
+  fetch("../actions/run_status_check.php?_=" + new Date().getTime() + "&force=1", {
     headers: { 'X-Requested-With': 'XMLHttpRequest' }
   })
     .then(res => {

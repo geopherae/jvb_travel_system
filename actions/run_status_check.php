@@ -7,10 +7,12 @@ header('Content-Type: application/json');
 
 // Optional caching: Skip full check if done recently
 $cacheTime = 2; // seconds (reduced from 60 for better responsiveness)
+$forceCheck = isset($_GET['force']) && $_GET['force'] == '1';
 $lastCheck = $_SESSION['last_status_check'] ?? 0;
 $timeSinceLastCheck = time() - $lastCheck;
 
-if ($timeSinceLastCheck < $cacheTime) {
+// Skip cache if force=1 is passed
+if (!$forceCheck && $timeSinceLastCheck < $cacheTime) {
   echo json_encode([
     "updated" => [],
     "count" => 0,

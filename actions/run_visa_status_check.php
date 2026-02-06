@@ -20,10 +20,12 @@ if ($actor['role'] !== 'superadmin' && $actor['role'] !== 'admin') {
 }
 
 $cacheTime = 5; // seconds
+$forceCheck = isset($_GET['force']) && $_GET['force'] == '1';
 $lastCheck = $_SESSION['last_visa_status_check'] ?? 0;
 $timeSinceLastCheck = time() - $lastCheck;
 
-if ($timeSinceLastCheck < $cacheTime) {
+// Skip cache if force=1 is passed
+if (!$forceCheck && $timeSinceLastCheck < $cacheTime) {
   echo json_encode([
     'updated' => [],
     'count' => 0,
