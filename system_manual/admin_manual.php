@@ -250,7 +250,7 @@ $adminName = $_SESSION['first_name'] ?? 'Admin';
     </div>
 
     <div class="mb-6 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-      <img src="../images/system_manual/login.jpeg" alt="Admin Login Screen" class="w-full h-auto">
+      <img src="../images/system_manual/admin_login.jpg" alt="Admin Login Screen" class="w-full h-auto">
     </div>
 
     <div class="space-y-4">
