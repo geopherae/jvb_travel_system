@@ -136,22 +136,39 @@ $applicantsJson = json_encode(
   <?php include __DIR__ . '/../components/favicon_links.php'; ?>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="../includes/global-toast.js" defer></script>
-    <script src="../includes/message_received_toast_poller.js" defer></script>
+  <script src="../includes/global-toast.js" defer></script>
+  <script src="../includes/message_received_toast_poller.js" defer></script>
   <script>
-    document.addEventListener('alpine:init', () => {
-      Alpine.store('modals', {
-        clientId: null,
-        reassignVisa: false,
-      });
-
-      Alpine.store('applicantSelector', {
-        currentIdx: 0,
-        totalApplicants: <?= count($applicantsList) ?>,
-        applicants: <?= $applicantsJson ?>
-      });
+    document.addEventListener('show-toast', function(e) {
+      console.log('[show-toast event]', e.detail);
+      if (window.showToast) {
+        console.log('[show-toast] window.showToast exists');
+      } else {
+        console.log('[show-toast] window.showToast missing');
+      }
+      if (window.showToast && e.detail) {
+        window.showToast(e.detail.message, e.detail.type || 'info');
+      }
     });
   </script>
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.store('modals', {
+      clientId: null,
+      applicationId: <?= !empty($visa_applications) ? (int)$visa_applications[0]['id'] : 0 ?>, // ← ADD THIS LINE
+      reassignVisa: false,
+      editVisaClient: false,
+      editVisaClientData: null,
+      archiveVisaClient: false,
+    });
+
+    Alpine.store('applicantSelector', {
+      currentIdx: 0,
+      totalApplicants: <?= count($applicantsList) ?>,
+      applicants: <?= $applicantsJson ?>
+    });
+  });
+</script>
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 
@@ -162,13 +179,15 @@ $applicantsJson = json_encode(
 <?php $isAdmin = true; include '../components/right-panel.php'; ?>
 <?php include '../components/status_alert.php'; ?>
 <?php include '../components/reassign-visa-modal.php'; ?>
+<?php include '../components/edit_visa_client_modal.php'; ?>
+<?php include '../components/archive_visa_application_modal.php'; ?>
 
 <!-- Mobile Toggle -->
-<button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-20 bg-primary text-white rounded">>
+<button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-20 bg-primary text-white rounded">
   ☰
 </button>
 
-<main class="ml-0 lg:ml-64 lg:mr-80 min-h-screen overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 relative z-0">
+<main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative">
 
   <!-- 🧭 Page Title -->
   <h2 class="text-xl sm:text-2xl font-bold">Client Visa Applications</h2>

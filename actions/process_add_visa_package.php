@@ -17,6 +17,52 @@ guard('admin');
 date_default_timezone_set('Asia/Manila');
 header('Content-Type: application/json');
 
+/**
+ * Convert applicant status labels to standardized JSON format
+ * Uses a predefined mapping to ensure consistent option values
+ */
+function convertApplicantStatusToJson(array $statusLabels) {
+    // Predefined mapping of labels to option values
+    $statusMapping = [
+        'Employed' => 'employed',
+        'Self-Employed' => 'self_employed',
+        'Business Owner' => 'business_owner',
+        'Corporation' => 'corporation',
+        'Student' => 'student',
+        'Senior Citizen/Retired' => 'senior_citizen_retired',
+        'Married' => 'married',
+        'Widowed' => 'widowed',
+        'Visiting Family/Friend' => 'visiting_family_friend',
+        'None of the above' => 'none'
+    ];
+    
+    $result = [];
+    
+    foreach ($statusLabels as $label) {
+        $label = trim($label);
+        if (empty($label)) continue;
+        
+        // Use predefined option value if available, otherwise generate from label
+        if (isset($statusMapping[$label])) {
+            $option = $statusMapping[$label];
+        } else {
+            // Fallback: generate option value from label
+            $option = strtolower($label);
+            $option = str_replace(['/', ' ', '(', ')', '-'], '_', $option);
+            $option = preg_replace('/[^a-z0-9_]/', '', $option);
+            $option = preg_replace('/_+/', '_', $option);
+            $option = trim($option, '_');
+        }
+        
+        $result[] = [
+            'option' => $option,
+            'label' => $label
+        ];
+    }
+    
+    return json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+}
+
 try {
     // Validate required fields
     $visaPackageName = isset($_POST['visa_package_name']) ? trim($_POST['visa_package_name']) : '';
@@ -26,6 +72,7 @@ try {
     $inclusionsJson = isset($_POST['inclusions_json']) ? trim($_POST['inclusions_json']) : '[]';
     $requirementsJson = isset($_POST['requirements_json']) ? trim($_POST['requirements_json']) : '[]';
     $visaTypesJson = isset($_POST['visa_types_json']) ? trim($_POST['visa_types_json']) : '[]';
+    $applicantStatusOptionsJson = isset($_POST['applicant_status_options_json']) ? trim($_POST['applicant_status_options_json']) : '[]';
 
     $errors = [];
 
@@ -43,20 +90,51 @@ try {
         $errors[] = 'Invalid inclusions JSON: ' . json_last_error_msg();
     }
 
-    $requirements = json_decode($requirementsJson, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        $errors[] = 'Invalid requirements JSON: ' . json_last_error_msg();
+// After validating requirements JSON, normalize the structure
+$requirements = json_decode($requirementsJson, true);
+if (json_last_error() !== JSON_ERROR_NONE) {
+    $errors[] = 'Invalid requirements JSON: ' . json_last_error_msg();
+} else {
+    // Normalize requirement conditions to match Canada format
+    foreach ($requirements as &$req) {
+        // Ensure condition structure exists
+        if (!isset($req['condition'])) {
+            $req['condition'] = [
+                'type' => 'applicant_status',
+                'operator' => 'equals',
+                'value' => ''
+            ];
+        }
+        // Ensure condition.type is never empty - default to applicant_status
+        if (empty($req['condition']['type'])) {
+            $req['condition']['type'] = 'applicant_status';
+        }
+        // Ensure operator exists
+        if (!isset($req['condition']['operator'])) {
+            $req['condition']['operator'] = 'equals';
+        }
     }
+    // Re-encode normalized requirements
+    $requirementsJson = json_encode($requirements, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+}
 
     $visaTypes = json_decode($visaTypesJson, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         $errors[] = 'Invalid visa types JSON: ' . json_last_error_msg();
     }
 
+    $applicantStatusOptionsArray = json_decode($applicantStatusOptionsJson, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $errors[] = 'Invalid applicant status options JSON: ' . json_last_error_msg();
+    }
+
     if (!empty($errors)) {
         echo json_encode(['success' => false, 'message' => implode(' ', $errors)]);
         exit;
     }
+
+    // Convert applicant status options to proper format with option and label
+    $applicantStatusOptionsFormatted = convertApplicantStatusToJson($applicantStatusOptionsArray);
 
     // Handle image upload
     $coverImageFilename = '';
@@ -86,7 +164,6 @@ try {
         $uploadPath = $uploadDir . $coverImageFilename;
 
         // Use compression helper
-        require_once __DIR__ . '/../includes/image_compression_helper.php';
         if (!compressImage($file['tmp_name'], $uploadPath, $mimeType, 85)) {
             $phpError = error_get_last();
             error_log('Image compression failed. Tmp: ' . $file['tmp_name'] . ', Dest: ' . $uploadPath . ', PHP Error: ' . print_r($phpError, true));
@@ -106,14 +183,15 @@ try {
             inclusions_json, 
             requirements_json, 
             visa_types_json, 
+            applicant_status_options,
             is_active, 
             created_at, 
             updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
     ");
 
     $stmt->bind_param(
-        'ssisssss',
+        'ssissssss',
         $visaPackageName,
         $country,
         $processingDays,
@@ -121,7 +199,8 @@ try {
         $coverImageFilename,
         $inclusionsJson,
         $requirementsJson,
-        $visaTypesJson
+        $visaTypesJson,
+        $applicantStatusOptionsFormatted
     );
 
     if ($stmt->execute()) {

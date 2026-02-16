@@ -66,7 +66,7 @@ $isAdmin = true;
   <?php include '../components/right-panel.php'; ?>
 
   <!-- Main Content -->
-  <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative z-0">
+  <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative">
     
     <!-- Page Header -->
     <div class="mb-8">

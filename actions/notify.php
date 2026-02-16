@@ -218,6 +218,19 @@ class NotificationManager {
             // ═══════════════════════════════════════════════════════════════
             // VISA PACKAGE NOTIFICATIONS
             // ═══════════════════════════════════════════════════════════════
+            'visa_details_updated' => [
+                'category'    => 'visa',
+                'title'       => 'Visa Details Updated',
+                'message'     => "Your visa applicant details for <strong>{applicant_name}</strong> were updated by {admin_name}. If anything looks incorrect, please contact support.",
+                'html'        => true,
+                'icon'        => '📝',
+                'color'       => 'blue',
+                'priority'    => 'normal',
+                'action_url'  => '/client/client_visa_dashboard.php',
+                'action_text' => 'View Visa Dashboard',
+                'log_action'  => 'visa_details_updated',
+                'expires_days' => 30
+            ],
             'visa_package_assigned' => [
                 'category'    => 'visa',
                 'title'       => 'Visa Package Assigned',

@@ -86,11 +86,13 @@
             inclusions: [],
             requirements: [],
             visaTypes: [],
+            applicantStatusOptions: [],
             isSubmitting: false,
             getCountryCode,
             buildRequirementId,
             loadFrom(pkg) {
               const data = pkg || {};
+              
               this.id = data.id || null;
               this.visaPackageName = data.visa_package_name || '';
               this.country = data.country || '';
@@ -103,19 +105,61 @@
                 ? ('../uploads/visa_packages_banners/' + data.visa_cover_image)
                 : '';
               this.inclusions = [...safeArray(data.inclusions)];
-              this.requirements = safeArray(data.requirements).map((req, index) => ({
-                id: req?.id || buildRequirementId(this.country, index),
-                name: req?.name || '',
-                description: req?.description || '',
-                required: req?.required !== undefined ? !!req.required : true,
-                category: req?.category || 'Primary',
-                condition: req?.condition ?? { type: 'applicant_status', operator: 'equals', value: '' }
-              }));
+              this.requirements = safeArray(data.requirements).map((req, index) => {
+                // Normalize all categories to lowercase
+                let category = (req?.category || 'primary').toLowerCase();
+                
+                return {
+                  id: req?.id || this.buildRequirementId(this.country, index),
+                  name: req?.name || '',
+                  description: req?.description || '',
+                  required: req?.required !== undefined ? !!req.required : true,
+                  category: category, // Now always lowercase: primary, financial, conditional
+                  condition: {
+                    type: req?.condition?.type || 'applicant_status',
+                    operator: req?.condition?.operator || 'equals',
+                    value: req?.condition?.value || ''
+                  }
+                };
+              });
               this.visaTypes = safeArray(data.visa_types).map((type) => ({
                 type: type?.type || '',
                 price: type?.price || ''
               }));
-            },
+              
+              // Load applicant status options
+              // Database stores: [{"option": "employed", "label": "Employed"}, ...]
+              // Convert to array of label strings: ["Employed", "Self-Employed", ...]
+              if (data.applicant_status_options) {
+                try {
+                  let parsed = data.applicant_status_options;
+                  
+                  // Parse JSON string if needed
+                  if (typeof parsed === 'string') {
+                    parsed = JSON.parse(parsed);
+                  }
+                  
+              // Convert to array of strings
+              if (Array.isArray(parsed)) {
+                this.applicantStatusOptions = parsed.map(item => {
+                  if (typeof item === 'string') {
+                    return item;
+                  } else if (typeof item === 'object' && item !== null) {
+                    return item.label || item.option || '';
+                  }
+                  return '';
+                }).filter(label => label !== '');
+              } else {
+                this.applicantStatusOptions = [];
+              }
+            } catch (e) {
+              console.error('Error parsing applicant_status_options:', e);
+              this.applicantStatusOptions = [];
+            }
+          } else {
+            this.applicantStatusOptions = [];
+          }
+        },
             addInclusion() {
               this.inclusions.push('');
             },
@@ -125,12 +169,16 @@
             addRequirement() {
               const nextIndex = this.requirements.length;
               this.requirements.push({
-                id: buildRequirementId(this.country, nextIndex),
+                id: this.buildRequirementId(this.country, nextIndex),
                 name: '',
                 description: '',
                 required: true,
-                category: 'Primary',
-                condition: { type: 'applicant_status', operator: 'equals', value: '' }
+                category: 'primary', // lowercase
+                condition: { 
+                  type: 'applicant_status',
+                  operator: 'equals', 
+                  value: '' 
+                }
               });
             },
             removeRequirement(index) {
@@ -141,10 +189,22 @@
               }));
             },
             addVisaType() {
-              this.visaTypes.push({ type: '', price: '' });
+              if (this.visaTypes.length < 5) {
+                this.visaTypes.push({ type: '', price: '' });
+              }
             },
             removeVisaType(index) {
               this.visaTypes.splice(index, 1);
+            },
+            toggleApplicantStatus(status) {
+              const index = this.applicantStatusOptions.indexOf(status);
+              if (index > -1) {
+                // Status exists, remove it (uncheck)
+                this.applicantStatusOptions.splice(index, 1);
+              } else {
+                // Status doesn't exist, add it (check)
+                this.applicantStatusOptions.push(status);
+              }
             },
             handleCoverUpload(event) {
               const file = event.target.files && event.target.files[0];
@@ -212,6 +272,7 @@
     }
   })();
 </script>
+
 <!-- 👁️ Visa Package View Modal -->
 <div
   x-show="$store.visaPackageModal.isOpen"
@@ -372,7 +433,7 @@
     </div>
 
     <!-- Sticky Action Buttons -->
-    <div class="sticky bottom-0 flex justify-between items-center px-4 py-3 sm:px-6 sm:py-2 bg-gray-50 gap-2 sm:gap-3 z-10 border-t border-gray-200">
+    <div class="mb-4 sticky bottom-0 flex justify-between items-center px-4 py-3 sm:px-6 sm:py-2 bg-gray-50 gap-2 sm:gap-3 z-10 border-t border-gray-200">
       <div class="flex w-full justify-between gap-2 sm:gap-3">
         <button
           type="button"
@@ -522,9 +583,10 @@
                   <label class="block">
                     <span class="text-xs font-medium text-slate-600">Category</span>
                     <select x-model="req.category" class="w-full border px-3 py-2 rounded text-sm bg-white">
-                      <option value="Primary">Primary</option>
-                      <option value="Conditional">Conditional</option>
-                      <option value="Other">Other</option>
+                      <option value="primary">Primary</option>
+                      <option value="financial">Financial</option>
+                      <option value="conditional">Conditional</option>
+                      <option value="other">Other</option>
                     </select>
                   </label>
                   <label class="block">
@@ -535,7 +597,7 @@
                     <span class="text-xs font-medium text-slate-600">Description</span>
                     <input type="text" x-model="req.description" class="w-full border px-3 py-2 rounded text-sm bg-white" placeholder="Requirement description" />
                   </label>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" x-show="req.category === 'Conditional'">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" x-show="req.category === 'conditional'">
                     <label class="block">
                       <span class="text-xs font-medium text-slate-600">Condition Type</span>
                       <input type="text" class="w-full border px-3 py-2 rounded text-sm bg-gray-100 text-slate-600" value="Applicant Status" readonly />

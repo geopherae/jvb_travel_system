@@ -249,7 +249,7 @@ unset($_SESSION['modal_status']);
 
   <form method="POST" action="../actions/process_admin_settings.php"
         enctype="multipart/form-data"
-        class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative z-0">
+        class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative">
 
     <input type="hidden" name="csrf_token_settings" value="<?= $_SESSION['csrf_token_settings'] ?>">
 

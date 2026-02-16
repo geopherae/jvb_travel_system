@@ -9,6 +9,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/../includes/image_compression_helper.php';
 require_once __DIR__ . '/../includes/log_helper.php';
+require_once __DIR__ . '/../includes/applicant_status_helper.php';
 
 use function Auth\guard, Auth\getActorContext, LogHelper\logClientOnboardingAudit;
 
@@ -28,6 +29,14 @@ try {
     $requirementsJson = isset($_POST['requirements_json']) ? trim($_POST['requirements_json']) : '[]';
     $visaTypesJson = isset($_POST['visa_types_json']) ? trim($_POST['visa_types_json']) : '[]';
     $existingImage = isset($_POST['existing_image']) ? trim($_POST['existing_image']) : '';
+
+    // Applicant status options
+    $applicantStatusOptionsJson = $_POST['applicant_status_options_json'] ?? '[]';
+    $applicantStatusArray = json_decode($applicantStatusOptionsJson, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $errors[] = 'Invalid applicant status options JSON: ' . json_last_error_msg();
+    }
+    $applicantStatusFormatted = convertApplicantStatusToJson($applicantStatusArray);
 
     $errors = [];
 
@@ -108,6 +117,7 @@ try {
     }
 
     // Prepare update statement
+
     $stmt = $conn->prepare("
         UPDATE visa_packages
         SET visa_package_name = ?,
@@ -118,6 +128,7 @@ try {
             inclusions_json = ?,
             requirements_json = ?,
             visa_types_json = ?,
+            applicant_status_options = ?,
             updated_at = NOW()
         WHERE id = ?
     ");
@@ -127,7 +138,7 @@ try {
     }
 
     $stmt->bind_param(
-        'ssssisssi',
+        'ssssissssi',
         $visaPackageName,
         $visaPackageDescription,
         $visaCoverImageFilename,
@@ -136,6 +147,7 @@ try {
         $inclusionsJson,
         $requirementsJson,
         $visaTypesJson,
+        $applicantStatusFormatted,
         $packageId
     );
 

@@ -43,7 +43,7 @@ header("Pragma: no-cache");
     include '../components/right-panel.php';
   ?>
 
-  <main class="ml-0 md:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-8 relative z-0 flex justify-center w-full">
+  <main class="ml-0 md:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-8 relative flex justify-center w-full">
 
   <div class="max-w-4xl py-10 px-6 space-y-10">
     <header class="text-center">

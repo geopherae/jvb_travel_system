@@ -7,10 +7,25 @@ if ($conn->connect_error) {
   exit();
 }
 
+
 $client_id = isset($_GET['client_id']) ? (int)$_GET['client_id'] : null;
 if (!$client_id) {
   echo "Client not specified.";
   exit();
+}
+
+// Canonical check: is this client a companion for the latest visa application?
+$isCompanion = false;
+$visaApplicationId = $client['app_id'] ?? null;
+if ($visaApplicationId && $client_id) {
+  $companionCheck = $conn->prepare("SELECT id FROM client_visa_companions WHERE visa_application_id = ? AND client_id = ? LIMIT 1");
+  $companionCheck->bind_param("ii", $visaApplicationId, $client_id);
+  $companionCheck->execute();
+  $companionResult = $companionCheck->get_result()->fetch_assoc();
+  if ($companionResult && isset($companionResult['id'])) {
+    $isCompanion = true;
+  }
+  $companionCheck->close();
 }
 
 // 🧭 Fetch client + latest visa application + visa package details
@@ -116,23 +131,26 @@ $statusDisplay = htmlspecialchars($appStatus);
 
       <div x-show="open" x-transition x-cloak
            class="absolute right-0 mt-2 w-60 sm:w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+
         <button type="button"
-                class="w-full text-left px-4 sm:px-5 py-3 sm:py-3.5 text-sm font-medium text-gray-800 hover:bg-sky-50 active:bg-sky-100 transition touch-manipulation"
-                @click="open = false; $store.modals.reassignVisa = true; $store.modals.clientId = <?= $client_id ?>">
+          class="w-full text-left px-4 sm:px-5 py-3 sm:py-3.5 text-sm font-medium text-gray-800 hover:bg-sky-50 active:bg-sky-100 transition touch-manipulation<?= $isCompanion ? ' cursor-not-allowed opacity-60' : '' ?>"
+          @click="open = false; $store.modals.reassignVisa = true; $store.modals.clientId = <?= $client_id ?>"
+          <?= $isCompanion ? 'disabled title="Available only for lead applicants of the visa package."' : '' ?>>
           <?= $hasVisaPackage ? 'Reassign Visa Package' : 'Assign Visa Package' ?>
         </button>
 
         <div x-data="{ showUnassignTip: false }" class="relative">
           <button type="button"
-                  class="w-full text-left px-4 sm:px-5 py-3 sm:py-3.5 text-sm font-medium <?= $hasVisaPackage ? 'text-red-600 hover:bg-red-50 active:bg-red-100' : 'text-gray-400 cursor-not-allowed' ?> transition touch-manipulation"
-                  <?= $hasVisaPackage ? '' : 'disabled' ?>
-                  @mouseenter="showUnassignTip = <?= $hasVisaPackage ? 'false' : 'true' ?>"
+                  class="w-full text-left px-4 sm:px-5 py-3 sm:py-3.5 text-sm font-medium <?= $hasVisaPackage ? 'text-red-600 hover:bg-red-50 active:bg-red-100' : 'text-gray-400 cursor-not-allowed' ?><?= $isCompanion ? ' cursor-not-allowed opacity-60' : '' ?> transition touch-manipulation"
+                  <?= ($hasVisaPackage && !$isCompanion) ? '' : 'disabled' ?>
+                  <?= $isCompanion ? 'title="Available only for lead applicants of the visa package."' : '' ?>
+                  @mouseenter="showUnassignTip = <?= ($hasVisaPackage && !$isCompanion) ? 'false' : 'true' ?>"
                   @mouseleave="showUnassignTip = false">
             Unassign Visa Package
           </button>
           <div x-show="showUnassignTip" x-cloak x-transition
                class="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-3 py-2 text-xs text-white bg-gray-800 rounded-lg shadow-lg whitespace-nowrap">
-            No visa package currently assigned
+            <?= $isCompanion ? 'Available only for lead applicants of the visa package.' : 'No visa package currently assigned' ?>
           </div>
         </div>
       </div>

@@ -66,7 +66,7 @@ $adminName = $_SESSION['first_name'] ?? 'Admin';
   <?php include '../components/right-panel.php'; ?>
 
   <!-- Main Content -->
-  <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative z-0">
+  <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative">
 
     <h2 class="text-xl font-bold">Client Reviews & Testimonials</h2>
 

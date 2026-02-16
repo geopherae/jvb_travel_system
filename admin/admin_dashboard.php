@@ -218,7 +218,7 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
   <?php include '../components/right-panel.php'; ?>
 
   <!-- Main Content -->
-  <main class="ml-0 lg:ml-64 lg:mr-80 min-h-screen md:h-screen overflow-y-auto p-4 pb-20 md:p-6 md:pb-6 space-y-6 relative z-0">
+  <main class="ml-0 lg:ml-64 lg:mr-80 min-h-screen md:h-screen overflow-y-auto p-4 pb-20 md:p-6 md:pb-6 space-y-6 relative">
 
     <div class="flex items-center justify-between">
       <h2 class="text-xl font-bold">Admin Booking Dashboard</h2>

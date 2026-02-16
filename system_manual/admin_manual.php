@@ -55,7 +55,7 @@ $adminName = $_SESSION['first_name'] ?? 'Admin';
     include '../components/right-panel.php';
   ?>
 
-  <main class="ml-0 md:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-8 relative z-0">
+  <main class="ml-0 md:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-8 relative">
 
 <div class="max-w-5xl mx-auto py-8 px-4 space-y-8">
   <!-- Header -->

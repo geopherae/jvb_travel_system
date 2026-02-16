@@ -1,5 +1,5 @@
 <!-- 📤 Add Requirement Modal -->
-<div x-cloak x-transition x-show="modals.addRequirement" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+<div x-cloak x-transition x-show="modals.addRequirement" class="backdrop-blur-sm fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-2 sm:px-4 py-4 overflow-y-auto">
     <div @click.away="modals.addRequirement = false"
          class="w-full max-w-4xl max-h-[calc(100vh-4rem)] overflow-y-auto bg-white rounded-xl shadow-xl px-6 py-6 sm:px-8 sm:py-8 transition-all space-y-6 relative">
 
@@ -47,15 +47,66 @@
 
   <!-- Two Column Layout: Requirement Type (Left) | Requirement Name (Right) -->
   <div class="grid grid-cols-5 gap-6">
-    <!-- LEFT COLUMN: Requirement Type -->
-    <div class="col-span-2">
-      <label class="block text-sm font-medium text-gray-700 mb-3">Requirement Type <span class="text-red-500">*</span></label>
-      <select class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-700 bg-white transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-              name="requirement_type">
-        <option value="admin_added" selected>Custom Requirement (Other)</option>
-        <option value="primary">Primary</option>
-      </select>
+
+  
+  <!-- LEFT COLUMN: Requirement Type -->
+<div class="col-span-2" @click.away="reqTypeOpen = false">
+  <label class="block text-sm font-medium text-gray-700 mb-3">Requirement Type <span class="text-red-500">*</span></label>
+  
+  <!-- Dropdown Button -->
+  <button 
+    type="button"
+    @click="toggleReqTypeDropdown()"
+    x-ref="reqTypeButton"
+    class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent flex items-center justify-between bg-white"
+    :class="{ 'text-gray-500': !selectedReqType, 'text-gray-900': selectedReqType }">
+    <span x-text="getReqTypeDisplayText()"></span>
+    <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': reqTypeOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </button>
+
+  <!-- Dropdown Options - Teleported to body -->
+  <template x-teleport="body">
+    <div 
+      x-show="reqTypeOpen"
+      x-transition:enter="transition ease-out duration-100"
+      x-transition:enter-start="opacity-0 scale-95"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="transition ease-in duration-75"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-95"
+      :style="`position: fixed; top: ${reqTypeDropdownTop}px; left: ${reqTypeDropdownLeft}px; width: ${reqTypeDropdownWidth}px; z-index: 9999;`"
+      class="bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+      
+      <!-- Options -->
+      <label class="flex items-center px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition"
+             @click.stop="selectReqType('admin_added')">
+        <input 
+          type="radio"
+          name="requirement_type_display"
+          value="admin_added"
+          :checked="selectedReqType === 'admin_added'"
+          class="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500 focus:ring-2 cursor-pointer">
+        <span class="ml-3 text-sm text-gray-700">Custom Requirement (Other)</span>
+      </label>
+      
+      <label class="flex items-center px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition"
+             @click.stop="selectReqType('primary')">
+        <input 
+          type="radio"
+          name="requirement_type_display"
+          value="primary"
+          :checked="selectedReqType === 'primary'"
+          class="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500 focus:ring-2 cursor-pointer">
+        <span class="ml-3 text-sm text-gray-700">Primary</span>
+      </label>
     </div>
+  </template>
+
+  <!-- Hidden input for form submission -->
+  <input type="hidden" name="requirement_type" :value="selectedReqType">
+</div>
 
     <!-- RIGHT COLUMN: Requirement Name -->
     <div class="col-span-3">

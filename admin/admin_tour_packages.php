@@ -319,7 +319,7 @@ window.AIRPORTS = <?php echo json_encode(require __DIR__ . '/../includes/airport
     <?php include '../components/right-panel.php'; ?>
 
     <!-- 📦 Main Content -->
-    <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative z-0">
+    <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative">
       <h2 class="text-xl font-bold">Manage Tour Packages</h2>
 
       <div class="bg-white rounded-lg p-6 space-y-4" x-data="tourFilterData()">

@@ -61,11 +61,47 @@ $financialSource   = in_array($financialSource, ['self_funded', 'sponsor'], true
 // Passport & visa status fields for lead applicant
 $passportNumber    = trim($_POST['passport_number'] ?? '') ?: null;
 $passportExpiry    = toMysqlDate($_POST['passport_expiry'] ?? '');
-$visaLeadApplicantStatus = trim($_POST['applicant_status'] ?? '') ?: null;
+
+// Handle Applicant Status as array (multi-select)
+$visaLeadApplicantStatus = null;
+if (isset($_POST['applicant_status'])) {
+  $leadStatusRaw = $_POST['applicant_status'];
+  // Try to get status options from POST (should be sent as JSON string or array)
+  $statusOptions = [];
+  if (isset($_POST['applicant_status_options'])) {
+    $opts = $_POST['applicant_status_options'];
+    if (is_string($opts)) {
+      $decoded = json_decode($opts, true);
+      if (is_array($decoded)) $statusOptions = $decoded;
+    } elseif (is_array($opts)) {
+      $statusOptions = $opts;
+    }
+  }
+  // Build a map for quick lookup: option value (case-insensitive) => label
+  $optionLabelMap = [];
+  foreach ($statusOptions as $opt) {
+    if (isset($opt['option']) && isset($opt['label'])) {
+      $optionLabelMap[strtolower($opt['option'])] = $opt['label'];
+    }
+  }
+  if (is_array($leadStatusRaw)) {
+    $leadStatusArr = array_map(function($opt) use ($optionLabelMap) {
+      $label = $optionLabelMap[strtolower($opt)] ?? $opt;
+      return ["option" => $opt, "label" => $label];
+    }, array_filter($leadStatusRaw, function($v) { return trim($v) !== ''; }));
+    $visaLeadApplicantStatus = !empty($leadStatusArr) ? json_encode($leadStatusArr, JSON_UNESCAPED_UNICODE) : null;
+  } else if (is_string($leadStatusRaw) && trim($leadStatusRaw) !== '') {
+    $opt = trim($leadStatusRaw);
+    $label = $optionLabelMap[strtolower($opt)] ?? $opt;
+    $visaLeadApplicantStatus = json_encode([["option" => $opt, "label" => $label]], JSON_UNESCAPED_UNICODE);
+  }
+}
 
 // Visa-specific fields (optional)
+
 $visaPackageId     = !empty($_POST['visa_package_id']) ? intval($_POST['visa_package_id']) : null;
 $visaTypeSelected  = trim($_POST['visa_type_selected'] ?? '') ?: null;
+$sponsorStatus     = isset($_POST['sponsor_status']) ? trim($_POST['sponsor_status']) : null;
 
 $currentAdminId    = $_SESSION['admin']['id'] ?? null;
 $assignedAdminId   = !empty($_POST['assigned_admin_id']) ? intval($_POST['assigned_admin_id']) : $currentAdminId;
@@ -299,12 +335,12 @@ function createVisaClient(
     $hasGroupAccessCodeCol = columnExists($conn, 'client_visa_applications', 'group_access_code');
     $hasApplicantStatusCol = columnExists($conn, 'client_visa_applications', 'applicant_status');
     $applicantStatusIsJson = hasJsonCheckConstraint($conn, 'client_visa_applications', 'applicant_status');
-    $finalApplicantStatus = $visaLeadApplicantStatus;
-    if ($applicantStatusIsJson && $visaLeadApplicantStatus !== null) {
-      $finalApplicantStatus = json_encode($visaLeadApplicantStatus, JSON_UNESCAPED_UNICODE);
-    }
 
-    // Build columns: client_id, visa_package_id, application_mode, applicant_status, [optional: group_access_code]
+    // $visaLeadApplicantStatus is already JSON string or null
+    $finalApplicantStatus = $visaLeadApplicantStatus;
+
+
+    // Build columns: client_id, visa_package_id, application_mode, applicant_status, [optional: group_access_code, sponsor_status]
     $visaAppColumns = "client_id, visa_package_id, application_mode";
     $visaAppPlaceholders = "?, ?, ?";
     $bindTypes = "iis";  // i=int, i=int, s=string (application_mode)
@@ -313,6 +349,14 @@ function createVisaClient(
       intval($visaPackageId),
       $applicationMode
     ];
+
+    // Add sponsor_status if column exists and provided
+    if (columnExists($conn, 'client_visa_applications', 'sponsor_status') && $sponsorStatus !== null && $sponsorStatus !== '') {
+      $visaAppColumns .= ", sponsor_status";
+      $visaAppPlaceholders .= ", ?";
+      $bindTypes .= "s";
+      $bindValues[] = $sponsorStatus;
+    }
 
     // Add visa_type if column exists
     if (columnExists($conn, 'client_visa_applications', 'visa_type') && $visaTypeSelected !== null) {
@@ -500,7 +544,43 @@ if (!empty($groupMembers)) {
     $memberRelationship = trim($member['relationship'] ?? '') ?: null;
     $memberPassportNumber = trim($member['passportNumber'] ?? '') ?: null;
     $memberPassportExpiry = toMysqlDate($member['passportExpiry'] ?? '');
-    $memberApplicantStatus = trim($member['applicantStatus'] ?? '') ?: null;
+    // Handle companion applicant status as array (multi-select, from dropdown checkbox)
+    $memberApplicantStatus = null;
+    if (isset($member['applicantStatus'])) {
+      $compStatusRaw = $member['applicantStatus'];
+      // Companion status options: try to get from member['applicantStatusOptions'] if present
+      $statusOptions = [];
+      if (isset($member['applicantStatusOptions'])) {
+        $opts = $member['applicantStatusOptions'];
+        if (is_string($opts)) {
+          $decoded = json_decode($opts, true);
+          if (is_array($decoded)) $statusOptions = $decoded;
+        } elseif (is_array($opts)) {
+          $statusOptions = $opts;
+        }
+      }
+      $optionLabelMap = [];
+      foreach ($statusOptions as $opt) {
+        if (isset($opt['option']) && isset($opt['label'])) {
+          $optionLabelMap[strtolower($opt['option'])] = $opt['label'];
+        }
+      }
+      if (is_array($compStatusRaw)) {
+        $flatArr = array_map(function($v) {
+          if (is_array($v) && isset($v['option'])) return $v['option'];
+          return $v;
+        }, $compStatusRaw);
+        $compStatusArr = array_map(function($opt) use ($optionLabelMap) {
+          $label = $optionLabelMap[strtolower($opt)] ?? $opt;
+          return ["option" => $opt, "label" => $label];
+        }, array_filter($flatArr, function($v) { return trim($v) !== ''; }));
+        $memberApplicantStatus = !empty($compStatusArr) ? json_encode($compStatusArr, JSON_UNESCAPED_UNICODE) : null;
+      } else if (is_string($compStatusRaw) && trim($compStatusRaw) !== '') {
+        $opt = trim($compStatusRaw);
+        $label = $optionLabelMap[strtolower($opt)] ?? $opt;
+        $memberApplicantStatus = json_encode([["option" => $opt, "label" => $label]], JSON_UNESCAPED_UNICODE);
+      }
+    }
     $memberFinancialSource = trim($member['financialSource'] ?? '') ?: null;
     $memberVisaType = trim($member['visaType'] ?? '') ?: $visaTypeSelected;  // Use their own visa_type or fall back to lead's
 
@@ -577,7 +657,7 @@ if (!empty($groupMembers)) {
       }
       
       $companionId = $companionStmt->insert_id;
-      $companionStmt->close();
+      // $companionStmt->close(); // Removed redundant close, already closed in error/success paths
       
       // Safeguard: Ensure companion ID is never 0 (should be auto-increment >= 1)
       if ($companionId <= 0) {

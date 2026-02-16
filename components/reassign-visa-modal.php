@@ -97,7 +97,7 @@ if (!empty($client['id'])) {
     
     <p class="text-sm text-gray-600 mb-6 leading-relaxed">
       <template x-if="hasVisaPackages">
-        <span>Select a new visa package below. This will replace the client's current visa application.</span>
+        <span>Select a new visa package below. This will replace the client's current visa application. This applies to <strong>all</strong> applicants in group applications.</span>
       </template>
       <template x-if="!hasVisaPackages">
         <span>No visa packages are available yet. Please create one first.</span>

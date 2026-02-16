@@ -1,6 +1,6 @@
 <?php
 // Fetch visa packages for dropdown (including visa_types_json)
-$visaPackagesStmt = $conn->prepare("SELECT id, country, processing_days, visa_types_json FROM visa_packages WHERE is_active = 1 ORDER BY country ASC");
+$visaPackagesStmt = $conn->prepare("SELECT id, country, applicant_status_options, processing_days, visa_types_json FROM visa_packages WHERE is_active = 1 ORDER BY country ASC");
 $visaPackagesStmt->execute();
 $visaPackagesResult = $visaPackagesStmt->get_result();
 $visaPackages = [];
@@ -59,7 +59,7 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
         <div x-show="step === 1" class="px-4 py-4 sm:p-6 space-y-3 sm:space-y-4">
 
           <!-- Progress Header with Group Indicator -->
-          <div class="flex items-center justify-between mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-200">
+          <div class="grid grid-cols-3 items-center gap-4 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-200">
             <div>
               <h3 class="text-sm sm:text-base font-semibold text-gray-900">Client Basic Info</h3>
               <p x-show="isAddingToGroup" class="text-xs text-sky-600 font-medium mt-0.5 flex items-center gap-1">
@@ -67,12 +67,12 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
                 Adding to group
               </p>
             </div>
-            <div class="flex gap-1.5 sm:gap-2">
+            <div class="flex items-center justify-center gap-1.5 sm:gap-2">
               <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-sky-500"></div>
               <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-gray-300"></div>
               <div x-show="applicationMode === 'group'" class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-gray-300"></div>
             </div>
-            <div class="text-xs sm:text-sm text-gray-500" x-text="'Step 1 of ' + getTotalSteps()"></div>
+            <div class="text-xs sm:text-sm text-gray-500 text-right" x-text="'Step 1 of ' + getTotalSteps()"></div>
           </div>
 
           <!-- Two-Column Layout (Responsive) -->
@@ -172,44 +172,186 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
 
               <!-- Group: Processing + Application Mode -->
               <div class="space-y-3 sm:space-y-4">
+
+              
                 <!-- Processing Type -->
-                <div class="relative">
-                  <label for="processing_type" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700">
-                    Processing Type <span class="text-red-500">*</span>
-                  </label>
-                  <select id="processing_type" name="processing_type" x-model="processingType" required
-                          class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-3 sm:py-3.5 pt-5 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                    <option value="visa">Visa Processing</option>
-                <!--<option value="booking">Booking Only</option> -->
-                    <option value="both">Both Booking & Visa</option>
-                  </select>
-                  <p class="text-xs text-gray-500 mt-1.5">Select the type of service this client will use.</p>
-                </div>
+<!-- Processing Type -->
+<div x-data="{ 
+  open: false,
+  options: [
+    { value: 'visa', label: 'Visa Processing' },
+    { value: 'both', label: 'Both Booking & Visa' }
+  ],
+  getDisplayText() {
+    const found = this.options.find(o => o.value === processingType);
+    return found ? found.label : 'Select processing type';
+  }
+}" 
+@click.away="open = false"
+class="relative">
+  <label for="processing_type" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700 z-10">
+    Processing Type <span class="text-red-500">*</span>
+  </label>
+  
+  <!-- Dropdown Button -->
+  <button 
+    type="button"
+    @click="open = !open"
+    class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-3 sm:py-3.5 pt-5 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent flex items-center justify-between bg-white"
+    :class="{ 'text-gray-500': !processingType, 'text-gray-900': processingType }">
+    <span x-text="getDisplayText()"></span>
+    <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </button>
 
-                <!-- Application Mode -->
-                <div class="relative">
-                  <label for="application_mode" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700">
-                    Application Mode <span class="text-red-500">*</span>
-                  </label>
-                  <select id="application_mode" x-model="applicationMode" required
-                          class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-3 sm:py-3.5 pt-5 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                    <option value="individual">Individual Application</option>
-                    <option value="group">Group Application</option>
-                  </select>
-                  <p class="text-xs text-gray-500 mt-1.5">Choose Individual for single client or Group for family/group.</p>
-                </div>
+  <!-- Dropdown Options -->
+  <div 
+    x-show="open"
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+    
+    <template x-for="option in options" :key="option.value">
+      <label class="flex items-center px-3 sm:px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition"
+             @click.stop="processingType = option.value; open = false">
+        <input 
+          type="radio"
+          name="processing_type_display"
+          :value="option.value"
+          :checked="processingType === option.value"
+          class="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500 focus:ring-2 cursor-pointer">
+        <span class="ml-3 text-sm text-gray-700" x-text="option.label"></span>
+      </label>
+    </template>
+  </div>
 
-                <!-- Financial Source -->
-                <div class="relative top-4">
-                  <label for="financial_source" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700">
-                    Financial Source <span class="text-red-500">*</span>
-                  </label>
-                  <select id="financial_source" name="financial_source" x-model="financialSource" required
-                          class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-3 sm:py-3.5 pt-5 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                    <option value="self_funded">Self-Funded</option>
-                    <option value="sponsor">Sponsor</option>
-                  </select>
-                </div>
+  <!-- Hidden input for form submission -->
+  <input type="hidden" name="processing_type" :value="processingType">
+
+  <p class="text-xs text-gray-500 mt-1.5">Select the type of service this client will use.</p>
+</div>
+
+<!-- Application Mode -->
+<div x-data="{ 
+  open: false,
+  options: [
+    { value: 'individual', label: 'Individual Application' },
+    { value: 'group', label: 'Group Application' }
+  ],
+  getDisplayText() {
+    const found = this.options.find(o => o.value === applicationMode);
+    return found ? found.label : 'Select application mode';
+  }
+}" 
+@click.away="open = false"
+class="relative">
+  <label for="application_mode" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700 z-10">
+    Application Mode <span class="text-red-500">*</span>
+  </label>
+  
+  <!-- Dropdown Button -->
+  <button 
+    type="button"
+    @click="open = !open"
+    class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-3 sm:py-3.5 pt-5 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent flex items-center justify-between bg-white"
+    :class="{ 'text-gray-500': !applicationMode, 'text-gray-900': applicationMode }">
+    <span x-text="getDisplayText()"></span>
+    <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </button>
+
+  <!-- Dropdown Options -->
+  <div 
+    x-show="open"
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+    
+    <template x-for="option in options" :key="option.value">
+      <label class="flex items-center px-3 sm:px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition"
+             @click.stop="applicationMode = option.value; open = false">
+        <input 
+          type="radio"
+          name="application_mode_display"
+          :value="option.value"
+          :checked="applicationMode === option.value"
+          class="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500 focus:ring-2 cursor-pointer">
+        <span class="ml-3 text-sm text-gray-700" x-text="option.label"></span>
+      </label>
+    </template>
+  </div>
+
+  <p class="text-xs text-gray-500 mt-1.5">Choose Individual for single client or Group for family/group.</p>
+</div>
+
+<!-- Financial Source -->
+<div x-data="{ 
+  open: false,
+  options: [
+    { value: 'self_funded', label: 'Self-Funded' },
+    { value: 'sponsor', label: 'Sponsor' }
+  ],
+  getDisplayText() {
+    const found = this.options.find(o => o.value === financialSource);
+    return found ? found.label : 'Select financial source';
+  }
+}" 
+@click.away="open = false"
+class="relative top-4">
+  <label for="financial_source" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700 z-10">
+    Financial Source <span class="text-red-500">*</span>
+  </label>
+  
+  <!-- Dropdown Button -->
+  <button 
+    type="button"
+    @click="open = !open"
+    class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-3 sm:py-3.5 pt-5 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent flex items-center justify-between bg-white"
+    :class="{ 'text-gray-500': !financialSource, 'text-gray-900': financialSource }">
+    <span x-text="getDisplayText()"></span>
+    <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </button>
+
+  <!-- Dropdown Options -->
+  <div 
+    x-show="open"
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+    
+    <template x-for="option in options" :key="option.value">
+      <label class="flex items-center px-3 sm:px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition"
+             @click.stop="financialSource = option.value; open = false">
+        <input 
+          type="radio"
+          name="financial_source_display"
+          :value="option.value"
+          :checked="financialSource === option.value"
+          class="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500 focus:ring-2 cursor-pointer">
+        <span class="ml-3 text-sm text-gray-700" x-text="option.label"></span>
+      </label>
+    </template>
+  </div>
+
+  <!-- Hidden input for form submission -->
+  <input type="hidden" name="financial_source" :value="financialSource">
+</div>
               </div>
 
               <!-- Group: Full Name + Access Code -->
@@ -265,16 +407,16 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
 
         </div>
 
-        <!-- STEP 2: Passport & Visa Status -->
+<!-- STEP 2: Passport & Visa Status -->
         <div x-show="step === 2" class="px-4 py-4 sm:p-6 space-y-4 sm:space-y-6">
 
-          <!-- Progress Header -->
-          <div class="flex items-center justify-between mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-200">
+<!-- Progress Header -->
+          <div class="grid grid-cols-3 items-center gap-4 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-200">
             <div>
               <h3 class="text-sm sm:text-base font-semibold text-gray-900">Passport & Visa Status</h3>
-              <p class="text-xs text-gray-500 mt-0.5">Add passport details and applicant status for requirement matching.</p>
+              <p class="text-xs text-gray-500 mt-0.5">Add passport details and applicant status.</p>
             </div>
-            <div class="flex items-center gap-1.5 sm:gap-2">
+            <div class="flex items-center justify-center gap-1.5 sm:gap-2">
               <template x-if="getTotalSteps() === 2">
                 <div class="flex gap-1.5 sm:gap-2">
                   <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-gray-300"></div>
@@ -289,11 +431,334 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
                 </div>
               </template>
             </div>
-            <div class="text-xs sm:text-sm text-gray-500" x-text="'Step 2 of ' + getTotalSteps()"></div>
+            <div class="text-xs sm:text-sm text-gray-500 text-right" x-text="'Step 2 of ' + getTotalSteps()"></div>
           </div>
 
+          <!-- Visa Package Selection -->
+          <div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              
+<!-- Visa Package Dropdown -->
+<div x-data="{ 
+  open: false,
+  packages: <?= htmlspecialchars(json_encode(array_map(function($pkg) {
+    return [
+      'id' => $pkg['id'],
+      'label' => $pkg['country'] . ' (' . $pkg['processing_days'] . ' days)',
+      'processingDays' => $pkg['processing_days'],
+      'visaTypes' => $pkg['visa_types_json'] ? json_decode($pkg['visa_types_json'], true) : [],
+      'applicantStatusOptions' => $pkg['applicant_status_options'] ?? '[]'
+    ];
+  }, $visaPackages)), ENT_QUOTES, 'UTF-8') ?>,
+  getDisplayText() {
+    if (!selectedVisaPackage) return 'Select a visa package...';
+    const found = this.packages.find(p => p.id == selectedVisaPackage);
+    return found ? found.label : 'Select a visa package...';
+  },
+  selectPackage(pkg) {
+    selectedVisaPackage = pkg.id;
+    this.open = false;
+    // Manually trigger the package change
+    const selectElement = document.getElementById('visa_package_id');
+    if (selectElement) {
+      selectElement.value = pkg.id;
+      selectElement.dispatchEvent(new Event('change'));
+    }
+    onVisaPackageChange();
+  }
+}"
+@click.away="open = false">
+  <label for="visa_package_id" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+    <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+    </svg>
+    Visa Package <span class="text-red-500">*</span>
+  </label>
+  
+  <!-- Dropdown Button -->
+  <button 
+    type="button"
+    @click="open = !open"
+    class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent flex items-center justify-between bg-white"
+    :class="{ 'text-gray-500': !selectedVisaPackage, 'text-gray-900': selectedVisaPackage }">
+    <span x-text="getDisplayText()"></span>
+    <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </button>
+
+  <!-- Dropdown Options -->
+  <div 
+    x-show="open"
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="absolute z-50 w-full max-w-[845px] mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+    
+    <template x-for="pkg in packages" :key="pkg.id">
+      <label class="flex items-center px-3 sm:px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition"
+             @click.stop="selectPackage(pkg)">
+        <input 
+          type="radio"
+          name="visa_package_display"
+          :value="pkg.id"
+          :checked="selectedVisaPackage == pkg.id"
+          class="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500 focus:ring-2 cursor-pointer">
+        <span class="ml-3 text-sm text-gray-700" x-text="pkg.label"></span>
+      </label>
+    </template>
+  </div>
+
+  <!-- Hidden select for form submission and change detection -->
+  <select id="visa_package_id" name="visa_package_id" x-model.number="selectedVisaPackage" 
+          @change="onVisaPackageChange()" required class="hidden">
+    <option value="">Select a visa package...</option>
+    <?php foreach ($visaPackages as $pkg):
+      // Safe decode for visa_types_json
+      $visaTypesArr = [];
+      if (!empty($pkg['visa_types_json'])) {
+        $decoded = json_decode($pkg['visa_types_json'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+          $visaTypesArr = $decoded;
+        }
+      }
+      // Safe decode for applicant_status_options
+      $appStatusArr = [];
+      if (!empty($pkg['applicant_status_options'])) {
+        $decoded = json_decode($pkg['applicant_status_options'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+          $appStatusArr = $decoded;
+        }
+      }
+    ?>
+      <option value="<?= $pkg['id'] ?>" 
+              data-processing-days="<?= $pkg['processing_days'] ?>"
+              data-visa-types="<?= htmlspecialchars(json_encode($visaTypesArr, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') ?>"
+              data-applicant-status-options="<?= htmlspecialchars(json_encode($appStatusArr, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') ?>">
+        <?= htmlspecialchars($pkg['country']) ?> (<?= $pkg['processing_days'] ?> days)
+      </option>
+    <?php endforeach; ?>
+  </select>
+
+  <p class="text-xs text-gray-500 mt-1.5 sm:mt-2">Choose a visa package. This will be applied if group application.</p>
+</div>
+
+<!-- Visa Type Dropdown (Enabled only after package selection) -->
+<div x-data="{ 
+  open: false,
+  getDisplayText() {
+    return visaTypeSelected || 'Select Visa Type';
+  }
+}" 
+@click.away="open = false">
+  <label for="visa_type_selected" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+    <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+    </svg>
+    Visa Type <span class="text-red-500">*</span>
+  </label>
+  
+  <!-- Dropdown Button -->
+  <button 
+    type="button"
+    @click="open = !open"
+    :disabled="!selectedVisaPackage"
+    class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500 flex items-center justify-between bg-white"
+    :class="{ 'text-gray-500': !visaTypeSelected, 'text-gray-900': visaTypeSelected }">
+    <span x-text="getDisplayText()"></span>
+    <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </button>
+
+  <!-- Dropdown Options -->
+  <div 
+    x-show="open"
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+    
+    <template x-for="visaType in availableVisaTypes" :key="visaType">
+      <label class="flex items-center px-3 sm:px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition"
+             @click.stop="visaTypeSelected = visaType; open = false">
+        <input 
+          type="radio"
+          name="visa_type_display"
+          :value="visaType"
+          :checked="visaTypeSelected === visaType"
+          class="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500 focus:ring-2 cursor-pointer">
+        <span class="ml-3 text-sm text-gray-700" x-text="visaType"></span>
+      </label>
+    </template>
+  </div>
+
+  <!-- Hidden input for form submission -->
+  <input type="hidden" id="visa_type_selected" name="visa_type_selected" :value="visaTypeSelected" required>
+
+  <p class="text-xs text-gray-500 mt-1.5 sm:mt-2" x-show="!selectedVisaPackage">
+    Select a visa package above to choose a visa type.
+  </p>
+  <p class="text-xs text-gray-500 mt-1.5 sm:mt-2" x-show="selectedVisaPackage && availableVisaTypes.length === 0">
+    No visa types available for this package.
+  </p>
+</div>
+
+            </div>
+          </div>
+
+<!-- Applicant Status and Sponsor Status (Side by Side) -->
+<div class="border-t border-gray-200 pt-4 sm:pt-6">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+    
+    <!-- Applicant Status -->
+    <div x-data="{ 
+      open: false,
+      selectedStatuses: [],
+      toggleStatus(status) {
+        const index = this.selectedStatuses.indexOf(status);
+        if (index === -1) {
+          this.selectedStatuses.push(status);
+        } else {
+          this.selectedStatuses.splice(index, 1);
+        }
+      },
+      isSelected(status) {
+        return this.selectedStatuses.includes(status);
+      },
+      getDisplayText() {
+        if (this.selectedStatuses.length === 0) return 'Select applicant status';
+        if (this.selectedStatuses.length === 1) {
+          const found = applicantStatusOptions.find(o => o.option === this.selectedStatuses[0]);
+          return found ? found.label : this.selectedStatuses[0];
+        }
+        return `${this.selectedStatuses.length} statuses selected`;
+      }
+    }" 
+    @click.away="open = false"
+    class="relative">
+      <label for="applicant_status" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+        <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+        </svg>
+        Applicant Status <span class="text-red-500">*</span>
+      </label>
+      
+      <!-- Dropdown Button -->
+      <button 
+        type="button"
+        @click="open = !open"
+        :disabled="!selectedVisaPackage"
+        class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500 flex items-center justify-between"
+        :class="{ 'text-gray-500': selectedStatuses.length === 0, 'text-gray-900': selectedStatuses.length > 0 }">
+        <span x-text="getDisplayText()"></span>
+        <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+
+      <!-- Dropdown Options -->
+      <div 
+        x-show="open"
+        x-transition:enter="transition ease-out duration-100"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-75"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        
+        <div class="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-gray-200 bg-gray-50">
+          <button type="button" @click="selectedStatuses = applicantStatusOptions.map(o => o.option)" 
+                  class="text-xs text-sky-600 hover:text-sky-700 font-medium">
+            Select All
+          </button>
+          <button type="button" @click="selectedStatuses = []" 
+                  class="text-xs text-gray-600 hover:text-gray-700 font-medium">
+            Clear All
+          </button>
+        </div>
+
+        <template x-for="statusOption in applicantStatusOptions" :key="statusOption.option">
+          <label 
+            class="flex items-center px-3 sm:px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition">
+            <input 
+              type="checkbox"
+              :value="statusOption.option"
+              @change="toggleStatus(statusOption.option)"
+              :checked="isSelected(statusOption.option)"
+              class="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500 focus:ring-2 cursor-pointer">
+            <span class="ml-3 text-sm text-gray-700" x-text="statusOption.label"></span>
+          </label>
+        </template>
+      </div>
+
+      <!-- Hidden inputs for form submission and validation -->
+      <template x-for="(status, index) in selectedStatuses" :key="index">
+        <input type="hidden" name="applicant_status[]" :value="status">
+      </template>
+      <!-- Hidden field to send status options for backend mapping -->
+      <input type="hidden" name="applicant_status_options" :value="JSON.stringify(applicantStatusOptions)">
+      
+      <!-- Hidden required field for validation -->
+      <input type="hidden" name="applicant_status_required" :value="selectedStatuses.length > 0 ? 'valid' : ''" required>
+
+      <p class="text-xs text-gray-500 mt-1.5 sm:mt-2" x-show="!selectedVisaPackage">
+        Select a visa package above to choose applicant status.
+      </p>
+      <p class="text-xs text-gray-500 mt-1.5 sm:mt-2" x-show="selectedVisaPackage">
+        This determines which conditional requirements apply.
+      </p>
+    </div>
+
+    <!-- Sponsor Status (only if Financial Source is Sponsor) -->
+    <div x-show="financialSource === 'sponsor'" x-transition>
+      <label for="sponsor_status" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+        <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        Sponsor Status <span class="text-red-500">*</span>
+      </label>
+      <div x-data="{ open: false, options: [
+        { value: 'employed', label: 'Employed' },
+        { value: 'self_employed_business_owner_corporation', label: 'Self-Employed/Business Owner/Corporation' }
+      ], getDisplayText() {
+        const found = this.options.find(o => o.value === sponsorStatus);
+        return found ? found.label : 'Select sponsor status';
+      }}" @click.away="open = false">
+        <button type="button" @click="open = !open"
+          class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent flex items-center justify-between bg-white"
+          :class="{ 'text-gray-500': !sponsorStatus, 'text-gray-900': sponsorStatus }">
+          <span x-text="getDisplayText()"></span>
+          <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          <template x-for="option in options" :key="option.value">
+            <label class="flex items-center px-3 sm:px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition" @click.stop="sponsorStatus = option.value; open = false">
+              <input type="radio" name="sponsor_status_display" :value="option.value" :checked="sponsorStatus === option.value" class="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500 focus:ring-2 cursor-pointer">
+              <span class="ml-3 text-sm text-gray-700" x-text="option.label"></span>
+            </label>
+          </template>
+        </div>
+        <input type="hidden" name="sponsor_status" :value="sponsorStatus" :required="financialSource === 'sponsor'">
+      </div>
+      <p class="text-xs text-gray-500 mt-1.5">Required when financial source is Sponsor.</p>
+    </div>
+
+  </div>
+</div>
+
           <!-- Passport Details (Two Column Layout) -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 pb-4 sm:pb-6 border-b border-gray-200">
+           <div class="border-t border-gray-200 pt-4 sm:pt-6">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 pb-4 sm:pb-6">
             
             <!-- Passport Number -->
             <div class="relative">
@@ -321,82 +786,6 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
               </p>
             </div>
           </div>
-
-          <!-- Applicant Status -->
-          <div>
-            <label for="applicant_status" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
-              <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-              </svg>
-              Applicant Status (Optional)
-              <span class="text-gray-400 text-xs font-normal">For requirement matching</span>
-            </label>
-            <select id="applicant_status" name="applicant_status" x-model="applicantStatus"
-                    class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-              <option value="">Not specified</option>
-              <option value="employed">Employed</option>
-              <option value="self_employed">Self-Employed</option>
-              <option value="business_owner">Business Owner</option>
-              <option value="student">Student</option>
-              <option value="retired">Retired</option>
-              <option value="senior_citizen">Senior Citizen</option>
-              <option value="unemployed">Unemployed</option>
-            </select>
-            <p class="text-xs text-gray-500 mt-1.5 sm:mt-2">This determines which conditional requirements apply in visa processing.</p>
-          </div>
-
-          <!-- Visa Package Selection -->
-          <div class="border-t border-gray-200 pt-4 sm:pt-6 mt-4 sm:mt-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              
-              <!-- Visa Package Dropdown -->
-              <div>
-                <label for="visa_package_id" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
-                  <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                  </svg>
-                  Visa Package (Optional)
-                </label>
-                <select id="visa_package_id" name="visa_package_id" x-model.number="selectedVisaPackage" 
-                        @change="onVisaPackageChange()"
-                        class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                  <option value="">Select a visa package...</option>
-                  <?php foreach ($visaPackages as $pkg): ?>
-                    <option value="<?= $pkg['id'] ?>" 
-                            data-processing-days="<?= $pkg['processing_days'] ?>"
-                            data-visa-types="<?= htmlspecialchars(json_encode($pkg['visa_types_json'] ? json_decode($pkg['visa_types_json'], true) : []), ENT_QUOTES, 'UTF-8') ?>">
-                      <?= htmlspecialchars($pkg['country']) ?> (<?= $pkg['processing_days'] ?> days)
-                    </option>
-                  <?php endforeach; ?>
-                </select>
-                <p class="text-xs text-gray-500 mt-1.5 sm:mt-2">Choose a visa package if known, or leave blank for later assignment.</p>
-              </div>
-
-              <!-- Visa Type Dropdown (Enabled only after package selection) -->
-              <div>
-                <label for="visa_type_selected" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
-                  <svg class="w-4 sm:w-5 h-4 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                  </svg>
-                  Visa Type <span class="text-red-500">*</span>
-                </label>
-                <select id="visa_type_selected" name="visa_type_selected" x-model="visaTypeSelected" 
-                        :disabled="!selectedVisaPackage"
-                        class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500">
-                  <option value="">Select Visa Type</option>
-                  <template x-for="visaType in availableVisaTypes" :key="visaType">
-                    <option :value="visaType" x-text="visaType"></option>
-                  </template>
-                </select>
-                <p class="text-xs text-gray-500 mt-1.5 sm:mt-2" x-show="!selectedVisaPackage">
-                  Select a visa package above to choose a visa type.
-                </p>
-                <p class="text-xs text-gray-500 mt-1.5 sm:mt-2" x-show="selectedVisaPackage && availableVisaTypes.length === 0">
-                  No visa types available for this package.
-                </p>
-              </div>
-
-            </div>
           </div>
 
         </div>
@@ -404,17 +793,18 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
         <!-- STEP 3: Group Members (Only if Group Application) -->
         <div x-show="step === 3 && applicationMode === 'group'" class="px-4 py-5 sm:p-6 space-y-3 sm:space-y-5 max-h-[60vh] overflow-y-auto">
 
-          <!-- Progress Header -->
-          <div class="flex items-start sm:items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200 gap-3">
+<!-- Progress Header -->
+          <div class="grid grid-cols-3 items-center gap-4 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-200">
             <div class="min-w-0">
               <h3 class="text-sm sm:text-base font-semibold text-gray-900">Group Members</h3>
-              <p class="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Step 3 of 3 - Add group members (Optional)</p>
+              <p class="text-xs text-gray-500 mt-0.5">Add group members (Optional)</p>
             </div>
-            <div class="flex gap-1.5 sm:gap-2 flex-shrink-0">
+            <div class="flex items-center justify-center gap-1.5 sm:gap-2">
               <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-gray-300"></div>
               <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-gray-300"></div>
               <div class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-sky-500"></div>
             </div>
+            <div class="text-xs sm:text-sm text-gray-500 text-right">Step 3 of 3</div>
           </div>
 
           <div class="bg-blue-50 border border-blue-100 rounded-lg p-3">
@@ -449,36 +839,60 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
                   </button>
                 </div>
 
-                <!-- Visa Type & Financial Source Row -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                  <div class="relative">
-                    <label :for="'companion_visa_type_' + index" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700">
-                      Visa Type <span class="text-red-500">*</span>
-                    </label>
-                    <select :id="'companion_visa_type_' + index" x-model="member.visaType"
-                           :name="'companion_visa_type_' + index" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-3 pt-5 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                      <option value="">Select visa type</option>
-                      <template x-for="vtype in availableVisaTypes" :key="vtype">
-                        <option :value="vtype" x-text="vtype"></option>
-                      </template>
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">Same as lead applicant or select different</p>
-                  </div>
+<div x-data="{ 
+  open: false,
+  getDisplayText() {
+    return member.visaType || 'Select visa type';
+  }
+}" 
+@click.away="open = false"
+class="relative mb-4">
+  <label :for="'companion_visa_type_' + index" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700 z-10">
+    Visa Type <span class="text-red-500">*</span>
+  </label>
+  
+  <!-- Dropdown Button -->
+  <button 
+    type="button"
+    @click="open = !open"
+    class="w-full border border-gray-300 rounded-lg px-3 py-3 pt-5 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent flex items-center justify-between bg-white"
+    :class="{ 'text-gray-500': !member.visaType, 'text-gray-900': member.visaType }">
+    <span x-text="getDisplayText()"></span>
+    <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </button>
 
-                  <div class="relative">
-                    <label :for="'companion_financial_' + index" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700">
-                      Financial Source
-                    </label>
-                    <select :id="'companion_financial_' + index" x-model="member.financialSource"
-                           :name="'companion_financial_' + index"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-3 pt-5 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                      <option value="">Not specified</option>
-                      <option value="self_funded">Self-Funded</option>
-                      <option value="sponsor">Sponsor</option>
-                    </select>
-                  </div>
-                </div>
+  <!-- Dropdown Options -->
+  <div 
+    x-show="open"
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+    
+    <template x-for="vtype in availableVisaTypes" :key="vtype">
+      <label class="flex items-center px-3 py-2.5 hover:bg-gray-50 cursor-pointer transition"
+             @click.stop="member.visaType = vtype; open = false">
+        <input 
+          type="radio"
+          :name="'companion_visa_type_display_' + index"
+          :value="vtype"
+          :checked="member.visaType === vtype"
+          class="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500 focus:ring-2 cursor-pointer">
+        <span class="ml-3 text-sm text-gray-700" x-text="vtype"></span>
+      </label>
+    </template>
+  </div>
+
+  <!-- Hidden input for form submission -->
+  <input type="hidden" :name="'companion_visa_type_' + index" :value="member.visaType" required>
+
+  <p class="text-xs text-gray-500 mt-1">Same as lead applicant or select different</p>
+</div>
 
                 <!-- Basic Info Row -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
@@ -492,22 +906,68 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
                            class="w-full border border-gray-300 rounded-lg px-3 py-3 pt-5 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
                   </div>
 
-                  <div class="relative">
-                    <label :for="'companion_relationship_' + index" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700">
-                      Relationship with Lead Guest<span class="text-red-500">*</span>
-                    </label>
-                    <select :id="'companion_relationship_' + index" x-model="member.relationship"
-                           :name="'companion_relationship_' + index" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-3 pt-5 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                      <option value="">Select relationship</option>
-                      <option value="spouse">Spouse</option>
-                      <option value="child">Child</option>
-                      <option value="parent">Parent</option>
-                      <option value="sibling">Sibling</option>
-                      <option value="relative">Other Relative</option>
-                      <option value="friend">Friend</option>
-                    </select>
-                  </div>
+<div x-data="{ 
+  open: false,
+  options: [
+    { value: 'spouse', label: 'Spouse' },
+    { value: 'child', label: 'Child' },
+    { value: 'parent', label: 'Parent' },
+    { value: 'sibling', label: 'Sibling' },
+    { value: 'relative', label: 'Other Relative' },
+    { value: 'friend', label: 'Friend' }
+  ],
+  getDisplayText() {
+    if (!member.relationship) return 'Select relationship';
+    const found = this.options.find(o => o.value === member.relationship);
+    return found ? found.label : member.relationship;
+  }
+}" 
+@click.away="open = false"
+class="relative">
+  <label :for="'companion_relationship_' + index" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700 z-10">
+    Relationship with Lead Guest<span class="text-red-500">*</span>
+  </label>
+  
+  <!-- Dropdown Button -->
+  <button 
+    type="button"
+    @click="open = !open"
+    class="w-full border border-gray-300 rounded-lg px-3 py-3 pt-5 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent flex items-center justify-between bg-white"
+    :class="{ 'text-gray-500': !member.relationship, 'text-gray-900': member.relationship }">
+    <span x-text="getDisplayText()"></span>
+    <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </button>
+
+  <!-- Dropdown Options -->
+  <div 
+    x-show="open"
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+    
+    <template x-for="option in options" :key="option.value">
+      <label class="flex items-center px-3 py-2.5 hover:bg-gray-50 cursor-pointer transition"
+             @click.stop="member.relationship = option.value; open = false">
+        <input 
+          type="radio"
+          :name="'companion_relationship_display_' + index"
+          :value="option.value"
+          :checked="member.relationship === option.value"
+          class="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500 focus:ring-2 cursor-pointer">
+        <span class="ml-3 text-sm text-gray-700" x-text="option.label"></span>
+      </label>
+    </template>
+  </div>
+
+  <!-- Hidden input for form submission -->
+  <input type="hidden" :name="'companion_relationship_' + index" :value="member.relationship" required>
+</div>
                 </div>
 
                 <!-- Contact & Passport Row -->
@@ -570,23 +1030,102 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
                            class="w-full border border-gray-300 rounded-lg px-3 py-3 pt-5 text-sm placeholder:text-gray-400 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
                   </div>
 
-                  <div class="relative">
-                    <label :for="'companion_status_' + index" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700 z-10">
-                      Applicant Status
-                    </label>
-                    <select :id="'companion_status_' + index" x-model="member.applicantStatus"
-                           :name="'companion_status_' + index"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-3 pt-5 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                      <option value="">Not specified</option>
-                      <option value="employed">Employed</option>
-                      <option value="self_employed">Self-Employed</option>
-                      <option value="business_owner">Business Owner</option>
-                      <option value="student">Student</option>
-                      <option value="retired">Retired</option>
-                      <option value="senior_citizen">Senior Citizen</option>
-                      <option value="unemployed">Unemployed</option>
-                    </select>
-                  </div>
+<div class="relative">
+  <!-- Applicant Status Multi-Select Dropdown (Companion) -->
+  <div x-data="{
+    open: false,
+    toggleStatus(status) {
+      const idx = member.applicantStatus?.indexOf(status) ?? -1;
+      if (idx === -1) {
+        if (!member.applicantStatus) member.applicantStatus = [];
+        member.applicantStatus.push(status);
+      } else {
+        member.applicantStatus.splice(idx, 1);
+      }
+    },
+    isSelected(status) {
+      return Array.isArray(member.applicantStatus) && member.applicantStatus.includes(status);
+    },
+    getDisplayText() {
+      if (!member.applicantStatus || member.applicantStatus.length === 0) return 'Select applicant status';
+      if (member.applicantStatus.length === 1) {
+        const found = applicantStatusOptions.find(o => o.option === member.applicantStatus[0]);
+        return found ? found.label : member.applicantStatus[0];
+      }
+      return `${member.applicantStatus.length} statuses selected`;
+    }
+  }" 
+  @click.away="open = false"
+  class="relative">
+    
+    <label :for="'companion_status_' + index" class="absolute top-0 left-3 -translate-y-1/2 bg-white px-1 text-xs font-semibold text-gray-700 z-10">
+      Applicant Status
+    </label>
+    
+    <!-- Dropdown Button -->
+    <button 
+      type="button"
+      @click="open = !open"
+      :id="'companion_status_' + index"
+      class="w-full border border-gray-300 rounded-lg px-3 py-3 pt-5 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent flex items-center justify-between"
+      :class="{ 'text-gray-500': !member.applicantStatus || member.applicantStatus.length === 0, 'text-gray-900': member.applicantStatus && member.applicantStatus.length > 0 }">
+      <span x-text="getDisplayText()"></span>
+      <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </button>
+
+    <!-- Dropdown Options -->
+    <div 
+      x-show="open"
+      x-transition:enter="transition ease-out duration-100"
+      x-transition:enter-start="opacity-0 scale-95"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="transition ease-in duration-75"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-95"
+      class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+      
+      <!-- Select All / Clear All -->
+      <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200 bg-gray-50">
+        <button 
+          type="button" 
+          @click="member.applicantStatus = applicantStatusOptions.map(o => o.option)"
+          class="text-xs text-sky-600 hover:text-sky-700 font-medium">
+          Select All
+        </button>
+        <button 
+          type="button" 
+          @click="member.applicantStatus = []"
+          class="text-xs text-gray-600 hover:text-gray-700 font-medium">
+          Clear All
+        </button>
+      </div>
+
+      <!-- Checkbox Options -->
+      <template x-for="statusOption in applicantStatusOptions" :key="statusOption.option">
+        <label class="flex items-center px-3 py-2.5 hover:bg-gray-50 cursor-pointer transition">
+          <input 
+            type="checkbox"
+            :value="statusOption.option"
+            @change="toggleStatus(statusOption.option)"
+            :checked="isSelected(statusOption.option)"
+            class="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500 focus:ring-2 cursor-pointer">
+          <span class="ml-3 text-sm text-gray-700" x-text="statusOption.label"></span>
+        </label>
+      </template>
+    </div>
+
+    <!-- Hidden inputs for form submission -->
+    <template x-if="Array.isArray(member.applicantStatus)">
+      <template x-for="(status, statusIdx) in member.applicantStatus" :key="statusIdx">
+        <input type="hidden" :name="'companion_status_' + index + '[]'" :value="status">
+      </template>
+    </template>
+    <!-- Hidden field to send status options for backend mapping (per companion) -->
+    <input type="hidden" :name="'companion_applicant_status_options_' + index" :value="JSON.stringify(applicantStatusOptions)">
+  </div>
+</div>
                 </div>
               </div>
             </template>
@@ -615,30 +1154,28 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
             </div>
           </template>
 
-          <template x-if="step === 2">
-            <div class="flex w-full justify-between gap-2 sm:gap-3">
-              <button type="button" @click="step = 1"
-                      class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors">
-                Back
-              </button>
-              <template x-if="applicationMode === 'individual'">
-                <button type="submit" :disabled="$el.closest('form').classList.contains('submitting')"
-                        class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-sky-600 border border-transparent rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                  <span x-show="!$el.closest('form').classList.contains('submitting')">
-                    <span x-show="isAddingToGroup">Add Companion</span>
-                    <span x-show="!isAddingToGroup">Create Visa Application</span>
-                  </span>
-                  <span x-show="$el.closest('form').classList.contains('submitting')">Creating...</span>
-                </button>
-              </template>
-              <template x-if="applicationMode === 'group'">
-                <button type="button" @click="step = 3"
-                        class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-sky-600 border border-transparent rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors">
-                  Next: Add Companions
-                </button>
-              </template>
-            </div>
-          </template>
+<!-- Step 2 Navigation Buttons -->
+<template x-if="step === 2">
+  <div class="flex w-full justify-between gap-2 sm:gap-3">
+    <button type="button" @click="step = 1"
+            class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors">
+      Back
+    </button>
+    <template x-if="applicationMode === 'individual'">
+      <button type="submit" :disabled="$el.closest('form').classList.contains('submitting')"
+              class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-sky-600 border border-transparent rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        <span x-show="!$el.closest('form').classList.contains('submitting')">Create Visa Application</span>
+        <span x-show="$el.closest('form').classList.contains('submitting')">Creating...</span>
+      </button>
+    </template>
+    <template x-if="applicationMode === 'group'">
+      <button type="button" @click="step = 3"
+              class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-sky-600 border border-transparent rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors">
+        Next: Add Companions
+      </button>
+    </template>
+  </div>
+</template>
 
           <template x-if="step === 3">
             <div class="flex w-full justify-between gap-2 sm:gap-3">
@@ -660,198 +1197,225 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
 </div>
 
 <script>
-  function visaClientForm(groupData = null, currentAdminId = null) {
-    return {
-      step: 1,
-      applicationMode: 'individual', // 'individual' or 'group'
-      isAddingToGroup: !!groupData,
-      groupCode: groupData?.group_code || '',
-      processingType: groupData?.processing_type || 'visa',
-      assignedAdminId: groupData?.assigned_admin_id || (currentAdminId ? String(currentAdminId) : ''),
-      financialSource: 'self_funded',
-      fullName: '',
-      email: '',
-      emailExists: false,
-      checkingEmail: false,
-      phone: '',
-      address: '',
-      accessCode: '',
-      passportNumber: '',
-      passportExpiry: '',
-      applicantStatus: '',
-      copied: false,
-      selectedVisaPackage: groupData?.visa_package_id || '',
-      visaTypeSelected: '',
-      availableVisaTypes: [],
-      
-      // Group members (companions)
-      groupMembers: [],
-      maxGroupMembers: 10,
+function visaClientForm(groupData = null, currentAdminId = null) {
+  return {
+    step: 1,
+    applicationMode: 'individual', // 'individual' or 'group'
+    isAddingToGroup: !!groupData,
+    groupCode: groupData?.group_code || '',
+    processingType: groupData?.processing_type || 'visa',
+    assignedAdminId: groupData?.assigned_admin_id || (currentAdminId ? String(currentAdminId) : ''),
+    financialSource: 'self_funded',
+    fullName: '',
+    email: '',
+    emailExists: false,
+    checkingEmail: false,
+    phone: '',
+    address: '',
+    accessCode: '',
+    passportNumber: '',
+    passportExpiry: '',
+    applicantStatus: '',
+    applicantStatusOptions: [],
+    copied: false,
+    selectedVisaPackage: groupData?.visa_package_id || '',
+    visaTypeSelected: '',
+    availableVisaTypes: [],
 
-      // Validation
-      isValidEmail() {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email);
-      },
-      isValidPhone() {
-        return /^09\d{9}$/.test(this.phone);
-      },
-      isValidPassportValidity() {
-        if (!this.passportExpiry) return true;
-        const today = new Date();
-        const expiry = new Date(this.passportExpiry);
-        const sixMonthsLater = new Date();
-        sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
-        return expiry >= sixMonthsLater;
-      },
-      isPassportValid() {
-        return this.isValidPassportValidity();
-      },
-      checkPassportValidity() {
-        // Validation happens on blur, checked by isPassportValid()
-      },
-      canProceedStep1() {
-        return this.fullName.trim() !== '' && this.isValidEmail() && !this.emailExists && this.isValidPhone() && this.address.trim() !== '';
-      },
-      async checkEmailExists() {
-        this.emailExists = false;
-        if (!this.email || !this.isValidEmail()) return false;
-        this.checkingEmail = true;
-        try {
-          const response = await fetch('../actions/check_client_email.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ email: this.email })
-          });
-          const data = await response.json();
-          this.emailExists = !!data.exists;
-          return !this.emailExists;
-        } catch (e) {
-          return false;
-        } finally {
-          this.checkingEmail = false;
-        }
-      },
-      async proceedStep1() {
-        const ok = await this.checkEmailExists();
-        if (!ok) return;
-        if (this.canProceedStep1()) {
-          this.step = 2;
-        }
-      },
-      
-      // Get today's date in YYYY-MM-DD format
-      getTodayDate() {
-        const today = new Date();
-        return today.toISOString().split('T')[0];
-      },
-      
-      // Get total steps based on application mode
-      getTotalSteps() {
-        return this.applicationMode === 'group' ? 3 : 2;
-      },
+    sponsorStatus: '',
 
-      // Access code generation
-      generateAccessCode() {
-        if (!this.fullName.trim()) return;
-        const nameParts = this.fullName.trim().split(/\s+/);
-        // First 2 letters of first name + first 2 letters of second/last name + dash + 4 random numbers
-        let prefix = '';
-        if (nameParts.length >= 2) {
-          prefix = (nameParts[0].substring(0, 2) + nameParts[nameParts.length - 1].substring(0, 2)).toUpperCase();
-        } else {
-          prefix = nameParts[0].substring(0, 4).toUpperCase().padEnd(4, 'X');
-        }
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        this.accessCode = prefix + '-' + randomNum;
-      },
+    // Group members (companions)
+    groupMembers: [],
+    maxGroupMembers: 10,
+
+    // Validation
+    isValidEmail() {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email);
+    },
+    isValidPhone() {
+      return /^09\d{9}$/.test(this.phone);
+    },
+    isValidPassportValidity() {
+      if (!this.passportExpiry) return true;
+      const today = new Date();
+      const expiry = new Date(this.passportExpiry);
+      const sixMonthsLater = new Date();
+      sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+      return expiry >= sixMonthsLater;
+    },
+    isPassportValid() {
+      return this.isValidPassportValidity();
+    },
+    checkPassportValidity() {
+      // Validation happens on blur, checked by isPassportValid()
+    },
+    canProceedStep1() {
+      return this.fullName.trim() !== '' && this.isValidEmail() && !this.emailExists && this.isValidPhone() && this.address.trim() !== '';
+    },
+    async checkEmailExists() {
+      this.emailExists = false;
+      if (!this.email || !this.isValidEmail()) return false;
+      this.checkingEmail = true;
+      try {
+        const response = await fetch('../actions/check_client_email.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ email: this.email })
+        });
+        const data = await response.json();
+        this.emailExists = !!data.exists;
+        return !this.emailExists;
+      } catch (e) {
+        return false;
+      } finally {
+        this.checkingEmail = false;
+      }
+    },
+    async proceedStep1() {
+      const ok = await this.checkEmailExists();
+      if (!ok) return;
+      if (this.canProceedStep1()) {
+        this.step = 2;
+      }
+    },
+
+    // Get today's date in YYYY-MM-DD format
+    getTodayDate() {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+    },
+
+    // Get total steps based on application mode
+    getTotalSteps() {
+      return this.applicationMode === 'group' ? 3 : 2;
+    },
+
+    // Access code generation
+    generateAccessCode() {
+      if (!this.fullName.trim()) return;
+      const nameParts = this.fullName.trim().split(/\s+/);
+      // First 2 letters of first name + first 2 letters of second/last name + dash + 4 random numbers
+      let prefix = '';
+      if (nameParts.length >= 2) {
+        prefix = (nameParts[0].substring(0, 2) + nameParts[nameParts.length - 1].substring(0, 2)).toUpperCase();
+      } else {
+        prefix = nameParts[0].substring(0, 4).toUpperCase().padEnd(4, 'X');
+      }
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      this.accessCode = prefix + '-' + randomNum;
+    },
+
+    // Handle visa package selection and load visa types and applicant status options
+    onVisaPackageChange() {
+      this.availableVisaTypes = [];
+      this.visaTypeSelected = '';
+      this.applicantStatusOptions = [];
+      this.applicantStatus = '';
+
+      if (!this.selectedVisaPackage) {
+        console.log('[onVisaPackageChange] No package selected');
+        return;
+      }
+      // Find the selected package option
+      const selectElement = document.getElementById('visa_package_id');
+      const selectedOption = selectElement.querySelector(`option[value="${this.selectedVisaPackage}"]`);
+
+      if (!selectedOption) {
+        console.error('[onVisaPackageChange] Selected option not found');
+        return;
+      }
+
+      // Get the visa_types_json from data attribute
+      const visaTypesJson = selectedOption.getAttribute('data-visa-types') || '[]';
+      console.log('[onVisaPackageChange] visa_types_json:', visaTypesJson);
       
-      // Handle visa package selection and load visa types
-      onVisaPackageChange() {
-        this.availableVisaTypes = [];
-        this.visaTypeSelected = '';
+      try {
+        const visaTypesData = JSON.parse(visaTypesJson);
+        console.log('[onVisaPackageChange] Parsed visa types data:', visaTypesData);
         
-        if (!this.selectedVisaPackage) {
-          console.log('[onVisaPackageChange] No package selected');
-          return;
-        }
-        
-        // Find the selected package option
-        const selectElement = document.getElementById('visa_package_id');
-        const selectedOption = selectElement.querySelector(`option[value="${this.selectedVisaPackage}"]`);
-        
-        if (!selectedOption) {
-          console.error('[onVisaPackageChange] Selected option not found');
-          return;
-        }
-        
-        // Get the visa_types_json from data attribute
-        const visaTypesJson = selectedOption.getAttribute('data-visa-types') || '[]';
-        console.log('[onVisaPackageChange] Raw data-visa-types:', visaTypesJson);
-        
-        try {
-          const visaTypesData = JSON.parse(visaTypesJson);
-          console.log('[onVisaPackageChange] Parsed visa types data:', visaTypesData);
-          
-          if (Array.isArray(visaTypesData) && visaTypesData.length > 0) {
-            // Extract 'type' field from each object in the array
-            // Format: [{"type": "B1/B2 Tourist", "price": 22000}, ...]
-            this.availableVisaTypes = visaTypesData.map(item => {
-              if (typeof item === 'object' && item.type) {
-                return item.type;
-              }
-              return item;
-            }).filter(Boolean);
-            
-            console.log('[onVisaPackageChange] Extracted visa types:', this.availableVisaTypes);
-            
-            // Auto-select the first visa type
-            if (this.availableVisaTypes.length > 0) {
-              this.visaTypeSelected = this.availableVisaTypes[0];
-              console.log('[onVisaPackageChange] Auto-selected visa type:', this.visaTypeSelected);
+        if (Array.isArray(visaTypesData) && visaTypesData.length > 0) {
+          // Extract the "type" field from each object
+          this.availableVisaTypes = visaTypesData.map(item => {
+            if (typeof item === 'object' && item !== null && item.type) {
+              return item.type.trim(); // Trim whitespace
             }
-          } else {
-            console.warn('[onVisaPackageChange] No visa types found or invalid format. Data:', visaTypesData);
-            this.availableVisaTypes = [];
+            return item;
+          }).filter(Boolean);
+          
+          console.log('[onVisaPackageChange] Available visa types:', this.availableVisaTypes);
+          
+          if (this.availableVisaTypes.length > 0) {
+            this.visaTypeSelected = this.availableVisaTypes[0];
+            console.log('[onVisaPackageChange] Auto-selected visa type:', this.visaTypeSelected);
           }
-        } catch (e) {
-          console.error('[onVisaPackageChange] Failed to parse visa_types_json:', visaTypesJson);
-          console.error('[onVisaPackageChange] Error:', e.message);
+        } else {
+          console.log('[onVisaPackageChange] No visa types in array');
           this.availableVisaTypes = [];
         }
-      },
-      
-      // Group member management
-      addGroupMember() {
-        if (this.groupMembers.length >= this.maxGroupMembers) {
-          alert('You can add up to 10 additional companions per application. Please submit another application for more.');
-          return;
-        }
-        this.groupMembers.push({
-          id: Date.now(),
-          fullName: '',
-          email: '',
-          phone: '',
-          address: this.address, // Pre-fill with lead address
-          relationship: '',
-          passportNumber: '',
-          passportExpiry: '',
-          applicantStatus: '',
-          visaType: this.visaTypeSelected, // Inherit lead applicant's visa type
-          financialSource: 'self_funded'
-        });
-      },
-      
-      removeGroupMember(id) {
-        this.groupMembers = this.groupMembers.filter(m => m.id !== id);
-      },
-      
-      isValidMemberEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      },
-      
-      isValidMemberPhone(phone) {
-        return /^09\d{9}$/.test(phone);
+      } catch (e) {
+        console.error('[onVisaPackageChange] Error parsing visa types:', e);
+        this.availableVisaTypes = [];
       }
+
+      // Get applicant status options from data attribute
+      const statusOptionsJson = selectedOption.getAttribute('data-applicant-status-options') || '[]';
+      try {
+        const statusOptionsData = JSON.parse(statusOptionsJson);
+        if (Array.isArray(statusOptionsData) && statusOptionsData.length > 0) {
+          this.applicantStatusOptions = statusOptionsData.map(item => {
+            // Handle both string and object formats
+            if (typeof item === 'object' && item !== null) {
+              return {
+                option: item.option || item.value || item,
+                label: item.label || item.option || item.value || item
+              };
+            }
+            return {
+              option: item,
+              label: item
+            };
+          });
+        } else {
+          this.applicantStatusOptions = [];
+        }
+      } catch (e) {
+        console.error('[onVisaPackageChange] Error parsing applicant status options:', e);
+        this.applicantStatusOptions = [];
+      }
+    },
+
+    // Group member management
+    addGroupMember() {
+      if (this.groupMembers.length >= this.maxGroupMembers) {
+        alert('You can add up to 10 additional companions per application. Please submit another application for more.');
+        return;
+      }
+      this.groupMembers.push({
+        id: Date.now(),
+        fullName: '',
+        email: '',
+        phone: '',
+        address: this.address, // Pre-fill with lead address
+        relationship: '',
+        passportNumber: '',
+        passportExpiry: '',
+        applicantStatus: [],
+        visaType: this.visaTypeSelected, // Inherit lead applicant's visa type
+        financialSource: 'self_funded'
+      });
+    },
+
+    removeGroupMember(id) {
+      this.groupMembers = this.groupMembers.filter(m => m.id !== id);
+    },
+
+    isValidMemberEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    },
+
+    isValidMemberPhone(phone) {
+      return /^09\d{9}$/.test(phone);
     }
   }
+}
 </script>

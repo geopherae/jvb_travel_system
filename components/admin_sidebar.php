@@ -13,12 +13,12 @@ $navLinks = [
   ],
   'Manage Packages' => [
     'url' => VISA_PROCESSING_ENABLED ? '../admin/admin_packages.php' : '../admin/admin_tour_packages.php',
-    'icon' => 'chart-bar',
+    'icon' => 'package',
     'match' => ['admin_packages.php', 'admin_tour_packages.php', 'admin_visa_packages.php']
   ],
   'Visa Processing' => [
     'url' => VISA_PROCESSING_ENABLED ? '../admin/admin_visa_dashboard.php' : '',
-    'icon' => 'itinerary',
+    'icon' => 'visa',
     'match' => ['admin_visa_dashboard.php', 'view_client_visa.php'],
     'disabled' => !VISA_PROCESSING_ENABLED
   ],

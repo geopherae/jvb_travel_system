@@ -5,6 +5,12 @@ function visaDocumentTable(el) {
   const isClient = el.dataset.isClient === '1';
   const visaApplicationId = el.dataset.visaApplicationId || null;
 
+      console.log('=== visaDocumentTable init ===');
+    console.log('meta:', meta);
+    console.log('applicantRequirements:', applicantRequirements);
+    console.log('accessType:', accessType);
+    console.log('isClient:', isClient);
+
   return {
     modals: {
       viewer: false,
@@ -18,6 +24,13 @@ function visaDocumentTable(el) {
     selectedAddReqFileName: '',
     selectedUploadDocFileName: '',
     actualVisaFileName: '',
+
+    reqTypeOpen: false,
+    selectedReqType: 'admin_added', // Default value
+    reqTypeDropdownTop: 0,
+    reqTypeDropdownLeft: 0,
+    reqTypeDropdownWidth: 0,
+
     toast: {
       visible: false,
       message: '',
@@ -54,61 +67,73 @@ function visaDocumentTable(el) {
     isFromTopButton: false,
     editableReqName: '',
     editableReqDescription: '',
-    init() {
-      this.syncWithApplicantStore();
+init() {
+  console.log('🔵 init() called');
+  try {
+    console.log('🔵 calling syncWithApplicantStore...');
+    this.syncWithApplicantStore();
+    console.log('✓ syncWithApplicantStore completed');
+  } catch (error) {
+    console.error('✗ Error in syncWithApplicantStore:', error);
+  }
+  
+  // Add file input listeners
+  this.$nextTick(() => {
+    console.log('🔵 $nextTick callback running');
+    try {
+      const addReqFileInput = document.getElementById('add_req_file');
+      if (addReqFileInput) {
+        addReqFileInput.addEventListener('change', (e) => {
+          if (e.target.files.length > 0) {
+            this.selectedAddReqFileName = e.target.files[0].name;
+          } else {
+            this.selectedAddReqFileName = '';
+          }
+        });
+      }
       
-      // Add file input listeners
-      this.$nextTick(() => {
-        const addReqFileInput = document.getElementById('add_req_file');
-        if (addReqFileInput) {
-          addReqFileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-              this.selectedAddReqFileName = e.target.files[0].name;
-            } else {
-              this.selectedAddReqFileName = '';
-            }
-          });
-        }
-        
-        const uploadDocFileInput = document.getElementById('upload_document_file');
-        if (uploadDocFileInput) {
-          uploadDocFileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-              this.selectedUploadDocFileName = e.target.files[0].name;
-            } else {
-              this.selectedUploadDocFileName = '';
-            }
-          });
-        }
-      });
-    },
-    syncWithApplicantStore() {
-      const store = window.Alpine?.store('applicantSelector');
-      if (!store) {
-        return;
+      const uploadDocFileInput = document.getElementById('upload_document_file');
+      if (uploadDocFileInput) {
+        uploadDocFileInput.addEventListener('change', (e) => {
+          if (e.target.files.length > 0) {
+            this.selectedUploadDocFileName = e.target.files[0].name;
+          } else {
+            this.selectedUploadDocFileName = '';
+          }
+        });
       }
+      console.log('✓ File input listeners added');
+    } catch (error) {
+      console.error('✗ Error adding file input listeners:', error);
+    }
+  });
+},
+syncWithApplicantStore() {
+  const store = window.Alpine?.store('applicantSelector');
+  if (!store) {
+    return;
+  }
 
-      if (Array.isArray(this.applicantMeta) && this.applicantMeta.length > 0) {
-        store.totalApplicants = this.applicantMeta.length;
-        if (!Array.isArray(store.applicants) || store.applicants.length === 0) {
-          store.applicants = this.applicantMeta.map(app => ({ name: app.name, relationship: app.relationship }));
-        }
-      }
+  if (Array.isArray(this.applicantMeta) && this.applicantMeta.length > 0) {
+    store.totalApplicants = this.applicantMeta.length;
+    if (!Array.isArray(store.applicants) || store.applicants.length === 0) {
+      store.applicants = this.applicantMeta.map(app => ({ name: app.name, relationship: app.relationship }));
+    }
+  }
 
-      const maxIdx = Math.max((this.applicantMeta.length || 1) - 1, 0);
-      const clamp = value => Math.min(Math.max(Number(value) || 0, 0), maxIdx);
+  const maxIdx = Math.max((this.applicantMeta.length || 1) - 1, 0);
+  const clamp = value => Math.min(Math.max(Number(value) || 0, 0), maxIdx);
 
-      this.currentIdx = clamp(store.currentIdx);
+  // One-time initial pull from store (handles pre-set values)
+  this.currentIdx = clamp(store.currentIdx);
 
-      this.$watch(() => store.currentIdx, value => {
-        if (value === undefined) return;
-        this.currentIdx = clamp(value);
-      });
+  // Push local changes to store (e.g., from dropdown)
+  this.$watch('currentIdx', value => {
+    store.currentIdx = clamp(value);
+  });
 
-      this.$watch('currentIdx', value => {
-        store.currentIdx = clamp(value);
-      });
-    },
+  // Removed store watcher to prevent redundant updates/resets
+},
     getCurrentApplicantRequirements() {
       // Get requirements for the currently selected applicant (indexed by currentIdx)
       if (!Array.isArray(this.applicantRequirements) || this.applicantRequirements.length === 0) {
@@ -162,6 +187,41 @@ function visaDocumentTable(el) {
       // Open modal for uploading actual visa document
       this.actualVisaFileName = '';
       this.modals.uploadActualVisa = true;
+    },
+        toggleReqTypeDropdown() {
+      this.reqTypeOpen = !this.reqTypeOpen;
+      if (this.reqTypeOpen) {
+        this.$nextTick(() => {
+          this.positionReqTypeDropdown();
+        });
+      }
+    },
+    
+    positionReqTypeDropdown() {
+      const button = this.$refs.reqTypeButton;
+      if (!button) return;
+      
+      const rect = button.getBoundingClientRect();
+      this.reqTypeDropdownTop = rect.bottom + 4;
+      this.reqTypeDropdownLeft = rect.left;
+      this.reqTypeDropdownWidth = rect.width;
+    },
+    
+    selectReqType(value) {
+      this.selectedReqType = value;
+      this.reqTypeOpen = false;
+    },
+    
+    getReqTypeDisplayText() {
+      if (!this.selectedReqType) return 'Select requirement type';
+      if (this.selectedReqType === 'admin_added') return 'Custom Requirement (Other)';
+      if (this.selectedReqType === 'primary') return 'Primary';
+      return this.selectedReqType;
+    },
+    
+    openUpload(reqId, reqName) {
+      // Deprecated - kept for backwards compatibility
+      this.openUploadDocument(reqId, reqName, '');
     },
     openUpload(reqId, reqName) {
       // Deprecated - kept for backwards compatibility

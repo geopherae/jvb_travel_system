@@ -94,7 +94,7 @@ $todayDay = getTodayItineraryDay($start, $end);
     <?php include '../components/sidebar.php'; ?>
     <?php include '../components/right-panel.php'; ?>
 
-  <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 flex flex-col relative z-0">
+  <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 flex flex-col relative">
     <div class="flex-1 overflow-y-auto space-y-6">
       <h2 class="text-xl font-bold">My Travel Itinerary</h2>
 

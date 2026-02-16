@@ -50,6 +50,7 @@ $statusMap = [
   'review_toggle_failed' => ['Failed to update review visibility. Please try again.', 'toast', 'error'],
   'review_deleted' => ['Review deleted successfully.', 'toast'],
   'review_delete_failed' => ['Failed to delete review. Please try again.', 'toast', 'error'],
+  'visa_applicant_updated' => ['Visa applicant updated successfully.', 'toast'],
 ];
 
 // 🔍 Resolve Status

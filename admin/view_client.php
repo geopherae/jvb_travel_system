@@ -180,7 +180,7 @@ $todayDay  = getTodayItineraryDay($start, $end);
   ☰
 </button>
 
-<main class="ml-0 lg:ml-64 lg:mr-80 min-h-screen overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 relative z-0">
+<main class="ml-0 lg:ml-64 lg:mr-80 min-h-screen overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 relative">
 
   <!-- 🧭 Page Title -->
   <h2 class="text-xl sm:text-2xl font-bold">Client Overview</h2>

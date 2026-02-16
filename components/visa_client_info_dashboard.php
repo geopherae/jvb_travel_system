@@ -110,12 +110,31 @@ foreach ($companions as $comp) {
         ? "Exp: {$compExpiryDays}d" 
         : "Valid"));
   
+  // Parse applicant_status JSON if present, store as array for pill rendering
+  $compApplicantStatusArr = [];
+  if (!empty($comp['applicant_status'])) {
+    $statusRaw = $comp['applicant_status'];
+    $statusArr = json_decode($statusRaw, true);
+    if (is_array($statusArr) && !empty($statusArr)) {
+      foreach ($statusArr as $item) {
+        if (isset($item['option']) && trim($item['option']) !== '') {
+          $normalized = $item['option'] === 'Self-Employed/Business Owner/Corporation' ? 'Self-Employed' : $item['option'];
+          $compApplicantStatusArr[] = $normalized;
+        }
+      }
+    } else if (is_string($statusRaw) && trim($statusRaw) !== '') {
+      $normalized = $statusRaw === 'Self-Employed/Business Owner/Corporation' ? 'Self-Employed' : $statusRaw;
+      $compApplicantStatusArr[] = $normalized;
+    }
+  }
+  // Limit to 2 statuses max
+  $compApplicantStatusArr = array_slice($compApplicantStatusArr, 0, 2);
   $applicants[] = [
     'type' => 'companion',
     'id' => $comp['id'],
     'name' => $comp['full_name'] ?? 'Unnamed',
     'relationship' => $comp['relationship'] ?? 'Companion',
-    'applicant_status' => $comp['applicant_status'] ?? 'Not Specified',
+    'applicant_status_arr' => $compApplicantStatusArr,
     'email' => $comp['email'] ?? '',
     'phone' => $comp['phone_number'] ?? '',
     'passport' => $comp['passport_number'] ?? '',
@@ -137,28 +156,105 @@ $applicantsJson = htmlspecialchars(
 <script>
 window.visaClientCard = window.visaClientCard || function(el) {
   const applicants = JSON.parse(el.dataset.applicants || '[]');
+  const clientId = Number(el.dataset.clientId) || 0;
   
-  // Helper function to convert strings to Sentence Case
-  const toSentenceCase = (str) => {
-    if (!str) return '';
-    return str
-      .toLowerCase()
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, char => char.toUpperCase())
-      .replace(/\b([A-Z])\w*/g, (match, first) => {
-        return first + match.slice(1).toLowerCase();
-      })
-      .trim();
-  };
+  console.log('visaClientCard initialized with clientId:', clientId, 'applicants:', applicants.length);
   
   return {
     currentIdx: 0,
     totalApplicants: applicants.length,
     applicants,
+    clientId: clientId,
+    
     get current() {
       return this.applicants[this.currentIdx] || this.applicants[0] || {};
     },
-    toSentenceCase,
+    
+    toSentenceCase(str) {
+      if (!str) return '';
+      return str
+        .toLowerCase()
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, char => char.toUpperCase())
+        .replace(/\b([A-Z])\w*/g, (match, first) => {
+          return first + match.slice(1).toLowerCase();
+        })
+        .trim();
+    },
+    
+    async fetchApplicantData(applicantType, applicantId) {
+      try {
+        if (!this.clientId) {
+          throw new Error('Client ID is missing');
+        }
+
+        const formData = new FormData();
+        formData.append('applicant_type', applicantType);
+        formData.append('client_id', String(this.clientId));
+        if (applicantId) {
+          formData.append('applicant_id', String(applicantId));
+        }
+
+        const response = await fetch('../actions/fetch_visa_applicant_data.php', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Server response:', errorText);
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to fetch applicant data');
+        }
+
+        return result.data;
+      } catch (error) {
+        console.error('Error fetching applicant data:', error);
+        if (window.showToast) {
+          showToast('Failed to load applicant data: ' + error.message, 'error');
+        }
+        return null;
+      }
+    },
+
+    async openEditModal(applicant) {
+      console.log('openEditModal called for:', applicant);
+      
+      const data = await this.fetchApplicantData(applicant.type, applicant.id || null);
+      console.log('Fetched data:', data);
+      
+      if (data && window.Alpine) {
+        const store = window.Alpine.store('modals');
+        
+        if (store) {
+          const modalData = {
+            applicant: data,
+            applicantType: applicant.type,
+            applicantId: applicant.id || null,
+            clientId: this.clientId  // Pass clientId from dashboard
+          };
+          
+          console.log('Setting store data:', modalData);
+          store.editVisaClientData = modalData;
+
+          window.dispatchEvent(new CustomEvent('edit-visa-client-data', {
+            detail: modalData
+          }));
+        } else {
+          console.error('Modals store not found!');
+        }
+      } else {
+        console.error('Data fetch failed or Alpine not available');
+      }
+    },
+
     preloadAvatars() {
       this.applicants.forEach(applicant => {
         if (applicant?.avatar) {
@@ -167,6 +263,7 @@ window.visaClientCard = window.visaClientCard || function(el) {
         }
       });
     },
+    
     syncWithStore() {
       const store = window.Alpine?.store('applicantSelector');
       if (!store) {
@@ -186,10 +283,11 @@ window.visaClientCard = window.visaClientCard || function(el) {
         }
       });
 
-      this.$watch('currentIdx', value => {
-        store.currentIdx = Number(value) || 0;
-      });
+      //this.$watch('currentIdx', value => {
+      //  store.currentIdx = Number(value) || 0;
+      //});
     },
+    
     init() {
       this.preloadAvatars();
       this.syncWithStore();
@@ -199,7 +297,7 @@ window.visaClientCard = window.visaClientCard || function(el) {
 </script>
 
 <!-- 🎯 Compact Client Card Swiper -->
-<div x-data="visaClientCard($el)" x-init="init()" data-applicants="<?= $applicantsJson ?>" class="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 sm:hover:scale-[1.02] h-full">
+<div x-data="visaClientCard($el)" x-init="init()" data-client-id="<?= $clientId ?>" data-applicants="<?= $applicantsJson ?>" class="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 sm:hover:scale-[1.02] h-full">
   
   <!-- Background: Blurred Avatar -->
   <div class="absolute inset-0">
@@ -224,6 +322,36 @@ window.visaClientCard = window.visaClientCard || function(el) {
       />
       <!-- Name & Status -->
       <div class="flex-1 min-w-0 text-center sm:text-left w-full max-w-[90%] sm:w-auto">
+
+      <!-- Dropdown Menu -->
+      <div class="absolute top-3 right-3 sm:top-4 sm:right-4 z-50" x-data="{ open: false }" @click.outside="open = false">
+        <button 
+          @click="open = !open"
+          class="p-2 bg-white/90 hover:bg-white active:bg-white rounded-full shadow-lg transition backdrop-blur-sm border border-gray-200 touch-manipulation"
+          aria-label="Toggle visa applicant actions"
+        >
+          <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />
+          </svg>
+        </button>
+
+        <div x-show="open" x-transition x-cloak
+             class="absolute right-0 mt-2 w-52 sm:w-56 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+          <button 
+            @click="$store.modals.editVisaClient = true; openEditModal(current); open = false"
+            class="w-full text-left px-4 py-3 text-sm font-medium text-gray-800 hover:bg-sky-50 active:bg-sky-100 transition touch-manipulation"
+          >
+            Edit Visa Client Info
+          </button>
+          <button 
+            @click="$store.modals.archiveVisaClient = true; open = false"
+            class="w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 active:bg-red-100 transition touch-manipulation"
+          >
+            Archive Visa Application
+          </button>
+        </div>
+      </div>
+      
         <h3 class="pb-1 sm:pb-1 text-lg sm:text-xl font-bold text-white line-clamp-1 break-words">
           <span x-text="current.name"></span>
         </h3>
@@ -232,11 +360,13 @@ window.visaClientCard = window.visaClientCard || function(el) {
             <span x-text="toSentenceCase(current.relationship)"></span>
           </span>
           
-          <!-- Status Badge (only if companion with applicant_status) -->
-          <template x-if="current.applicant_status">
-            <span class="inline-block px-3 py-1 rounded-full bg-indigo-500/90 text-white text-xs font-semibold shadow-md border border-white/20">
-              <span x-text="toSentenceCase(current.applicant_status)"></span>
-            </span>
+          <!-- Status Badges: Render each applicant status as a pill -->
+          <template x-if="Array.isArray(current.applicant_status_arr) && current.applicant_status_arr.length > 0">
+            <template x-for="status in current.applicant_status_arr" :key="status">
+              <span class="inline-block px-3 py-1 rounded-full bg-sky-500/40 text-white text-xs font-semibold shadow-md border border-white/20">
+                <span x-text="toSentenceCase(status)"></span>
+              </span>
+            </template>
           </template>
         </div>
       </div>

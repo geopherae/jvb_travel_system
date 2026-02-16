@@ -18,7 +18,27 @@ $decodeJson = function ($json) {
 };
 
 try {
-    $stmt = $conn->prepare("SELECT id, visa_cover_image, visa_package_name, country, processing_days, visa_package_description, inclusions_json, requirements_json, visa_types_json, is_active, created_at, updated_at FROM visa_packages WHERE is_active <> 0 ORDER BY country ASC");
+    // UPDATED: Added applicant_status_options to the SELECT query
+    $stmt = $conn->prepare("
+        SELECT 
+            id, 
+            visa_cover_image, 
+            visa_package_name, 
+            country, 
+            processing_days, 
+            visa_package_description, 
+            inclusions_json, 
+            requirements_json, 
+            visa_types_json, 
+            applicant_status_options,
+            is_active, 
+            created_at, 
+            updated_at 
+        FROM visa_packages 
+        WHERE is_active <> 0 
+        ORDER BY country ASC
+    ");
+    
     if (!$stmt) {
         throw new Exception('Failed to prepare statement: ' . $conn->error);
     }
@@ -27,9 +47,10 @@ try {
     $result = $stmt->get_result();
 
     while ($row = $result->fetch_assoc()) {
-        $inclusions    = $decodeJson($row['inclusions_json'] ?? '[]');
-        $requirements  = $decodeJson($row['requirements_json'] ?? '[]');
-        $visaTypes     = $decodeJson($row['visa_types_json'] ?? '[]');
+        $inclusions           = $decodeJson($row['inclusions_json'] ?? '[]');
+        $requirements         = $decodeJson($row['requirements_json'] ?? '[]');
+        $visaTypes            = $decodeJson($row['visa_types_json'] ?? '[]');
+        $applicantStatusOpts  = $decodeJson($row['applicant_status_options'] ?? '[]'); // ADDED
 
         $coverFile = trim($row['visa_cover_image'] ?? '');
         $coverUrl  = $coverFile !== ''
@@ -37,22 +58,23 @@ try {
           : '../images/default_visa_cover.jpg';
 
         $visaPackages[] = [
-          'id'                => (int) ($row['id'] ?? 0),
-          'visa_cover_image'  => $row['visa_cover_image'] ?? '',
-          'cover_url'         => $coverUrl,
-          'visa_package_name' => $row['visa_package_name'] ?? 'Unnamed Package',
-          'country'           => $row['country'] ?? 'Unknown Country',
-          'processing_days'   => (int) ($row['processing_days'] ?? 0),
-          'description'       => $row['visa_package_description'] ?? 'No description available.',
-          'inclusions'        => $inclusions,
-          'requirements'      => $requirements,
-          'visa_types'        => $visaTypes,
-          'inclusion_count'   => is_array($inclusions) ? count($inclusions) : 0,
-          'requirement_count' => is_array($requirements) ? count($requirements) : 0,
-          'visa_type_count'   => is_array($visaTypes) ? count($visaTypes) : 0,
-          'updated_at'        => $row['updated_at'] ?? null,
-          'created_at'        => $row['created_at'] ?? null,
-          'is_active'         => (int) ($row['is_active'] ?? 0),
+          'id'                        => (int) ($row['id'] ?? 0),
+          'visa_cover_image'          => $row['visa_cover_image'] ?? '',
+          'cover_url'                 => $coverUrl,
+          'visa_package_name'         => $row['visa_package_name'] ?? 'Unnamed Package',
+          'country'                   => $row['country'] ?? 'Unknown Country',
+          'processing_days'           => (int) ($row['processing_days'] ?? 0),
+          'description'               => $row['visa_package_description'] ?? 'No description available.',
+          'inclusions'                => $inclusions,
+          'requirements'              => $requirements,
+          'visa_types'                => $visaTypes,
+          'applicant_status_options'  => $applicantStatusOpts, // ADDED
+          'inclusion_count'           => is_array($inclusions) ? count($inclusions) : 0,
+          'requirement_count'         => is_array($requirements) ? count($requirements) : 0,
+          'visa_type_count'           => is_array($visaTypes) ? count($visaTypes) : 0,
+          'updated_at'                => $row['updated_at'] ?? null,
+          'created_at'                => $row['created_at'] ?? null,
+          'is_active'                 => (int) ($row['is_active'] ?? 0),
         ];
     }
     $stmt->close();
@@ -220,7 +242,7 @@ try {
   <?php include '../components/right-panel.php'; ?>
 
   <!-- Main Content -->
-    <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative z-0" x-data="{ searchName: '', filterDestination: '' }">
+    <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 relative" x-data="{ searchName: '', filterDestination: '' }">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
         <h2 class="text-xl font-bold text-gray-900">Visa Packages</h2>

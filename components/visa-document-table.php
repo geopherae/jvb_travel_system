@@ -10,18 +10,60 @@ try {
   echo '<p class="text-gray-500 text-sm">' . htmlspecialchars($e->getMessage()) . '</p>';
   return;
 }
+
+/**
+ * Helper function to escape strings for safe use in Alpine.js expressions
+ * Handles apostrophes, quotes, and other special characters
+ */
+function escapeForAlpine($str) {
+    if ($str === null || $str === '') return '';
+    $str = (string) $str;
+    $str = str_replace('\\', '\\\\', $str);  // Escape backslashes first
+    $str = str_replace("'", "\\'", $str);     // Escape single quotes (apostrophes)
+    $str = str_replace('"', '\\"', $str);     // Escape double quotes
+    $str = str_replace("\n", '\\n', $str);    // Escape newlines
+    $str = str_replace("\r", '\\r', $str);    // Escape carriage returns
+    return $str;
+}
 ?>
 
 <!-- ✅ Alpine.js & x-cloak -->
 <style>[x-cloak] { display: none !important; }</style>
 
-<!-- Load component function BEFORE Alpine initializes -->
+<!-- Load component function FIRST (synchronously, no defer) -->
 <script src="../includes/documents_table_scripts.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script>
+  console.log('Testing visaDocumentTable function...');
+  try {
+    const testEl = document.createElement('div');
+    testEl.dataset.applicantsMeta = '[]';
+    testEl.dataset.applicantRequirements = '[]';
+    testEl.dataset.accessType = 'individual';
+    testEl.dataset.isClient = '0';
+    testEl.dataset.visaApplicationId = '1';
+    
+    const result = visaDocumentTable(testEl);
+    console.log('✓ Function works, returned:', result);
+  } catch (error) {
+    console.error('✗ Function error:', error);
+  }
+</script>
 
-<!-- Wrapper to keep all modals in Alpine scope while positioned outside section -->
-<div x-cloak x-data="visaDocumentTable($el)" data-applicants-meta="<?= $applicantMetaJson ?>" data-applicant-requirements="<?= $applicantRequirementsJson ?>" data-access-type="<?= htmlspecialchars($clientAccessType) ?>" data-is-client="<?= $isClient ? '1' : '0' ?>" data-visa-application-id="<?= htmlspecialchars($visaAppId) ?>">
+<script>
+  // Wait for function to be defined before loading Alpine
+  if (typeof visaDocumentTable === 'undefined') {
+    console.error('visaDocumentTable not loaded!');
+  } else {
+    console.log('✓ visaDocumentTable loaded successfully');
+  }
+</script>
+
+<!-- Load Alpine LAST without defer -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<!-- Main content section with Alpine data -->
+<div x-data="visaDocumentTable($el)" data-applicants-meta="<?= $applicantMetaJson ?>" data-applicant-requirements="<?= $applicantRequirementsJson ?>" data-access-type="<?= htmlspecialchars($clientAccessType) ?>" data-is-client="<?= $isClient ? '1' : '0' ?>" data-visa-application-id="<?= htmlspecialchars($visaAppId) ?>" id="visa-document-table-root">
 
 <section class="bg-white p-4 sm:p-6 rounded-lg shadow border border-gray-200">
 
@@ -102,9 +144,17 @@ try {
           <?php foreach ($actualVisaDocuments as $visaDoc): ?>
             <?php 
               $docPath = !empty($visaDoc['file_path']) ? ('../' . ltrim($visaDoc['file_path'], '/')) : '';
+              // Escape all dynamic values for Alpine.js
+              $escapedDocPath = escapeForAlpine($docPath);
+              $escapedFileName = escapeForAlpine($visaDoc['file_name']);
+              $escapedMimeType = escapeForAlpine($visaDoc['mime_type']);
+              $escapedNotes = escapeForAlpine($visaDoc['notes'] ?? '');
+              $escapedUploadedAt = escapeForAlpine($visaDoc['uploaded_at']);
+              $escapedUploadedBy = escapeForAlpine($visaDoc['uploaded_by_name'] ?? '');
+              $escapedId = escapeForAlpine($visaDoc['id']);
             ?>
             <div class="p-4 sm:p-6 bg-white hover:bg-emerald-50 transition-colors duration-150 ease-in-out cursor-pointer"
-                 @click="openViewer('<?= htmlspecialchars($docPath) ?>', '<?= htmlspecialchars($visaDoc['file_name']) ?>', 'Visa Document', '<?= htmlspecialchars($visaDoc['mime_type']) ?>', 'Approved', '<?= htmlspecialchars($visaDoc['notes'] ?? '') ?>', '<?= htmlspecialchars($visaDoc['uploaded_at']) ?>', '', '<?= htmlspecialchars($visaDoc['uploaded_by_name'] ?? '') ?>', '<?= htmlspecialchars($visaDoc['id']) ?>', 'actual_visa')">
+                 @click="openViewer('<?= $escapedDocPath ?>', '<?= $escapedFileName ?>', 'Visa Document', '<?= $escapedMimeType ?>', 'Approved', '<?= $escapedNotes ?>', '<?= $escapedUploadedAt ?>', '', '<?= $escapedUploadedBy ?>', '<?= $escapedId ?>', 'actual_visa')">
               <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 sm:gap-4">
                 <div class="flex-1">
                   <div class="flex items-center gap-2">
@@ -138,8 +188,9 @@ try {
 
     <!-- Content -->
     <div class="space-y-4">
-      <?php foreach ($applicantBundles as $idx => $applicant): ?>
-        <div x-show="currentIdx === <?= $idx ?>" x-transition class="border border-gray-200 rounded-lg overflow-hidden">
+<?php foreach ($applicantBundles as $idx => $applicant): ?>
+  <!-- BUNDLE <?= $idx ?> START: <?= htmlspecialchars($applicant['name']) ?> -->
+  <div x-show="currentIdx === <?= $idx ?>" class="border border-gray-200 rounded-lg overflow-hidden">
           <!-- Applicant Header -->
           <div class="px-3 sm:px-4 py-3 sm:py-4 bg-gradient-to-r from-sky-50 to-blue-50 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <p class="text-sm sm:text-base tracking-wide text-sky-700 font-semibold">Primary Requirements for:</p>
@@ -172,14 +223,141 @@ try {
                   <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-sky-500"></span>
                   <?= htmlspecialchars($section['title']); ?>
                 </div>
+                <?php
+                // If this is the conditional requirements section, group by applicant label
+                if (strtolower($section['title']) === 'conditional requirements') {
+                  // Build groups: label => [items]
+                  $labelGroups = [];
+                  foreach ($section['items'] as $item) {
+                    $condType = $item['condition']['type'] ?? '';
+                    $condValue = $item['condition']['value'] ?? '';
+                    $condLabel = '';
+if ($condType === 'sponsor_status') {
+  if ($condValue === 'employed') {
+    $condLabel = 'Sponsor is an Employee';
+  } elseif ($condValue === 'self_employed_business_owner') {
+    $condLabel = 'Sponsor is Self-Employed/Business Owner';
+  } elseif ($condValue === 'company') {
+    $condLabel = 'Sponsor is a Company/Corporation';
+  } else {
+    $condLabel = 'Sponsor status: ' . ucwords(str_replace('_', ' ', $condValue));
+  }
+} elseif ($condType === 'applicant_status') {
+  $applicantLabels = [
+    'employed' => 'Applicant is Employed',
+    'self_employed' => 'Applicant is Self-Employed',
+    'business_owner' => 'Applicant is a Business Owner',
+    'self_employed_business_owner' => 'Applicant is Self-Employed/Business Owner',
+    'company' => 'Applicant is a Company/Corporation',
+    'student' => 'Applicant is a Student',
+    'married' => 'Applicant is Married',
+    'widow' => 'Applicant is a Widow/Widower',
+    'visit_family_friend' => 'Applicant is Visiting Family/Friend',
+    'family_friend' => 'Applicant is Visiting Family/Friend',
+    'sponsored' => 'Applicant is Sponsored',
+    'unemployed' => 'Applicant is Unemployed',
+    'senior_citizen_retired' => 'Applicant is a Senior Citizen',
+  ];
+  $condLabel = $applicantLabels[$condValue] ?? ('Applicant status: ' . ucwords(str_replace('_', ' ', $condValue)));
+} else {
+  $condLabel = 'Condition: ' . htmlspecialchars($condType) . ' = ' . htmlspecialchars($condValue);
+}
+                    $labelGroups[$condLabel][] = $item;
+                  }
+                  // Output each group
+                  foreach ($labelGroups as $groupLabel => $groupItems) {
+                    echo '<div class="px-4 py-2 bg-purple-50 border-b border-purple-100 text-xs font-bold text-purple-700/80 flex items-center gap-2 mt-2">';
+                    echo '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-purple-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a5 5 0 00-10 0v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2z" /></svg>';
+                    echo htmlspecialchars($groupLabel);
+                    echo '</div>';
+                    foreach ($groupItems as $item) {
+                      ?>
+                      <div class="overflow-hidden"
+                           <?php if ($isAdmin): ?>@mouseenter="hoverRowId = '<?= htmlspecialchars($item['requirement_id']) ?>'"
+                           @mouseleave="hoverRowId = null"<?php endif; ?>>
+                        <div class="flex transition-transform duration-200 ease-in-out delay-200" 
+                             <?php if ($isAdmin): ?>:style="hoverRowId === '<?= htmlspecialchars($item['requirement_id']) ?>' ? 'transform: translateX(48px)' : 'transform: translateX(0)'"<?php endif; ?>>
+                          <?php if ($isAdmin): ?>
+                            <div class="absolute left-0 top-0 bottom-0 w-12 cursor-pointer z-10" style="position: absolute; width: 3rem;"></div>
+                          <?php endif; ?>
+                          <?php if ($isAdmin): ?>
+                            <button @click.stop="openDeleteRequirementModal('<?= escapeForAlpine($item['requirement_id']) ?>', '<?= escapeForAlpine($item['requirement_name']) ?>')"
+                                    class="-ml-12 flex-shrink-0 flex items-center justify-center w-12 h-auto bg-red-100 hover:bg-red-200 text-red-600 transition-colors"
+                                    title="Remove requirement">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          <?php endif; ?>
+                          <div class="p-4 sm:p-6 w-full transition-colors duration-150 ease-in-out cursor-pointer relative <?= ($item['submission']['status'] ?? '') === 'Rejected' ? 'bg-red-50' : 'bg-white' ?>"
+                            title="<?= !$item['submission'] ? 'Click to upload requirement' : 'Click to view document' ?>"
+                            @click="<?php if ($item['submission']): ?>openViewer('<?= escapeForAlpine($docPath) ?>', '<?= escapeForAlpine($item['submission']['file_name']) ?>', '<?= escapeForAlpine($item['requirement_name']) ?>', '<?= escapeForAlpine($item['submission']['mime_type']) ?>', '<?= escapeForAlpine($item['submission']['status']) ?>', '<?= escapeForAlpine($item['submission']['admin_comments'] ?? '') ?>', '<?= escapeForAlpine($item['submission']['uploaded_at'] ?? '') ?>', '<?= escapeForAlpine($item['submission']['approved_at'] ?? '') ?>', '<?= escapeForAlpine($item['submission']['updated_by'] ?? '') ?>', '<?= escapeForAlpine($item['submission']['id'] ?? $item['submission']['submission_id'] ?? '') ?>')<?php else: ?>openUploadDocument('<?= escapeForAlpine($item['requirement_id']) ?>', '<?= escapeForAlpine($item['requirement_name']) ?>', '<?= escapeForAlpine($item['description'] ?? '') ?>')<?php endif; ?>">
+                            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 sm:gap-4">
+                              <div class="flex-1">
+                                <div class="flex items-start justify-between gap-3">
+                                  <div class="pr-2">
+                                    <div class="flex items-center gap-2">
+                                      <h3 class="text-base font-semibold text-sky-800"><?= htmlspecialchars($item['requirement_name']) ?></h3>
+                                      <?php if (!empty($item['is_confidential']) && $isAdmin): ?>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-full bg-purple-100 text-purple-700 border border-purple-200" title="Confidential - Hidden from other group members">
+                                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                          </svg>
+                                          Confidential
+                                        </span>
+                                      <?php endif; ?>
+                                    </div>
+                                    <p class="italic text-xs text-gray-600 mt-2"><?= htmlspecialchars($item['description']) ?></p>
+                                    
+                                  </div>
+                                </div>
+                                <?php if ($item['submission']): ?>
+                                  <p class="text-xs text-gray-500 mt-2">Uploaded at: <?= date("M j, Y", strtotime($item['submission']['uploaded_at'])) ?></p>
+                                <?php endif; ?>
+                              </div>
+                              <div class="flex flex-col items-end gap-2 sm:gap-4 md:w-56">
+                                <span class="px-2 md:px-3 py-1 text-xs font-semibold rounded-full <?= getStatusClass($item['status']); ?>">
+                                  <?= htmlspecialchars($item['status']) ?>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <?php
+                    }
+                  }
+                  // Skip the default foreach below for this section
+                  continue;
+                }
+                ?>
                 <?php foreach ($section['items'] as $item): ?>
-                  <?php $isRejected = ($item['submission']['status'] ?? '') === 'Rejected'; ?>
-                  <!-- Calculate docPath early for use in click handler -->
-                  <?php
+                  <?php 
+                    $isRejected = ($item['submission']['status'] ?? '') === 'Rejected';
+                    
+                    // Calculate docPath early for use in click handler
                     $docPath = '';
                     if ($item['submission']) {
                       $storedPath = $item['submission']['file_path'] ?? '';
                       $docPath = $storedPath ? ('../' . ltrim($storedPath, '/')) : getVisaDocPath($clientId, $visaAppId, $item['submission']['file_name']);
+                    }
+                    
+                    // Escape all values for Alpine.js
+                    $escapedReqId = escapeForAlpine($item['requirement_id']);
+                    $escapedReqName = escapeForAlpine($item['requirement_name']);
+                    $escapedReqDesc = escapeForAlpine($item['description'] ?? '');
+                    
+                    // For submissions
+                    if ($item['submission']) {
+                      $escapedDocPath = escapeForAlpine($docPath);
+                      $escapedFileName = escapeForAlpine($item['submission']['file_name']);
+                      $escapedMimeType = escapeForAlpine($item['submission']['mime_type']);
+                      $escapedStatus = escapeForAlpine($item['submission']['status']);
+                      $escapedComments = escapeForAlpine($item['submission']['admin_comments'] ?? '');
+                      $escapedUploadedAt = escapeForAlpine($item['submission']['uploaded_at'] ?? '');
+                      $escapedApprovedAt = escapeForAlpine($item['submission']['approved_at'] ?? '');
+                      $escapedUpdatedBy = escapeForAlpine($item['submission']['updated_by'] ?? '');
+                      $escapedSubmissionId = escapeForAlpine($item['submission']['id'] ?? $item['submission']['submission_id'] ?? '');
                     }
                   ?>
                   <!-- Admin hover-reveal wrapper (slide only on left edge hover) -->
@@ -197,7 +375,7 @@ try {
 
                       <!-- Trash icon (admin only, revealed on left edge hover) -->
                       <?php if ($isAdmin): ?>
-                        <button @click.stop="openDeleteRequirementModal('<?= htmlspecialchars($item['requirement_id']) ?>', '<?= htmlspecialchars($item['requirement_name']) ?>')"
+                        <button @click.stop="openDeleteRequirementModal('<?= $escapedReqId ?>', '<?= $escapedReqName ?>')"
                                 class="-ml-12 flex-shrink-0 flex items-center justify-center w-12 h-auto bg-red-100 hover:bg-red-200 text-red-600 transition-colors"
                                 title="Remove requirement">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -207,42 +385,77 @@ try {
                       <?php endif; ?>
                       
                       <!-- Main content -->
-                        <div class="p-4 sm:p-6 w-full transition-colors duration-150 ease-in-out cursor-pointer relative <?= $isRejected ? 'bg-red-50' : 'bg-white' ?>"
-                          title="<?= !$item['submission'] ? 'Click to upload requirement' : 'Click to view document' ?>"
-                          @click="<?php if ($item['submission']): ?>openViewer('<?= htmlspecialchars($docPath) ?>', '<?= htmlspecialchars($item['submission']['file_name']) ?>', '<?= htmlspecialchars($item['requirement_name']) ?>', '<?= htmlspecialchars($item['submission']['mime_type']) ?>', '<?= htmlspecialchars($item['submission']['status']) ?>', '<?= htmlspecialchars($item['submission']['admin_comments'] ?? '') ?>', '<?= htmlspecialchars($item['submission']['uploaded_at'] ?? '') ?>', '<?= htmlspecialchars($item['submission']['approved_at'] ?? '') ?>', '<?= htmlspecialchars($item['submission']['updated_by'] ?? '') ?>', '<?= htmlspecialchars($item['submission']['id'] ?? $item['submission']['submission_id'] ?? '') ?>')<?php else: ?>openUploadDocument('<?= htmlspecialchars($item['requirement_id']) ?>', '<?= htmlspecialchars($item['requirement_name']) ?>', '<?= htmlspecialchars($item['description'] ?? '') ?>')<?php endif; ?>">
+                      <div class="p-4 sm:p-6 w-full transition-colors duration-150 ease-in-out cursor-pointer relative <?= $isRejected ? 'bg-red-50' : 'bg-white' ?>"
+                        title="<?= !$item['submission'] ? 'Click to upload requirement' : 'Click to view document' ?>"
+                        @click="<?php if ($item['submission']): ?>openViewer('<?= $escapedDocPath ?>', '<?= $escapedFileName ?>', '<?= $escapedReqName ?>', '<?= $escapedMimeType ?>', '<?= $escapedStatus ?>', '<?= $escapedComments ?>', '<?= $escapedUploadedAt ?>', '<?= $escapedApprovedAt ?>', '<?= $escapedUpdatedBy ?>', '<?= $escapedSubmissionId ?>')<?php else: ?>openUploadDocument('<?= $escapedReqId ?>', '<?= $escapedReqName ?>', '<?= $escapedReqDesc ?>')<?php endif; ?>">
                         
                         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 sm:gap-4">
-                      <div class="flex-1">
-                        <div class="flex items-start justify-between gap-3">
-                          <div class="pr-2">
-                            <div class="flex items-center gap-2">
-                              <h3 class="text-base font-semibold text-sky-800"><?= htmlspecialchars($item['requirement_name']) ?></h3>
-                              <?php if (!empty($item['is_confidential']) && $isAdmin): ?>
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-full bg-purple-100 text-purple-700 border border-purple-200" title="Confidential - Hidden from other group members">
-                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                  </svg>
-                                  Confidential
-                                </span>
-                              <?php endif; ?>
+                          <div class="flex-1">
+                            <div class="flex items-start justify-between gap-3">
+                              <div class="pr-2">
+                                <div class="flex items-center gap-2">
+                                  <h3 class="text-base font-semibold text-sky-800"><?= htmlspecialchars($item['requirement_name']) ?></h3>
+                                  <?php if (!empty($item['is_confidential']) && $isAdmin): ?>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-full bg-purple-100 text-purple-700 border border-purple-200" title="Confidential - Hidden from other group members">
+                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                      </svg>
+                                      Confidential
+                                    </span>
+                                  <?php endif; ?>
+                                </div>
+                                <p class="italic text-xs text-gray-600 mt-2"><?= htmlspecialchars($item['description']) ?></p>
+                                <?php if (strtolower($item['category'] ?? '') === 'conditional' && isset($item['condition']['value'])): ?>
+<?php
+$condType = $item['condition']['type'] ?? '';
+$condValue = $item['condition']['value'] ?? '';
+$condLabel = '';
+if ($condType === 'sponsor_status') {
+  if ($condValue === 'employed') {
+    $condLabel = 'Sponsor is an Employee';
+  } elseif ($condValue === 'self_employed_business_owner') {
+    $condLabel = 'Sponsor is Self-Employed/Business Owner';
+  } elseif ($condValue === 'company') {
+    $condLabel = 'Sponsor is a Company/Corporation';
+  } else {
+    $condLabel = 'Sponsor status: ' . ucwords(str_replace('_', ' ', $condValue));
+  }
+} elseif ($condType === 'applicant_status') {
+  $applicantLabels = [
+    'employed' => 'Applicant is Employed',
+    'self_employed' => 'Applicant is Self-Employed',
+    'business_owner' => 'Applicant is a Business Owner',
+    'self_employed_business_owner' => 'Applicant is Self-Employed/Business Owner',
+    'company' => 'Applicant is a Company/Corporation',
+    'student' => 'Applicant is a Student',
+    'married' => 'Applicant is Married',
+    'widow' => 'Applicant is a Widow/Widower',
+    'visit_family_friend' => 'Applicant is Visiting Family/Friend',
+    'family_friend' => 'Applicant is Visiting Family/Friend',
+    'sponsored' => 'Applicant is Sponsored',
+    'unemployed' => 'Applicant is Unemployed',
+    'senior_citizen_retired' => 'Applicant is a Senior Citizen',
+  ];
+  $condLabel = $applicantLabels[$condValue] ?? ('Applicant status: ' . ucwords(str_replace('_', ' ', $condValue)));
+} else {
+  $condLabel = 'Condition: ' . htmlspecialchars($condType) . ' = ' . htmlspecialchars($condValue);
+}
+?>
+                                  <p class="text-[11px] text-purple-700 font-medium mt-1">Why shown: <?= htmlspecialchars($condLabel) ?></p>
+                                <?php endif; ?>
+                              </div>
                             </div>
-                            <p class="italic text-xs text-gray-600 mt-2"><?= htmlspecialchars($item['description']) ?></p>
-                            <?php if (($item['category'] ?? '') === 'conditional' && isset($item['condition']['value'])): ?>
-                              <p class="text-[11px] text-purple-700 font-medium mt-1">Condition: <?= htmlspecialchars($item['condition']['type'] ?? 'applicant_status') ?> <?= htmlspecialchars($item['condition']['operator'] ?? '=') ?> <?= htmlspecialchars($item['condition']['value']) ?></p>
+                            <?php if ($item['submission']): ?>
+                              <p class="text-xs text-gray-500 mt-2">Uploaded at: <?= date("M j, Y", strtotime($item['submission']['uploaded_at'])) ?></p>
                             <?php endif; ?>
                           </div>
-                        </div>
-                        <?php if ($item['submission']): ?>
-                          <p class="text-xs text-gray-500 mt-2">Uploaded at: <?= date("M j, Y", strtotime($item['submission']['uploaded_at'])) ?></p>
-                        <?php endif; ?>
-                      </div>
 
-                      <div class="flex flex-col items-end gap-2 sm:gap-4 md:w-56">
-                        <span class="px-2 md:px-3 py-1 text-xs font-semibold rounded-full <?= getStatusClass($item['status']); ?>">
-                          <?= htmlspecialchars($item['status']) ?>
-                        </span>
-                      </div>
-                    </div>
+                          <div class="flex flex-col items-end gap-2 sm:gap-4 md:w-56">
+                            <span class="px-2 md:px-3 py-1 text-xs font-semibold rounded-full <?= getStatusClass($item['status']); ?>">
+                              <?= htmlspecialchars($item['status']) ?>
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -261,12 +474,6 @@ try {
 
 </section>
 
-<?php include __DIR__ . '/visa-file-viewer-modal.php'; ?>
-<?php include __DIR__ . '/visa-add-requirement-modal.php'; ?>
-<?php include __DIR__ . '/visa-upload-document-modal.php'; ?>
-<?php include __DIR__ . '/visa-upload-actual-visa-modal.php'; ?>
-<?php include __DIR__ . '/visa-confirmation-modal.php'; ?>
-
 <!-- ✅ Success/Error Toast -->
 <div x-show="toast.visible" x-transition x-cloak
      class="fixed inset-0 flex items-start justify-center z-50 px-4"
@@ -281,4 +488,11 @@ try {
   </div>
 </div>
 
-</div>
+<!-- ✅ MODALS - Inside Alpine scope but outside section to fix z-index stacking -->
+<?php include __DIR__ . '/visa-file-viewer-modal.php'; ?>
+<?php include __DIR__ . '/visa-add-requirement-modal.php'; ?>
+<?php include __DIR__ . '/visa-upload-document-modal.php'; ?>
+<?php include __DIR__ . '/visa-upload-actual-visa-modal.php'; ?>
+<?php include __DIR__ . '/visa-confirmation-modal.php'; ?>
+
+</div><!-- End Alpine wrapper -->

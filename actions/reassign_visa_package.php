@@ -99,48 +99,61 @@ if ($previousVisaPackageId === $visaPackageId) {
 }
 
 // ✅ 7. Fetch requirements_json from the new visa package
-$fetchReqSql = "SELECT requirements_json FROM visa_packages WHERE id = ?";
-$fetchReqStmt = $conn->prepare($fetchReqSql);
-if (!$fetchReqStmt) {
+
+// Fetch requirements_json and visa_types_json from the new visa package
+$fetchVisaSql = "SELECT requirements_json, visa_types_json FROM visa_packages WHERE id = ?";
+$fetchVisaStmt = $conn->prepare($fetchVisaSql);
+if (!$fetchVisaStmt) {
   http_response_code(500);
   $_SESSION['modal_status'] = 'db_error';
-  error_log("Fetch requirements prepare failed for visa_package_id=$visaPackageId: " . $conn->error);
+  error_log("Fetch visa package prepare failed for visa_package_id=$visaPackageId: " . $conn->error);
   header("Location: ../admin/view_client.php?client_id=" . $clientId);
   exit();
 }
 
-$fetchReqStmt->bind_param("i", $visaPackageId);
-if (!$fetchReqStmt->execute()) {
+$fetchVisaStmt->bind_param("i", $visaPackageId);
+if (!$fetchVisaStmt->execute()) {
   http_response_code(500);
   $_SESSION['modal_status'] = 'db_error';
-  error_log("Fetch requirements execute failed for visa_package_id=$visaPackageId: " . $fetchReqStmt->error);
+  error_log("Fetch visa package execute failed for visa_package_id=$visaPackageId: " . $fetchVisaStmt->error);
   header("Location: ../admin/view_client.php?client_id=" . $clientId);
   exit();
 }
 
-$fetchReqStmt->bind_result($requirementsJson);
-$fetchReqStmt->fetch();
-$fetchReqStmt->close();
+$fetchVisaStmt->bind_result($requirementsJson, $visaTypesJson);
+$fetchVisaStmt->fetch();
+$fetchVisaStmt->close();
 
 // Validate and use default if requirements_json is empty
 $requirementsJson = $requirementsJson ?: json_encode([], JSON_UNESCAPED_UNICODE);
-
-// Validate JSON
 if (json_decode($requirementsJson, true) === null && $requirementsJson !== '[]') {
   error_log("[reassign_visa_package] Warning: Invalid requirements_json from visa_package $visaPackageId, using empty array");
   $requirementsJson = json_encode([], JSON_UNESCAPED_UNICODE);
 }
 
+// Decode visa_types_json and select the first type
+$visaType = null;
+if ($visaTypesJson) {
+  $visaTypesArr = json_decode($visaTypesJson, true);
+  if (json_last_error() === JSON_ERROR_NONE && is_array($visaTypesArr) && count($visaTypesArr) > 0 && isset($visaTypesArr[0]['type'])) {
+    $visaType = $visaTypesArr[0]['type'];
+  }
+}
+if (!$visaType) {
+  $visaType = null;
+}
+
 // ✅ 8. Update or Create Visa Application
 if ($previousVisaPackageId !== null) {
-  // Update existing visa application
+  // Update existing visa application, clear visa_type then set new
   $update = $conn->prepare("
     UPDATE client_visa_applications 
     SET visa_package_id = ?, 
+        visa_type = ?,
         updated_at = NOW()
     WHERE client_id = ?
   ");
-  $update->bind_param("ii", $visaPackageId, $clientId);
+  $update->bind_param("isi", $visaPackageId, $visaType, $clientId);
   $updateSuccess = $update->execute();
   $update->close();
 } else {
@@ -149,11 +162,12 @@ if ($previousVisaPackageId !== null) {
     INSERT INTO client_visa_applications (
       client_id, 
       visa_package_id, 
+      visa_type,
       created_at, 
       updated_at
-    ) VALUES (?, ?, NOW(), NOW())
+    ) VALUES (?, ?, ?, NOW(), NOW())
   ");
-  $insert->bind_param("ii", $clientId, $visaPackageId);
+  $insert->bind_param("iis", $clientId, $visaPackageId, $visaType);
   $updateSuccess = $insert->execute();
   $insert->close();
 }
@@ -165,6 +179,7 @@ if (!$updateSuccess) {
   header("Location: ../admin/view_client.php?client_id=" . $clientId);
   exit();
 }
+
 
 // ✅ 9. Update client_visa_requirements with new requirements_json
 // First, delete existing requirements for this client (for lead applicant only)
@@ -191,6 +206,21 @@ if (!$insertReqStmt) {
     error_log("[reassign_visa_package] Client $clientId: Visa requirements re-copied from package $visaPackageId");
   }
   $insertReqStmt->close();
+}
+
+// ✅ 9b. Update all companions' requirements_json to match the lead's
+$updateCompanionsSql = "UPDATE client_visa_requirements SET requirements_json = ?, updated_at = NOW() WHERE client_id = ? AND companion_id IS NOT NULL";
+$updateCompanionsStmt = $conn->prepare($updateCompanionsSql);
+if (!$updateCompanionsStmt) {
+  error_log("Update companions requirements prepare failed for client_id=$clientId: " . $conn->error);
+} else {
+  $updateCompanionsStmt->bind_param("si", $requirementsJson, $clientId);
+  if (!$updateCompanionsStmt->execute()) {
+    error_log("Update companions requirements execute failed for client_id=$clientId: " . $updateCompanionsStmt->error);
+  } else {
+    error_log("[reassign_visa_package] Client $clientId: Companions' visa requirements updated to match lead");
+  }
+  $updateCompanionsStmt->close();
 }
 
 // ✅ 10. Log Reassignment

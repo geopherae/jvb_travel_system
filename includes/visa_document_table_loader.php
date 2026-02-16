@@ -2,16 +2,10 @@
 /**
  * Visa Document Table Data Loader
  * 
- * Loads and prepares all data needed for the visa-document-table.php component.
- * This keeps the component file clean and focused on presentation.
- * 
- * Required Parameters:
- *   $conn - Database connection (from actions/db.php)
- *   $visa_application_id - Optional, the visa app ID (fetched from GET if not provided)
- *   $application_mode - Optional, application mode (fetched from visa app if not provided)
- * 
- * Returns:
- *   All variables needed by the component (see bottom of file)
+ * FIXES APPLIED:
+ * 1. Decode visa_lead_applicant_status JSON before using in conditional logic
+ * 2. Decode companion applicant_status JSON before using in conditional logic
+ * 3. Ensure proper extraction of status values from the new JSON format
  */
 
 // ============================================================================
@@ -33,9 +27,9 @@ if (!$visaAppId) {
 // DATABASE QUERIES (EARLY FETCH FOR ACCESS CONTROL)
 // ============================================================================
 
-// Fetch visa application early to determine application_mode
+// Fetch visa application early to determine application_mode and sponsor status
 $appStmt = $conn->prepare("
-  SELECT id, visa_package_id, application_mode, client_id, status
+  SELECT id, visa_package_id, application_mode, client_id, status, sponsor_status
   FROM client_visa_applications
   WHERE id = ?
 ");
@@ -52,6 +46,10 @@ $visaPackageId = $visaApp['visa_package_id'];
 $appMode = $appMode ?? $visaApp['application_mode'];
 $clientId = $visaApp['client_id'];
 $visaApplicationStatus = $visa_application_status ?? $visaApp['status']; // Get status from parameter or database
+
+// Set sponsor status global for requirement visibility logic
+global $sponsorStatusJson;
+$sponsorStatusJson = isset($visaApp['sponsor_status']) ? $visaApp['sponsor_status'] : '';
 
 // Determine client's access type (individual vs group)
 // Group access is only enabled if:
@@ -76,35 +74,43 @@ if ($isClient) {
 }
 
 // ============================================================================
-// HELPER FUNCTIONS
+// HELPER FUNCTIONS - UPDATED
 // ============================================================================
 
 /**
- * Construct full file path for visa document
+ * Extract status option values from applicant_status JSON
+ * Handles both old format (array of strings) and new format (array of objects with option/label)
+ * Returns array of option values for comparison
  */
-function getVisaDocPath($clientId, $visaAppId, $fileName) {
-  return '../uploads/visa_docs/client_' . $clientId . '/application_' . $visaAppId . '/' . $fileName;
-}
-
-/**
- * Get person (lead or companion) data by key
- */
-function getPersonData($personKey, $leadName, $companions) {
-  if ($personKey === 'lead') {
-    return ['name' => $leadName, 'id' => null];
+function extractApplicantStatusValues($applicantStatusJson) {
+  if (empty($applicantStatusJson)) {
+    return [];
   }
-  foreach ($companions as $comp) {
-    if ($comp['id'] == $personKey) {
-      return ['name' => $comp['full_name'], 'id' => $comp['id']];
+  
+  $decoded = json_decode($applicantStatusJson, true);
+  if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+    return [];
+  }
+  
+  $values = [];
+  foreach ($decoded as $item) {
+    if (is_string($item)) {
+      // Old format: just a string value
+      $values[] = strtolower($item);
+    } elseif (is_array($item) && isset($item['option'])) {
+      // New format: {"option": "employed", "label": "Employed"}
+      $values[] = strtolower($item['option']);
     }
   }
-  return ['name' => 'Unknown', 'id' => null];
+  
+  return $values;
 }
 
 /**
  * Check if requirement should be visible based on applicant status condition
+ * UPDATED: Now properly handles JSON-encoded applicant status
  */
-function isRequirementVisible($req, $applicantStatus) {
+function isRequirementVisible($req, $applicantStatusJson) {
   $condition = $req['condition'] ?? null;
   if (!$condition) {
     return true;
@@ -112,29 +118,57 @@ function isRequirementVisible($req, $applicantStatus) {
 
   $type = strtolower($condition['type'] ?? '');
   $operator = strtolower($condition['operator'] ?? 'equals');
-  $value = strtolower($condition['value'] ?? '');
-  $status = strtolower((string) $applicantStatus);
+  $conditionValue = strtolower($condition['value'] ?? '');
+
+  // Sponsor status values should be passed as a JSON string, similar to applicant status
+  global $sponsorStatusJson;
 
   if ($type === 'applicant_status') {
-    if ($value === '') {
+    if ($conditionValue === '') {
+      return true; // No specific condition, always show
+    }
+    $statusValues = extractApplicantStatusValues($applicantStatusJson);
+    if ($operator === 'equals') {
+      return in_array($conditionValue, $statusValues);
+    }
+  } else if ($type === 'sponsor_status') {
+    if ($conditionValue === '') {
       return true;
     }
-    if ($operator === 'equals') {
-      return $status === $value;
+    // Accept sponsor status as JSON or plain string
+    $sponsorRaw = $sponsorStatusJson ?? '';
+    $sponsorValues = [];
+    if (empty($sponsorRaw)) {
+      $sponsorValues = [];
+    } elseif (is_string($sponsorRaw) && ($sponsorRaw[0] === '[' || $sponsorRaw[0] === '{')) {
+      // JSON array or object
+      $sponsorValues = extractApplicantStatusValues($sponsorRaw);
+    } else {
+      // Plain string
+      $sponsorValues = [strtolower(trim($sponsorRaw))];
     }
-    return true;
+    if ($operator === 'equals') {
+      // Debug log for sponsor status comparison
+      // Output debug info to browser console (if headers not sent)
+      if (!headers_sent()) {
+        echo "<script>console.log('[SponsorStatusDebug] Requirement ID: " . addslashes($req['id'] ?? '') . " | Condition Value: " . addslashes($conditionValue) . " | Sponsor Values: " . addslashes(json_encode($sponsorValues)) . "');</script>";
+      }
+      return in_array($conditionValue, $sponsorValues);
+    }
+    return false;
   }
-
   return true;
 }
 
 /**
  * Merge requirements with their submissions and determine display status
+ * UPDATED: Now accepts JSON applicant status
  */
-function mergeRequirementsWithSubmissions($requirements, $submissions, $applicantStatus = null, $isViewingOwnDocuments = true, $isGroupView = false) {
+function mergeRequirementsWithSubmissions($requirements, $submissions, $applicantStatusJson = null, $isViewingOwnDocuments = true, $isGroupView = false) {
   $merged = [];
   foreach ($requirements as $req) {
-    if (!isRequirementVisible($req, $applicantStatus)) {
+    // Check if requirement should be visible based on applicant status
+    if (!isRequirementVisible($req, $applicantStatusJson)) {
       continue;
     }
     
@@ -170,6 +204,7 @@ function mergeRequirementsWithSubmissions($requirements, $submissions, $applican
 function groupRequirementsByCategory($requirements) {
   $groups = [
     'primary' => [],
+    'financial' => [],
     'secondary' => [],
     'conditional' => [],
     'other' => []
@@ -265,7 +300,9 @@ $lead = $leadStmt->get_result()->fetch_assoc();
 $leadStmt->close();
 
 $leadName = $lead['full_name'] ?? 'Lead Guest';
-$leadApplicantStatus = $lead['visa_lead_applicant_status'] ?? null;
+// Store the JSON string - will be passed to functions that handle decoding
+$leadApplicantStatusJson = $lead['visa_lead_applicant_status'] ?? null;
+
 
 // Fetch companions
 $isGroupApplication = false;
@@ -295,12 +332,9 @@ foreach ($submissions as $sub) {
   $groupedSubmissions[$key][] = $sub;
 }
 
-// ============================================================================
-// BUILD APPLICANT BUNDLES
-// ============================================================================
-
 $sectionTemplates = [
   ['key' => 'primary', 'title' => 'Primary Requirements', 'accent' => 'from-sky-50 to-blue-50 border-sky-100'],
+  ['key' => 'financial', 'title' => 'Financial Requirements', 'accent' => 'from-sky-50 to-blue-50 border-sky-100'],
   ['key' => 'secondary', 'title' => 'Secondary Requirements', 'accent' => 'from-emerald-50 to-green-50 border-emerald-100'],
   ['key' => 'conditional', 'title' => 'Conditional Requirements', 'accent' => 'from-purple-50 to-pink-50 border-purple-100'],
   ['key' => 'other', 'title' => 'Other Requirements', 'accent' => 'from-gray-50 to-slate-50 border-gray-100'],
@@ -321,10 +355,11 @@ if ($showLeadGuest) {
     $isViewingOwnDocs = empty($currentCompanionId);
   }
   
+  // Pass the JSON string to mergeRequirementsWithSubmissions
   $leadMerged = mergeRequirementsWithSubmissions(
     $templateRequirements,
     $groupedSubmissions['lead'] ?? [],
-    $leadApplicantStatus,
+    $leadApplicantStatusJson, // <-- JSON string, will be decoded in function
     $isViewingOwnDocs,
     ($clientAccessType === 'group')
   );
@@ -340,7 +375,7 @@ if ($showLeadGuest) {
   ];
 }
 
-// Build companion bundles
+// Build companion bundles (UPDATED)
 foreach ($companions as $idx => $companion) {
   $isOwnCompanion = ($currentCompanionId && $currentCompanionId == $companion['id']);
   
@@ -354,7 +389,7 @@ foreach ($companions as $idx => $companion) {
     $isViewingOwnDocs = $isOwnCompanion;
   }
   
-  // 🆕 Fetch companion's visa_type and requirements from client_visa_requirements
+  // Fetch companion's visa_type and requirements from client_visa_requirements
   $companionReqStmt = $conn->prepare("
     SELECT visa_type, requirements_json
     FROM client_visa_requirements
@@ -370,10 +405,14 @@ foreach ($companions as $idx => $companion) {
   $companionVisaType = $companionReqData['visa_type'] ?? '';
   $companionAllRequirements = json_decode($companionRequirementsJson, true) ?? [];
   
+  // Get companion's applicant status JSON
+  $companionApplicantStatusJson = $companion['applicant_status'] ?? null;
+  
+  // Pass the JSON string to mergeRequirementsWithSubmissions
   $companionMerged = mergeRequirementsWithSubmissions(
     $companionAllRequirements,
     $groupedSubmissions[$companion['id']] ?? [],
-    $companion['applicant_status'] ?? null,
+    $companionApplicantStatusJson, // <-- JSON string, will be decoded in function
     $isViewingOwnDocs,
     ($clientAccessType === 'group')
   );

@@ -40,6 +40,13 @@ if (!function_exists('getVisaStatusBadgeClass')) {
   }
 }
 
+// 🗂️ Filter out archived visa applications (is_archived == 1)
+$visaClients = array_filter($visaClients, function ($client) {
+  // Accept if is_archived is not set, null, 0, or '0'. Reject if 1 or '1'.
+  $archived = $client['is_archived'] ?? null;
+  return $archived === null || $archived === 0 || $archived === '0';
+});
+
 // 🔎 Apply search filter
 if ($search !== '') {
   $visaClients = array_filter($visaClients, function ($client) use ($search) {
