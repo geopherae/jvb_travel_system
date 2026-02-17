@@ -1,3 +1,4 @@
+<!-- components/tour-package-card.php -->
 <?php
 require_once __DIR__ . '/../actions/db.php';
 
@@ -32,15 +33,12 @@ $client = $query->get_result()->fetch_assoc();
 
 $hasPackage = !empty($client['assigned_package_id']);
 
-// 🧑 Assigned Agent
 $assignedAgent = trim(($client['agent_first_name'] ?? '') . ' ' . ($client['agent_last_name'] ?? '')) ?: '—';
 
-// 🖼️ Cover Image
 $coverImage = $hasPackage && !empty($client['tour_cover_image'])
   ? '../images/tour_packages_banners/' . rawurlencode($client['tour_cover_image'])
   : '../images/default_trip_cover.jpg';
 
-// 📅 Trip Duration & Dates
 $durationDisplay = '<span class="text-gray-500 italic">Unspecified</span>';
 $tripDateRangeDisplay = '<span class="text-gray-500 italic">Unspecified</span>';
 
@@ -59,9 +57,7 @@ if ($client['trip_date_start'] && $client['trip_date_end']) {
   }
 }
 
-// 📦 Inclusions
 $inclusions = [];
-$parsed = [];
 if ($hasPackage && !empty($client['inclusions_json'])) {
   $parsed = json_decode($client['inclusions_json'], true);
   if (is_array($parsed)) {
@@ -70,46 +66,55 @@ if ($hasPackage && !empty($client['inclusions_json'])) {
 }
 ?>
 
-<!-- 🧳 Tour Package Card - WOW Factor Design -->
-<div class="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 sm:hover:scale-[1.02] h-full flex flex-col">
+<!-- 🧳 Tour Package Card — click opens itinerary modal -->
+<div
+  class="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 sm:hover:scale-[1.02] h-full flex flex-col group"
+  @click="showItineraryModal = true"
+  role="button"
+  tabindex="0"
+  @keydown.enter="showItineraryModal = true"
+  title="Click to view itinerary"
+  style="cursor: pointer;"
+>
   <!-- Background Image -->
-  <img 
-    src="<?= $coverImage ?>" 
+  <img
+    src="<?= $coverImage ?>"
     alt="Tour Package Cover"
-    class="absolute inset-0 w-full h-full object-cover"
+    class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
     loading="lazy"
   />
 
-  <!-- Background overlay with semi-transparent dark gradient -->
+  <!-- Overlay -->
   <div class="absolute inset-0 bg-gradient-to-br from-sky-900/85 via-sky-800/80 to-blue-900/85 backdrop-blur-sm"></div>
-  
+
   <!-- Decorative elements -->
   <div class="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 bg-white/5 rounded-full -mr-8 -mt-8 sm:-mr-12 sm:-mt-12"></div>
   <div class="absolute bottom-0 left-0 w-20 h-20 sm:w-32 sm:h-32 bg-white/5 rounded-full -ml-10 -mb-10 sm:-ml-16 sm:-mb-16"></div>
 
+  <!-- "View Itinerary" hint badge — appears on hover -->
+  <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-0">
+    <span class="flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+      </svg>
+      View Itinerary
+    </span>
+  </div>
+
   <!-- Content -->
   <div class="relative z-10 p-4 sm:p-6 space-y-4 flex-1 flex flex-col">
-    <!-- Header: Package Name Only -->
+
+    <!-- Package Name -->
     <div>
       <p class="text-[0.65rem] font-semibold text-sky-100 uppercase tracking-wider mb-1">Assigned Package</p>
       <h3 class="line-clamp-1 pb-5 text-lg sm:text-xl font-bold text-white break-words max-w-[85%] sm:max-w-[80%]">
         <?= $hasPackage ? htmlspecialchars($client['package_name']) : '<span class="italic opacity-80">No Package Assigned</span>' ?>
       </h3>
-      <?php 
-        $priceVal = $client['price'] ?? null;
-        $priceDisplay = ($priceVal !== null && $priceVal !== '') ? '₱' . number_format((float)$priceVal, 2) : '—';
-      ?>
-      <!--
-      <div class="mt-2">
-        <span class="inline-block px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold">
-          <?= $priceDisplay ?>
-        </span>
-      </div> -->
     </div>
 
-    <!-- Dropdown Menu -->
-    <div x-data="{ open: false }" class="absolute top-3 right-3 sm:top-4 sm:right-4 z-50" @click.outside="open = false">
-      <button 
+    <!-- Dropdown Menu — stops propagation so it doesn't open the modal -->
+    <div x-data="{ open: false }" class="absolute top-3 right-3 sm:top-4 sm:right-4 z-50" @click.stop @click.outside="open = false">
+      <button
         @click="open = !open"
         class="p-2 bg-white/90 hover:bg-white active:bg-white rounded-full shadow-lg transition backdrop-blur-sm border border-gray-200 touch-manipulation"
         title="Package Options"
@@ -160,9 +165,8 @@ if ($hasPackage && !empty($client['inclusions_json'])) {
       </div>
     </div>
 
-    <!-- Package Details Grid -->
+    <!-- Details Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4 border-t border-white/30 mt-auto">
-      <!-- Trip Dates -->
       <div class="space-y-2 min-w-0">
         <div class="flex items-center gap-2 text-white/80">
           <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -173,7 +177,6 @@ if ($hasPackage && !empty($client['inclusions_json'])) {
         <p class="text-sm sm:text-base font-bold text-white break-words"><?= $tripDateRangeDisplay ?></p>
       </div>
 
-      <!-- Booking # -->
       <div class="space-y-2 min-w-0">
         <div class="flex items-center gap-2 text-white/80">
           <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -186,7 +189,6 @@ if ($hasPackage && !empty($client['inclusions_json'])) {
         </p>
       </div>
 
-      <!-- Duration -->
       <div class="space-y-2 min-w-0">
         <div class="flex items-center gap-2 text-white/80">
           <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -197,7 +199,6 @@ if ($hasPackage && !empty($client['inclusions_json'])) {
         <p class="text-sm sm:text-base font-bold text-white"><?= $durationDisplay ?></p>
       </div>
 
-      <!-- Travel Agent -->
       <div class="space-y-2 min-w-0">
         <div class="flex items-center gap-2 text-white/80">
           <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -208,6 +209,6 @@ if ($hasPackage && !empty($client['inclusions_json'])) {
         <p class="text-sm sm:text-base font-bold text-white truncate" title="<?= htmlspecialchars($assignedAgent) ?>"><?= htmlspecialchars($assignedAgent) ?></p>
       </div>
     </div>
+
   </div>
 </div>
-

@@ -1,3 +1,4 @@
+<!-- admin/view_client.php -->
 <?php
 session_start();
 
@@ -126,9 +127,9 @@ while ($doc = $docResult->fetch_assoc()) {
 }
 
 // ✅ Itinerary Pill Stylings
-$start     = $client['trip_date_start'] ?? null;
-$end       = $client['trip_date_end'] ?? null;
-$todayDay  = getTodayItineraryDay($start, $end);
+$start    = $client['trip_date_start'] ?? null;
+$end      = $client['trip_date_end'] ?? null;
+$todayDay = getTodayItineraryDay($start, $end);
 ?>
 
 <!DOCTYPE html>
@@ -139,41 +140,47 @@ $todayDay  = getTodayItineraryDay($start, $end);
   <title>View Client</title>
   <?php include __DIR__ . '/../components/favicon_links.php'; ?>
 
-<script>
-  document.addEventListener('alpine:init', () => {
-    Alpine.store('modals', {
-      clientId: null,
-      reassign: false,
-      reassignVisa: false,
-      unassign: false,
-      editBooking: false,
-      archiveClient: false,
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.store('modals', {
+        clientId: null,
+        reassign: false,
+        reassignVisa: false,
+        unassign: false,
+        editBooking: false,
+        archiveClient: false,
+        // NOTE: showItineraryModal lives in body x-data scope, NOT here,
+        // because the modal uses x-show="showItineraryModal" on the body scope.
+      });
     });
-  });
-</script>
+  </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../includes/global-toast.js" defer></script>
   <script src="../assets/js/modals.js" defer></script>
   <script src="../includes/gallery-scope.js" defer></script>
-  <!--<script src="../assets/js/clientOverviewScope.js" defer></script>-->
-  <style>[x-cloak] { display: none !important; }
+  <style>
+    [x-cloak] { display: none !important; }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     .animate-fade-in { animation: fadeIn 0.3s ease-out; }
   </style>
 </head>
 
-<body class="text-gray-800 font-sans" x-data="{ sidebarOpen: false, ...clientViewScope() }" x-init="initClientView()">
+<!-- ✅ showItineraryModal lives here in local scope so the modal include can reach it -->
+<body
+  class="text-gray-800 font-sans"
+  x-data="{ sidebarOpen: false, showItineraryModal: false, ...clientViewScope() }"
+  x-init="initClientView()"
+>
 
 <!-- Includes -->
 <?php $isAdmin = true; include '../components/admin_sidebar.php'; ?>
 <?php $isAdmin = true; include '../components/right-panel.php'; ?>
 <?php include '../components/status_alert.php'; ?>
-
 
 <!-- Mobile Toggle -->
 <button @click="sidebarOpen = !sidebarOpen" class="p-3 md:hidden absolute top-4 left-4 z-20 bg-primary text-white rounded">
@@ -192,17 +199,12 @@ $todayDay  = getTodayItineraryDay($start, $end);
       <!-- 🧭 Tab Navigation -->
       <div class="border-b border-gray-200">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 pb-3">
-          <!-- Tabs -->
+          <!-- Tabs — Itinerary tab removed; now opens as modal via tour package card click -->
           <div class="flex gap-3 sm:gap-6 overflow-x-auto scrollbar-hide text-sm font-semibold text-gray-600 -mb-px">
             <button @click="tab = 'info'"
                     :class="tab === 'info' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
                     class="pb-2 transition whitespace-nowrap shrink-0">
               Client & Tour Info
-            </button>
-            <button @click="tab = 'itinerary'"
-                    :class="tab === 'itinerary' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
-                    class="pb-2 transition whitespace-nowrap shrink-0">
-              Itinerary
             </button>
             <button @click="tab = 'tripPhotos'"
                     :class="tab === 'tripPhotos' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
@@ -210,9 +212,9 @@ $todayDay  = getTodayItineraryDay($start, $end);
               Trip Photos
             </button>
           </div>
-          
+
           <!-- Print Button -->
-          <a 
+          <a
             href="./print_client_details.php?client_id=<?= $client['id'] ?>"
             target="_blank"
             class="px-3 sm:px-4 py-2 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white text-sm font-semibold rounded-lg transition shadow-sm flex items-center justify-center gap-2 whitespace-nowrap shrink-0 touch-manipulation"
@@ -227,25 +229,19 @@ $todayDay  = getTodayItineraryDay($start, $end);
       </div>
 
       <!-- 📋 Tab 1: Client Info + Tour Package -->
+      <!-- Clicking the Tour Package Card fires showItineraryModal = true (see tour-package-card.php) -->
       <div x-show="tab === 'info'" x-transition x-cloak>
         <div class="flex flex-col lg:flex-row gap-4 lg:gap-6">
-          <!-- Client Contact Details Card -->
           <div class="w-full lg:flex-1">
             <?php include '../components/client-contact-details.php'; ?>
           </div>
-          <!-- 🧳 Tour Package Card -->
           <div class="w-full lg:flex-1">
             <?php include '../components/tour-package-card.php'; ?>
           </div>
         </div>
       </div>
 
-      <!-- 🗺️ Tab 2: Itinerary -->
-      <div x-show="tab === 'itinerary'" x-transition x-cloak>
-        <?php include '../components/itinerary_card.php'; ?>
-      </div>
-
-      <!-- 📷 Tab 3: Client Trip Photos -->
+      <!-- 📷 Tab 2: Client Trip Photos -->
       <div x-show="tab === 'tripPhotos'" x-transition x-cloak>
         <div class="rounded-lg border border-gray-200 p-4 sm:p-6 bg-white shadow-sm">
           <?php include '../components/trip_photos_gallery.php'; ?>
@@ -263,63 +259,55 @@ $todayDay  = getTodayItineraryDay($start, $end);
 
 </main>
 
-
-  <!-- ✨ Edit Client Modal -->
-  <div x-show="$store.modals.editClient" x-cloak
-       class="fixed inset-0 z-50 overflow-y-auto"
-       aria-labelledby="modal-title" role="dialog" aria-modal="true"
-       @keydown.escape.window="$store.modals.editClient = false">
-
-    <!-- Backdrop -->
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-4 text-center sm:p-0">
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="$store.modals.editClient = false"></div>
-
-      <!-- Modal panel -->
-      <div class="inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-0 sm:align-middle sm:max-w-4xl sm:w-full sm:max-h-[96vh]">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3 sm:px-6">
-          <div class="p-2 flex items-center justify-between">
-            <h3 class="text-lg leading-6 font-medium text-white" id="modal-title">
-              Edit Guest | Travel Booking
-            </h3>
-            <button type="button" @click="$store.modals.editClient = false"
-                    class="text-white hover:text-gray-200 transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
+<!-- ✨ Edit Client Modal -->
+<div x-show="$store.modals.editClient" x-cloak
+     class="fixed inset-0 z-50 overflow-y-auto"
+     aria-labelledby="modal-title" role="dialog" aria-modal="true"
+     @keydown.escape.window="$store.modals.editClient = false">
+  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-4 text-center sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="$store.modals.editClient = false"></div>
+    <div class="inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-0 sm:align-middle sm:max-w-4xl sm:w-full sm:max-h-[96vh]">
+      <div class="bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3 sm:px-6">
+        <div class="p-2 flex items-center justify-between">
+          <h3 class="text-lg leading-6 font-medium text-white" id="modal-title">Edit Guest | Travel Booking</h3>
+          <button type="button" @click="$store.modals.editClient = false" class="text-white hover:text-gray-200 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
-
-        <?php
-          $editClientId = $client['id'];
-          include '../admin/edit_client.php';
-        ?>
       </div>
+      <?php
+        $editClientId = $client['id'];
+        include '../admin/edit_client.php';
+      ?>
     </div>
   </div>
+</div>
 
 <?php include '../components/status_alert.php'; ?>
 <?php include '../components/update_client_booking_modal.php'; ?>
-<?php 
-$isAdmin = true; 
+<?php
+$isAdmin = true;
 include '../components/reassign-modal.php';
 include '../components/reassign-visa-modal.php';
 $editClientId = $client['id'];
-include __DIR__ . '/../components/unassign-modal.php'; 
+include __DIR__ . '/../components/unassign-modal.php';
 ?>
 <?php include __DIR__ . '/../components/archive_client_modal.php'; ?>
+
+<!-- ✅ Itinerary modal — uses showItineraryModal from body scope, triggered by tour-package-card click -->
+<?php include __DIR__ . '/../components/view_client_itinerary_card.php'; ?>
 
 <script>
   function clientViewScope() {
     return {
-      tab: 'tripPhotos',
+      tab: 'info',
       selectedPhoto: null,
       isAdmin: <?= json_encode($_SESSION['is_admin'] ?? false) ?>,
 
       updateStatus(status) {
         if (!this.selectedPhoto || this.selectedPhoto.status === status) return;
-
         fetch(`../actions/update_photo_status.php?id=${this.selectedPhoto.id}&status=${status}`)
           .then(res => res.json())
           .then(data => {
@@ -332,14 +320,12 @@ include __DIR__ . '/../components/unassign-modal.php';
               this.showToast(data.message, 'error');
             }
           })
-          .catch(err => {
-            this.showToast('Network error. Please try again.', 'error');
-          });
+          .catch(() => this.showToast('Network error. Please try again.', 'error'));
       },
 
       getStatusClass(status) {
         const map = {
-          'Pending': 'bg-[#F5B74D]/20 text-[#D89D41]',
+          'Pending':  'bg-[#F5B74D]/20 text-[#D89D41]',
           'Rejected': 'bg-[#EB5757]/20 text-[#C64646]',
           'Approved': 'bg-[#27AE60]/20 text-[#1D924F]'
         };
@@ -347,33 +333,25 @@ include __DIR__ . '/../components/unassign-modal.php';
       },
 
       showToast(message, level = 'success') {
-        if (typeof window.showToast === 'function') {
-          window.showToast(message, level);
-        }
+        if (typeof window.showToast === 'function') window.showToast(message, level);
       },
 
-      initClientView() {
-        // Optional: preload or hydrate data
-      }
+      initClientView() {}
     };
   }
 
-    function archiveClientScope(clientId) {
+  function archiveClientScope(clientId) {
     return {
       clientId,
       csrfToken: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
     };
   }
-
 </script>
 
 <script>
-// Initialize Alpine store for review modal
-document.addEventListener('alpine:init', () => {
-  Alpine.store('reviewModal', {
-    show: false
+  document.addEventListener('alpine:init', () => {
+    Alpine.store('reviewModal', { show: false });
   });
-});
 </script>
 
 </body>

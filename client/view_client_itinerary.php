@@ -1,3 +1,4 @@
+<!-- view_client_itinerary.php -->
 <?php
 session_start();
 
@@ -83,8 +84,8 @@ $todayDay = getTodayItineraryDay($start, $end);
   <!-- Tailwind / Fonts / Alpine -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs" defer></script>
-    <script src="../includes/global-toast.js" defer></script>
-    <script src="../includes/message_received_toast_poller.js" defer></script>
+  <script src="../includes/global-toast.js" defer></script>
+  <script src="../includes/message_received_toast_poller.js" defer></script>
 </head>
 
 <body class="font-poppins text-gray-800" x-data="{ sidebarOpen: false }" style="background: linear-gradient(to bottom, #e0f7ff 0%, white 10%, white 100%)">
@@ -94,16 +95,16 @@ $todayDay = getTodayItineraryDay($start, $end);
     <?php include '../components/sidebar.php'; ?>
     <?php include '../components/right-panel.php'; ?>
 
-  <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 flex flex-col relative">
-    <div class="flex-1 overflow-y-auto space-y-6">
-      <h2 class="text-xl font-bold">My Travel Itinerary</h2>
+    <main class="ml-0 lg:ml-64 lg:mr-80 h-screen overflow-y-auto p-6 space-y-6 flex flex-col relative">
+      <div class="flex-1 overflow-y-auto space-y-6">
+        <h2 class="text-xl font-bold">My Travel Itinerary</h2>
 
-    <!-- Contact Agent Message -->
-    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
-      <p class="text-sm text-gray-700">
-        <span class="font-medium">Need to make changes?</span> If you'd like to adjust anything in your itinerary, please contact your travel agent.
-      </p>
-    </div>
+        <!-- Contact Agent Message -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+          <p class="text-sm text-gray-700">
+            <span class="font-medium">Need to make changes?</span> If you'd like to adjust anything in your itinerary, please contact your travel agent.
+          </p>
+        </div>
 
         <?php if (!empty($parsedDays)): ?>
           <!-- Normal Itinerary View -->
@@ -111,29 +112,10 @@ $todayDay = getTodayItineraryDay($start, $end);
             <!-- Left Panel: Package Info -->
             <?php if (file_exists('../components/client-package-info.php')) include '../components/client-package-info.php'; ?>
 
-            <!-- Right Panel with Tabs -->
-            <div x-data="{ tab: 'itinerary' }" class="w-full lg:w-2/3">
-              <!-- Tabs -->
-              <div class="flex gap-6 border-b border-gray-200 mb-4">
-                <button @click="tab = 'itinerary'"
-                        :class="tab === 'itinerary' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
-                        class="pb-1 transition">
-                  Itinerary
-                </button>
-                <button @click="tab = 'photos'"
-                        :class="tab === 'photos' ? 'text-sky-600 border-b-2 border-sky-600' : 'hover:text-sky-500'"
-                        class="pb-1 transition">
-                  Trip Photos
-                </button>
-              </div>
-
-              <!-- Panels -->
-              <div x-show="tab === 'itinerary'" class="bg-gray-50 rounded-lg border border-gray-200 p-6 min-h-[400px]">
+            <!-- Right Panel -->
+            <div class="w-full lg:w-2/3">
+              <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 min-h-[400px]">
                 <?php if (file_exists('../components/client-itinerary-cards.php')) include '../components/client-itinerary-cards.php'; ?>
-              </div>
-
-              <div x-show="tab === 'photos'" class="bg-gray-50 rounded-lg border border-gray-200 p-6 min-h-[400px]">
-                <?php if (file_exists('../components/client-trip-photos.php')) include '../components/client-trip-photos.php'; ?>
               </div>
             </div>
           </div>
@@ -172,7 +154,7 @@ $todayDay = getTodayItineraryDay($start, $end);
               </div>
               <div class="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-lg border">
                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 <p class="font-medium text-gray-800 text-sm">Contact Your Agent</p>
                 <p class="text-xs">Message them anytime to discuss your trip preferences.</p>
@@ -180,9 +162,10 @@ $todayDay = getTodayItineraryDay($start, $end);
             </div>
           </div>
         <?php endif; ?>
+
       </div>
-    </div>
-  </main>
+    </main>
+  </div>
 
 </body>
 </html>

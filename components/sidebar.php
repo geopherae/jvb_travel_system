@@ -36,6 +36,13 @@ $allNavLinks = [
     'show_for' => ['booking', 'both'], // Travel Booking tab
     'category' => 'Travel Booking'
   ],
+    'My Trip Photos'    => [
+    'url' => '../components/client-trip-photos.php', 
+    'icon' => 'briefcase', 
+    'match' => ['client-trip-photos.php'],
+    'show_for' => ['booking', 'both'], // Travel Booking tab
+    'category' => 'Travel Booking'
+  ],
   'Visa Processing' => [
     'url' => '../client/client_visa_dashboard.php', 
     'icon' => 'itinerary', 
