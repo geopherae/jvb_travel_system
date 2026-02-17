@@ -79,3 +79,4 @@ MOBILE_RESPONSIVE_PATTERNS.md
 *.bak
 *.backup
 backup_*/
+includes/feature_flags.php
