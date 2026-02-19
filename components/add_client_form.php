@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../includes/feature_flags.php';
 
+date_default_timezone_set('Asia/Manila');
+
 $admins = $conn->query("SELECT id, first_name, last_name FROM admin_accounts WHERE id != 1 ORDER BY first_name ASC");
 $pkg_stmt = $conn->prepare("
   SELECT id, package_name, day_duration, night_duration, price, is_deleted
@@ -43,7 +45,13 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
       processingType: 'booking',
       tripStart: '',
       tripEnd: '',
-      bookingDate: '',
+      bookingDate: (function() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      })(),
       bookingNumber: '',
       assignedPackage: '',
       passportNumber: '',
@@ -565,6 +573,11 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div class="space-y-1">
+                  <label class="block text-xs font-medium text-gray-600">Booking Date</label>
+                  <input type="date" name="booking_date" x-model="bookingDate"
+                         class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-400" />
+                </div>
+                <div class="space-y-1">
                   <label class="block text-xs font-medium text-gray-600">Departure Date</label>
                   <input type="date" name="trip_date_start" x-model="tripStart"
                          @change="touched.tripStart = true"
@@ -577,11 +590,6 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
                          @change="touched.tripEnd = true"
                          class="w-full border rounded-lg px-3 py-2.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-sky-500"
                          :class="dateError && tripEnd ? 'border-red-400 bg-red-50/30' : 'border-gray-300 focus:border-sky-400'" />
-                </div>
-                <div class="space-y-1">
-                  <label class="block text-xs font-medium text-gray-600">Booking Date</label>
-                  <input type="date" name="booking_date" x-model="bookingDate"
-                         class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-400" />
                 </div>
               </div>
 
