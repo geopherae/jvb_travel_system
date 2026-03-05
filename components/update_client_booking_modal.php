@@ -413,13 +413,13 @@ $agents = $conn->query("SELECT id, admin_photo, first_name, last_name FROM admin
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="block text-sm font-medium text-slate-700 mb-1">Hotel Name</label>
-        <input type="text" name="hotel" value="<?= htmlspecialchars($client_data['hotel']) ?>"
-               class="w-full border rounded px-3 py-1.5 text-sm" required>
+         <input type="text" name="hotel" value="<?= htmlspecialchars($client_data['hotel'] ?? '') ?>"
+           class="w-full border rounded px-3 py-1.5 text-sm">
       </div>
       <div>
         <label class="block text-sm font-medium text-slate-700 mb-1">Room Type</label>
-        <input type="text" name="room_type" value="<?= htmlspecialchars($client_data['room_type']) ?>"
-               class="w-full border rounded px-3 py-1.5 text-sm">
+         <input type="text" name="room_type" value="<?= htmlspecialchars($client_data['room_type'] ?? '') ?>"
+           class="w-full border rounded px-3 py-1.5 text-sm">
       </div>
     </div>
   </div>

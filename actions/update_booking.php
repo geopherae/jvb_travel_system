@@ -80,8 +80,8 @@ try {
     // 🏨 Hotel & Room Type (default to N/A if empty)
     $hotel    = trim($_POST['hotel'] ?? '');
     $roomType = trim($_POST['room_type'] ?? '');
-    if ($hotel === '') $hotel = 'N/A';
-    if ($roomType === '') $roomType = 'N/A';
+    if ($hotel === '') $hotel = 'None Specified';
+    if ($roomType === '') $roomType = 'None Specified';
 
     // ✈️ Flight Details
     $departureFlightNo   = trim($_POST['departure_flight_number'] ?? '');
