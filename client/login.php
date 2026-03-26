@@ -11,24 +11,51 @@ $baseUrl = $scheme . '://' . $host;
 $canonicalUrl = $baseUrl . $requestUri;
 $ogImageUrl = $baseUrl . '/images/image_login_3.jpg';
 
-$imageDir = __DIR__ . "/../images/login_gallery_images";
-$baseImages = [];
-if (is_dir($imageDir)) {
-    $files = scandir($imageDir);
-    foreach ($files as $file) {
-        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-        if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
-            $baseImages[] = "../images/login_gallery_images/" . $file;
+// Helper for collecting valid image paths recursively
+function collectImagePaths($baseDir, $webPrefix) {
+    $images = [];
+    if (!is_dir($baseDir)) {
+        return $images;
+    }
+
+    $items = scandir($baseDir);
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') {
+            continue;
+        }
+
+        $path = $baseDir . DIRECTORY_SEPARATOR . $item;
+        if (is_dir($path)) {
+            $images = array_merge($images, collectImagePaths($path, $webPrefix . '/' . $item));
+        } else {
+            $ext = strtolower(pathinfo($item, PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                $images[] = $webPrefix . '/' . $item;
+            }
         }
     }
+
+    return $images;
 }
+
+// Collect upload photos first (priority) then fallback login gallery images
+$uploadImageBase = __DIR__ . "/../uploads/trip_photos";
+$uploadImages = collectImagePaths($uploadImageBase, '../uploads/trip_photos');
+
+$imageDir = __DIR__ . "/../images/login_gallery_images";
+$baseImages = collectImagePaths($imageDir, '../images/login_gallery_images');
+
+// Randomize within each group for variety, but keep uploads prioritized first
+shuffle($uploadImages);
+shuffle($baseImages);
+$allImages = array_merge($uploadImages, $baseImages);
 
 // Prepare up to 6 images, cycle if fewer
 $galleryImages = [];
-$imgCount = count($baseImages);
+$imgCount = count($allImages);
 if ($imgCount > 0) {
     for ($i = 0; $i < 6; $i++) {
-        $galleryImages[] = $baseImages[$i % $imgCount];
+        $galleryImages[] = $allImages[$i % $imgCount];
     }
 }
 ?>
