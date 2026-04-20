@@ -21,7 +21,8 @@ $currentMonth = date('F');
       <?= number_format($totalTripsCompleted) ?>
     </p>
     <p class="text-xs font-semibold text-white mt-1">
-      Month of <?= $currentMonth ?>
+      Since deployment
+      <!--Month of <?= $currentMonth ?>-->
     </p>
   </div>
   <div class="bg-green-100 text-green-600 rounded-full p-3">

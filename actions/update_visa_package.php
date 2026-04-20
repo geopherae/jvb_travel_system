@@ -30,6 +30,8 @@ try {
     $visaTypesJson = isset($_POST['visa_types_json']) ? trim($_POST['visa_types_json']) : '[]';
     $existingImage = isset($_POST['existing_image']) ? trim($_POST['existing_image']) : '';
 
+    $errors = [];
+
     // Applicant status options
     $applicantStatusOptionsJson = $_POST['applicant_status_options_json'] ?? '[]';
     $applicantStatusArray = json_decode($applicantStatusOptionsJson, true);
@@ -37,8 +39,6 @@ try {
         $errors[] = 'Invalid applicant status options JSON: ' . json_last_error_msg();
     }
     $applicantStatusFormatted = convertApplicantStatusToJson($applicantStatusArray);
-
-    $errors = [];
 
     // Validate package ID
     if ($packageId <= 0) {
@@ -70,14 +70,13 @@ try {
     }
 
     // Handle image upload
-    $visaCoverImageFilename = null; // Default to NULL when no new image is uploaded
+    $visaCoverImageFilename = !empty($existingImage) ? $existingImage : null; // Keep existing image when no new upload is made
 
-    if (!empty($_FILES['visa_cover_image']['name'])) {
+    if (isset($_FILES['visa_cover_image']) && $_FILES['visa_cover_image']['error'] !== UPLOAD_ERR_NO_FILE) {
         $file = $_FILES['visa_cover_image'];
         $maxSize = 3 * 1024 * 1024; // 3MB
         $allowedMimes = ['image/jpeg', 'image/png'];
 
-        // Validate file
         if ($file['error'] !== UPLOAD_ERR_OK) {
             $errors[] = 'File upload error: ' . $file['error'];
         } elseif ($file['size'] > $maxSize) {
@@ -92,7 +91,7 @@ try {
                 $errors[] = 'Only JPG and PNG images are allowed.';
             } else {
                 // Create upload directory if needed
-                $uploadDir = __DIR__ . '/../uploads/visa_packages_banners';
+                $uploadDir = __DIR__ . '/../images/visa_packages_banners';
                 if (!is_dir($uploadDir)) {
                     mkdir($uploadDir, 0755, true);
                 }
@@ -103,7 +102,10 @@ try {
 
                 // Compress and save image
                 if (!compressImage($file['tmp_name'], $uploadPath, $mimeType, 85)) {
-                    $errors[] = 'Failed to process image. Please try again.';
+                    // Fallback to direct move if compression is unavailable or fails
+                    if (!move_uploaded_file($file['tmp_name'], $uploadPath)) {
+                        $errors[] = 'Failed to process image. Please try again.';
+                    }
                 }
             }
         }

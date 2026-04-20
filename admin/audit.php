@@ -140,6 +140,7 @@ $hasModules = !empty($modules);
             FROM clients c
             WHERE c.confirmed_at IS NOT NULL
               AND c.created_at >= DATE_SUB(NOW(), INTERVAL 12 WEEK)
+              AND TIMESTAMPDIFF(DAY, c.created_at, c.confirmed_at) <= 30
           ");
           $velocitySummaryStmt->execute();
           $vsData = $velocitySummaryStmt->get_result()->fetch_assoc();
@@ -180,15 +181,15 @@ $hasModules = !empty($modules);
           <div class="relative p-6 space-y-5">
             <div class="flex flex-col lg:flex-row justify-between gap-6">
               <div class="space-y-3">
-                <p class="text-sm font-semibold text-sky-700 uppercase tracking-[0.18em]">Onboarding Velocity</p>
+                <p class="text-sm font-semibold text-sky-700 uppercase tracking-[0.18em]">Onboarding Completion Time</p>
                 <div class="flex items-baseline gap-3">
                   <p class="text-4xl font-bold text-gray-900 leading-none">
                     <?= $ovDisplay; ?>
                   </p>
                   <?php if ($ovAvgHours !== null): ?>
-                    <span class="text-base text-gray-700">avg from account creation → confirmed</span>
+                    <span class="text-base text-gray-700">avg from account creation → confirmed (≤30 days)</span>
                   <?php else: ?>
-                    <span class="text-base text-gray-500">no confirmed journeys yet</span>
+                    <span class="text-base text-gray-500">no quick completions yet</span>
                   <?php endif; ?>
                 </div>
 
@@ -197,14 +198,18 @@ $hasModules = !empty($modules);
                     <span aria-hidden="true">🚀</span>
                     <?= htmlspecialchars($ovSentiment); ?>
                   </span>
-                  <span class="text-sm text-gray-600">Lower hours = faster boarding. Goal: under 24h.</span>
+                  <span class="text-sm text-gray-600">Lower hours = faster onboarding. Goal: under 24h.</span>
+                </div>
+
+                <div class="text-xs text-gray-500 mt-2 leading-relaxed">
+                  <strong>Why ≤30 days?</strong> Filters out long-term bookings to focus on active onboarding efficiency. Clients booking months ahead may have extended timelines due to travel planning, not system delays.
                 </div>
               </div>
 
               <div class="shrink-0 bg-white/80 border border-gray-200 rounded-2xl p-4 shadow-sm min-w-[220px]">
                 <div class="flex items-center justify-between mb-2">
                   <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Snapshot</p>
-                  <span class="text-xs text-gray-500">Past 12 weeks</span>
+                  <span class="text-xs text-gray-500">Past 12 weeks (≤30d completions)</span>
                 </div>
                 <div class="space-y-2">
                   <div class="flex items-center justify-between">

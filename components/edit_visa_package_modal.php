@@ -3,7 +3,7 @@
   x-show="$store.editVisaPackageModal.isOpen"
   x-cloak
   x-transition.opacity
-  x-data="visaPackageFormData()"
+  x-data="{ ...visaPackageFormData(), section: 'details' }"
   x-effect="loadFrom($store.editVisaPackageModal.packageData || {})"
   class="fixed inset-0 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm bg-black/0 px-3 sm:px-4"
   @keydown.escape.window="$store.editVisaPackageModal.close()"
@@ -24,8 +24,8 @@
       </div>
 
       <form method="POST" action="../actions/update_visa_package.php" enctype="multipart/form-data" class="p-4 flex flex-col flex-1 overflow-hidden"
-            @submit="handleFormSubmit($event)" x-data="{ section: 'details' }">
-        <input type="hidden" name="package_id" :value="id">
+            @submit="handleFormSubmit($event)">
+        <input type="hidden" name="package_id" :value="id || $store.editVisaPackageModal.packageData?.id || ''">
 
         <div class="flex flex-1 overflow-hidden">
           <!-- Left Sidebar Navigation -->
@@ -39,13 +39,13 @@
                   class="w-full h-32 object-cover rounded-lg"
                 />
                 <label
-                  for="visa-cover-upload-edit"
+                  for="visa-cover-upload-edit-secondary"
                   class="absolute bottom-2 right-2 bg-white/95 backdrop-blur-sm px-2 py-1 rounded text-xs cursor-pointer text-slate-700 font-medium shadow-sm hover:bg-white transition"
                 >
                   Change
                 </label>
                 <input
-                  id="visa-cover-upload-edit"
+                  id="visa-cover-upload-edit-secondary"
                   type="file"
                   name="visa_cover_image"
                   accept=".jpg,.jpeg,.png"

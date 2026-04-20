@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Asia/Manila');
+
 function updateClientStatus(int $clientId, mysqli $conn): ?array {
     // 🔍 Fetch uploaded files
     $stmt = $conn->prepare("
@@ -53,14 +55,13 @@ function updateClientStatus(int $clientId, mysqli $conn): ?array {
         foreach ($files as $file) {
             $type = strtolower(trim($file['document_type']));
             $status = $file['document_status'];
-
-            if (in_array($type, ['passport', 'id', 'identification card'])) {
-                if ($status === "Approved") {
-                    $hasApprovedID = true;
-                } elseif ($status === "Rejected") {
-                    $hasRejectedID = true;
-                }
-            }
+if (in_array($type, ['passport', 'id', 'identification card', 'service voucher', 'airline ticket'])) {
+    if ($status === "Approved") {
+        $hasApprovedID = true;
+    } elseif ($status === "Rejected") {
+        $hasRejectedID = true;
+    }
+}
         }
 
         if ($hasApprovedID || $allApproved) {

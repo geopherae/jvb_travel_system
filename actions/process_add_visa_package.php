@@ -139,7 +139,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     // Handle image upload
     $coverImageFilename = '';
     if (isset($_FILES['visa_cover_image']) && $_FILES['visa_cover_image']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = __DIR__ . '/../uploads/visa_packages_banners/';
+        $uploadDir = __DIR__ . '/../images/visa_packages_banners/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }

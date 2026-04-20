@@ -99,10 +99,10 @@
               this.processingDays = data.processing_days || 0;
               this.description = data.description || '';
               this.previewUrl = data.visa_cover_image
-                ? ('../uploads/visa_packages_banners/' + data.visa_cover_image)
+                ? ('../images/visa_packages_banners/' + data.visa_cover_image)
                 : '../images/default_visa_cover.jpg';
               this.coverUrl = data.visa_cover_image
-                ? ('../uploads/visa_packages_banners/' + data.visa_cover_image)
+                ? ('../images/visa_packages_banners/' + data.visa_cover_image)
                 : '';
               this.inclusions = [...safeArray(data.inclusions)];
               this.requirements = safeArray(data.requirements).map((req, index) => {
@@ -302,7 +302,7 @@
       <!-- Left Column -->
       <div class="sm:max-w-[55%] flex-1 flex flex-col">
         <img
-          :src="$store.visaPackageModal.activePackage?.visa_cover_image ? ('../uploads/visa_packages_banners/' + $store.visaPackageModal.activePackage.visa_cover_image) : ($store.visaPackageModal.activePackage?.cover_url || '../images/default_visa_cover.jpg')"
+          :src="$store.visaPackageModal.activePackage?.visa_cover_image ? ('../images/visa_packages_banners/' + $store.visaPackageModal.activePackage.visa_cover_image) : ($store.visaPackageModal.activePackage?.cover_url || '../images/default_visa_cover.jpg')"
           alt="Visa Package Cover"
           class="w-full h-52 sm:h-64 object-cover rounded-t-lg sm:rounded-lg sm:shadow"
         />
@@ -498,13 +498,13 @@
 
               <div class="absolute top-4 right-4">
                 <label
-                  for="visa-cover-upload-edit"
+                  for="visa-cover-upload-edit-main"
                   class="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg text-sm cursor-pointer text-slate-700 font-medium shadow hover:bg-white transition"
                 >
                   Change Cover
                 </label>
                 <input
-                  id="visa-cover-upload-edit"
+                  id="visa-cover-upload-edit-main"
                   type="file"
                   name="visa_cover_image"
                   accept=".jpg,.jpeg,.png"

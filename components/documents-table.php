@@ -6,6 +6,8 @@ $tooltips = require __DIR__ . '/../includes/tooltip_map.php';
 require_once __DIR__ . '/../includes/tooltip_render.php';
 require_once __DIR__ . '/../includes/empty_state_map.php';
 
+date_default_timezone_set('Asia/Manila');
+
 // 🧠 Determine access
 $isAdmin   = isset($_SESSION['admin']['id']);
 $isClient  = !$isAdmin && isset($_SESSION['client_id']);

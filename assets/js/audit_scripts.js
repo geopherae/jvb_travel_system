@@ -75,22 +75,31 @@ if (statusChartEl) {
         return;
       }
 
+      // Dynamic color assignment based on status
+      const getStatusColor = (status) => {
+        switch (status.toLowerCase()) {
+          case 'approved':
+            return { bg: 'rgba(34, 197, 94, 0.8)', hover: 'rgba(34, 197, 94, 1)' }; // Green
+          case 'pending':
+            return { bg: 'rgba(251, 191, 36, 0.8)', hover: 'rgba(251, 191, 36, 1)' }; // Yellow
+          case 'rejected':
+            return { bg: 'rgba(239, 68, 68, 0.8)', hover: 'rgba(239, 68, 68, 1)' }; // Red
+          default:
+            return { bg: 'rgba(156, 163, 175, 0.8)', hover: 'rgba(156, 163, 175, 1)' }; // Gray
+        }
+      };
+
+      const backgroundColors = chartData.labels.map(label => getStatusColor(label).bg);
+      const hoverBackgroundColors = chartData.labels.map(label => getStatusColor(label).hover);
+
       new Chart(statusChartEl, {
         type: 'doughnut',
         data: {
           labels: chartData.labels,
           datasets: [{
             data: chartData.data,
-            backgroundColor: [
-              'rgba(251, 191, 36, 0.8)',  // Yellow - Pending
-              'rgba(34, 197, 94, 0.8)',   // Green - Approved
-              'rgba(239, 68, 68, 0.8)'    // Red - Rejected
-            ],
-            hoverBackgroundColor: [
-              'rgba(251, 191, 36, 1)',
-              'rgba(34, 197, 94, 1)',
-              'rgba(239, 68, 68, 1)'
-            ],
+            backgroundColor: backgroundColors,
+            hoverBackgroundColor: hoverBackgroundColors,
             borderWidth: 0
           }]
         },

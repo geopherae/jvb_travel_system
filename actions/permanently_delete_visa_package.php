@@ -58,7 +58,7 @@ try {
     if ($deleteStmt->execute()) {
         // Delete cover image if exists
         if (!empty($package['visa_cover_image']) && $package['visa_cover_image'] !== 'NULL') {
-            $imagePath = __DIR__ . '/../uploads/visa_packages_banners/' . $package['visa_cover_image'];
+            $imagePath = __DIR__ . '/../images/visa_packages_banners/' . $package['visa_cover_image'];
             if (file_exists($imagePath)) {
                 @unlink($imagePath);
             }

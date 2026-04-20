@@ -54,7 +54,7 @@ try {
 
         $coverFile = trim($row['visa_cover_image'] ?? '');
         $coverUrl  = $coverFile !== ''
-          ? '../uploads/visa_packages_banners/' . ltrim($coverFile, '/\\')
+          ? '../images/visa_packages_banners/' . ltrim($coverFile, '/\\')
           : '../images/default_visa_cover.jpg';
 
         $visaPackages[] = [
