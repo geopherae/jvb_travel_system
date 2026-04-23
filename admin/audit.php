@@ -269,6 +269,11 @@ $hasModules = !empty($modules);
           </div>
         </div>
 
+        <!-- Client Last Activity Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <?php include '../components/audit_card_client_last_activity.php'; ?>
+        </div>
+
         <!-- Filters & Tabs Section -->
         <div class="space-y-6">
           <!-- Modern Tab Navigation -->
@@ -325,10 +330,20 @@ $hasModules = !empty($modules);
             <div x-show="activeTab === 'surveys'" x-transition class="px-6 py-6">
               <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
-                  <h3 class="text-lg font-bold text-gray-900">Client Feedback</h3>
-                  <p class="text-sm text-gray-500 mt-1">View responses from clients about their experience</p>
+                  <h3 class="text-lg font-bold text-gray-900">User Feedback</h3>
+                  <p class="text-sm text-gray-500 mt-1">View responses from clients and admins about their experience</p>
                 </div>
                 <div class="flex items-center gap-3">
+                  <label for="surveyRoleSelect" class="text-gray-700 font-medium">Filter by:</label>
+                  <select id="surveyRoleSelect" class="px-4 py-2 rounded-lg border border-gray-300 bg-white font-medium hover:border-gray-400 transition">
+                    <option value="all">All Users</option>
+                    <option value="client">Clients</option>
+                    <option value="admin">Admins</option>
+                  </select>
+                  <label for="surveyTypeSelect" class="text-gray-700 font-medium">Survey Type:</label>
+                  <select id="surveyTypeSelect" class="px-4 py-2 rounded-lg border border-gray-300 bg-white font-medium hover:border-gray-400 transition">
+                    <option value="all">All Types</option>
+                  </select>
                   <label for="surveySortSelect" class="text-gray-700 font-medium">Sort by:</label>
                   <select id="surveySortSelect" class="px-4 py-2 rounded-lg border border-gray-300 bg-white font-medium hover:border-gray-400 transition">
                     <option value="recent">Recent First</option>

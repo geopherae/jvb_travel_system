@@ -1,6 +1,6 @@
 <?php
 // Fetch visa packages for dropdown (including visa_types_json)
-$visaPackagesStmt = $conn->prepare("SELECT id, country, applicant_status_options, processing_days, visa_types_json FROM visa_packages WHERE is_active = 1 ORDER BY country ASC");
+$visaPackagesStmt = $conn->prepare("SELECT id, visa_package_name, country, applicant_status_options, processing_days, visa_types_json FROM visa_packages WHERE is_active = 1 ORDER BY visa_package_name ASC");
 $visaPackagesStmt->execute();
 $visaPackagesResult = $visaPackagesStmt->get_result();
 $visaPackages = [];
@@ -444,7 +444,7 @@ class="relative top-4">
   packages: <?= htmlspecialchars(json_encode(array_map(function($pkg) {
     return [
       'id' => $pkg['id'],
-      'label' => $pkg['country'] . ' (' . $pkg['processing_days'] . ' days)',
+      'label' => $pkg['visa_package_name'] ?: ($pkg['country'] . ' (' . $pkg['processing_days'] . ' days)'),
       'processingDays' => $pkg['processing_days'],
       'visaTypes' => $pkg['visa_types_json'] ? json_decode($pkg['visa_types_json'], true) : [],
       'applicantStatusOptions' => $pkg['applicant_status_options'] ?? '[]'
@@ -481,7 +481,7 @@ class="relative top-4">
     @click="open = !open"
     class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent flex items-center justify-between bg-white"
     :class="{ 'text-gray-500': !selectedVisaPackage, 'text-gray-900': selectedVisaPackage }">
-    <span x-text="getDisplayText()"></span>
+    <span class="block truncate" :title="getDisplayText()" x-text="getDisplayText()"></span>
     <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
     </svg>
@@ -507,7 +507,7 @@ class="relative top-4">
           :value="pkg.id"
           :checked="selectedVisaPackage == pkg.id"
           class="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500 focus:ring-2 cursor-pointer">
-        <span class="ml-3 text-sm text-gray-700" x-text="pkg.label"></span>
+        <span class="ml-3 text-sm text-gray-700 truncate" :title="pkg.label" x-text="pkg.label"></span>
       </label>
     </template>
   </div>
@@ -538,7 +538,7 @@ class="relative top-4">
               data-processing-days="<?= $pkg['processing_days'] ?>"
               data-visa-types="<?= htmlspecialchars(json_encode($visaTypesArr, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') ?>"
               data-applicant-status-options="<?= htmlspecialchars(json_encode($appStatusArr, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') ?>">
-        <?= htmlspecialchars($pkg['country']) ?> (<?= $pkg['processing_days'] ?> days)
+        <?= htmlspecialchars($pkg['visa_package_name'] ?: ($pkg['country'] . ' (' . $pkg['processing_days'] . ' days)')) ?>
       </option>
     <?php endforeach; ?>
   </select>

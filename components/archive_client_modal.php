@@ -30,7 +30,7 @@ if (!isset($conn) || !isset($client_id)) {
     This action is reversible. You may restore the client later if needed. Archiving is recommended for completed trips, inactive leads, or withdrawn clients.
     </p>
 
-    <form action="../actions/archive_client.php" method="POST" class="space-y-4">
+    <form action="../actions/process_archive_client.php" method="POST" class="space-y-4">
       <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
       <input type="hidden" name="client_id" :value="clientId">
 

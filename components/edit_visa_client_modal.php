@@ -24,7 +24,7 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="$store.modals.editVisaClient = false; $store.modals.editVisaClientData = null"></div>
 
     <!-- Modal panel -->
-    <div class="inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-0 sm:align-middle sm:max-w-4xl sm:w-full sm:max-h-[96vh]">
+    <div class="inline-block align-middle bg-white rounded-lg text-left overflow-visible shadow-xl transform transition-all sm:my-0 sm:align-middle sm:max-w-4xl sm:w-full sm:max-h-[96vh]">
       <form method="POST" action="../actions/process_edit_visa_client.php" enctype="multipart/form-data"
         class="flex flex-col h-full font-sans"
         x-data="editVisaClientForm()"
@@ -269,7 +269,6 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
   <button 
     type="button"
     @click="toggleStatusDropdown()"
-    x-ref="statusButton"
     class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-3 sm:py-3.5 pt-5 text-sm text-left transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent flex items-center justify-between"
     :class="{ 'text-gray-500': !selectedStatuses || selectedStatuses.length === 0, 'text-gray-900': selectedStatuses && selectedStatuses.length > 0 }">
     <span x-text="getStatusDisplayText()"></span>
@@ -278,49 +277,45 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
     </svg>
   </button>
 
-  <!-- Dropdown Options - Teleported to body -->
-  <template x-teleport="body">
-    <div 
-      x-show="statusOpen"
-      x-transition:enter="transition ease-out duration-100"
-      x-transition:enter-start="opacity-0 scale-95"
-      x-transition:enter-end="opacity-100 scale-100"
-      x-transition:leave="transition ease-in duration-75"
-      x-transition:leave-start="opacity-100 scale-100"
-      x-transition:leave-end="opacity-0 scale-95"
-      :style="`position: fixed; top: ${dropdownTop}px; left: ${dropdownLeft}px; width: ${dropdownWidth}px; z-index: 9999;`"
-      class="bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-      
-      <!-- Select All / Clear All -->
-      <div class="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-gray-200 bg-gray-50">
-        <button 
-          type="button" 
-          @click.stop="selectAllStatuses()"
-          class="text-xs text-sky-600 hover:text-sky-700 font-medium">
-          Select All
-        </button>
-        <button 
-          type="button" 
-          @click.stop="clearAllStatuses()"
-          class="text-xs text-gray-600 hover:text-gray-700 font-medium">
-          Clear All
-        </button>
-      </div>
-
-      <!-- Checkbox Options -->
-      <template x-for="statusOption in applicantStatusOptions" :key="statusOption.option">
-        <label class="flex items-center px-3 sm:px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition">
-          <input 
-            type="checkbox"
-            :value="statusOption.option"
-            @change.stop="toggleStatus(statusOption.option)"
-            :checked="isStatusSelected(statusOption.option)"
-            class="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500 focus:ring-2 cursor-pointer">
-          <span class="ml-3 text-sm text-gray-700" x-text="statusOption.label"></span>
-        </label>
-      </template>
+  <!-- Dropdown Options - Positioned below and left-aligned -->
+  <div x-show="statusOpen"
+       x-transition:enter="transition ease-out duration-100"
+       x-transition:enter-start="opacity-0 scale-95"
+       x-transition:enter-end="opacity-100 scale-100"
+       x-transition:leave="transition ease-in duration-75"
+       x-transition:leave-start="opacity-100 scale-100"
+       x-transition:leave-end="opacity-0 scale-95"
+       class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto z-[60]">
+    
+    <!-- Select All / Clear All -->
+    <div class="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-gray-200 bg-gray-50">
+      <button 
+        type="button" 
+        @click.stop="selectAllStatuses()"
+        class="text-xs text-sky-600 hover:text-sky-700 font-medium">
+        Select All
+      </button>
+      <button 
+        type="button" 
+        @click.stop="clearAllStatuses()"
+        class="text-xs text-gray-600 hover:text-gray-700 font-medium">
+        Clear All
+      </button>
     </div>
-  </template>
+
+    <!-- Checkbox Options -->
+    <template x-for="statusOption in applicantStatusOptions">
+      <label class="flex items-center px-3 sm:px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition">
+        <input 
+          type="checkbox"
+          :value="statusOption.option"
+          @change.stop="toggleStatus(statusOption.option)"
+          :checked="isStatusSelected(statusOption.option)"
+          class="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500 focus:ring-2 cursor-pointer">
+        <span class="ml-3 text-sm text-gray-700" x-text="statusOption.label"></span>
+      </label>
+    </template>
+  </div>
 
   <!-- Hidden inputs for form submission -->
   <template x-if="Array.isArray(selectedStatuses)">
@@ -355,7 +350,6 @@ require_once __DIR__ . '/../includes/tooltip_render.php';
               <select id="relationship" name="relationship" x-model="relationship"
                       :required="applicantType === 'companion'"
                       class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-3 sm:py-3.5 pt-5 text-sm transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                <option value="">Select relationship</option>
                 <option value="spouse">Spouse</option>
                 <option value="child">Child</option>
                 <option value="parent">Parent</option>
@@ -425,9 +419,6 @@ window.editVisaClientForm = window.editVisaClientForm || function() {
     passportExpiry: '',
     selectedStatuses: [],
     statusOpen: false,
-    dropdownTop: 0,
-    dropdownLeft: 0,
-    dropdownWidth: 0,
     visaType: '',
     relationship: '',
     applicantData: null,
@@ -465,21 +456,6 @@ window.editVisaClientForm = window.editVisaClientForm || function() {
     
     toggleStatusDropdown() {
       this.statusOpen = !this.statusOpen;
-      if (this.statusOpen) {
-        this.$nextTick(() => {
-          this.positionDropdown();
-        });
-      }
-    },
-    
-    positionDropdown() {
-      const button = this.$refs.statusButton;
-      if (!button) return;
-      
-      const rect = button.getBoundingClientRect();
-      this.dropdownTop = rect.bottom + 4;
-      this.dropdownLeft = rect.left;
-      this.dropdownWidth = rect.width;
     },
     
     toggleStatus(status) {
@@ -579,11 +555,11 @@ window.editVisaClientForm = window.editVisaClientForm || function() {
       
       // ✅ Load available options from visa package
       this.applicantStatusOptions = Array.isArray(applicant.applicant_status_options) && applicant.applicant_status_options.length > 0
-        ? applicant.applicant_status_options
+        ? [...applicant.applicant_status_options]
         : [];
       
       this.visaTypeOptions = Array.isArray(applicant.visa_type_options) && applicant.visa_type_options.length > 0
-        ? applicant.visa_type_options
+        ? [...applicant.visa_type_options]
         : [];
       
       console.log('✅ Loaded from visa package:', {

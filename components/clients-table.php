@@ -2,8 +2,8 @@
 require_once '../includes/empty_state_map.php';
 
 $isAdmin = $isAdmin ?? false;
-$clients = $clients ?? [];
-$tableTitle = $isAdmin ? 'Active Clients — Bookings' : 'Client Bookings';
+$showCompleted = isset($_GET['show_completed']);
+$tableTitle = $isAdmin ? ($showCompleted ? 'Completed Clients — Bookings' : 'Active Clients — Bookings') : 'Client Bookings';
 
 // 🧠 Detect if this is an AJAX reload or a clean reload
 $isAjaxReload = basename($_SERVER['SCRIPT_NAME']) === 'reload_clients_table.php';
@@ -43,6 +43,16 @@ if ($search !== '') {
 $clients = array_filter($clients, function ($client) {
   $processingType = strtolower(trim($client['processing_type'] ?? ''));
   return $processingType === 'booking' || $processingType === 'both';
+});
+
+// 🔎 Filter by status: exclude 'trip completed' unless showing completed
+$clients = array_filter($clients, function ($client) use ($showCompleted) {
+  $status = strtolower(trim($client['status'] ?? ''));
+  if ($showCompleted) {
+    return $status === 'trip completed';
+  } else {
+    return $status !== 'trip completed';
+  }
 });
 
 // 🔃 Apply status sort
@@ -89,6 +99,25 @@ error_log("DEBUG: clients-table.php - Total clients: $totalClients, Paginated cl
     </div>
 
     <?php if ($isAdmin): ?>
+      <?php
+        $toggleParams = $_GET;
+        if (isset($toggleParams['show_completed'])) {
+          unset($toggleParams['show_completed']);
+        } else {
+          $toggleParams['show_completed'] = '1';
+        }
+        $toggleParams['page'] = '1'; // Reset to first page when switching views
+        $toggleUrl = '?' . http_build_query($toggleParams);
+        $toggleText = $showCompleted ? 'View Active Clients' : 'View Completed Clients';
+      ?>
+      <a href="<?= htmlspecialchars($toggleUrl) ?>"
+         class="backdrop-blur-sm bg-emerald-600 text-white px-3 md:px-4 py-2 rounded hover:bg-emerald-700 transition text-xs md:text-sm font-medium whitespace-nowrap flex items-center gap-2"
+         aria-label="<?= htmlspecialchars($toggleText) ?>">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <?= htmlspecialchars($toggleText) ?>
+      </a>
       <button @click="showAddClientModal = true; step = 1"
               class="backdrop-blur-sm bg-sky-500 text-white px-3 md:px-4 py-2 rounded hover:bg-sky-400 transition text-xs md:text-sm font-medium whitespace-nowrap"
               aria-label="Add New Guest">
@@ -106,12 +135,15 @@ error_log("DEBUG: clients-table.php - Total clients: $totalClients, Paginated cl
 
       <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
       <input type="hidden" name="order" value="<?= htmlspecialchars($order) ?>">
+      <?php if ($showCompleted): ?>
+        <input type="hidden" name="show_completed" value="1">
+      <?php endif; ?>
 
       <button type="submit" class="bg-sky-600 text-white md:bg-transparent md:text-sky-600 px-3 py-2 md:py-1 rounded md:rounded-none text-sm underline hover:bg-sky-500 md:hover:bg-transparent md:hover:text-sky-500 transition font-medium md:font-normal">
         Search
       </button>
 
-      <a href="?sort=<?= urlencode($sort) ?>&order=<?= urlencode($order) ?>"
+      <a href="?sort=<?= urlencode($sort) ?>&order=<?= urlencode($order) ?><?= $showCompleted ? '&show_completed=1' : '' ?>"
          class="text-center text-sm underline py-2 md:py-1 <?= $search ? 'text-gray-500 hover:text-gray-700' : 'text-gray-300 cursor-default' ?>">
         Clear
       </a>
@@ -138,7 +170,7 @@ error_log("DEBUG: clients-table.php - Total clients: $totalClients, Paginated cl
       <th scope="col" class="p-2 md:p-3">
         <div class="flex items-center justify-center gap-1">
           <span class="hidden sm:inline">Status</span>
-          <a href="?sort=status&order=<?= $sort === 'status' && $order === 'asc' ? 'desc' : 'asc' ?>&search=<?= urlencode($search) ?>"
+          <a href="?sort=status&order=<?= $sort === 'status' && $order === 'asc' ? 'desc' : 'asc' ?>&search=<?= urlencode($search) ?><?= $showCompleted ? '&show_completed=1' : '' ?>"
              class="text-sky-600 hover:text-sky-500 transition" aria-label="Sort by Status">
             <?php if ($sort === 'status' && $order === 'asc'): ?>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -207,7 +239,7 @@ error_log("DEBUG: clients-table.php - Total clients: $totalClients, Paginated cl
         <div class="flex justify-center mt-6">
           <nav class="inline-flex space-x-1 text-sm font-medium">
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-<a href="?page=<?= $i ?>&sort=<?= urlencode($sort) ?>&order=<?= urlencode($order) ?>&search=<?= urlencode($search) ?>"
+<a href="?page=<?= $i ?>&sort=<?= urlencode($sort) ?>&order=<?= urlencode($order) ?>&search=<?= urlencode($search) ?><?= $showCompleted ? '&show_completed=1' : '' ?>"
    class="px-3 py-1 rounded border <?= $i === $page ? 'bg-sky-500 text-white border-sky-500' : 'bg-white text-sky-600 border-gray-300 hover:bg-sky-50' ?>">
   <?= $i ?>
 </a>

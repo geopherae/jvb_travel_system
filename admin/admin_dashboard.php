@@ -310,7 +310,13 @@ $preGeneratedAccessCode = generateAccessCode('New Client');
     const silent = options.silent || false;
     showLoadingSpinner();
 
-    fetch("../actions/reload_clients.php?_=" + new Date().getTime() + "&debug=true")
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.delete('_');
+    urlParams.delete('debug');
+    const queryString = urlParams.toString();
+    const url = "../actions/reload_clients.php?" + (queryString ? queryString + '&' : '') + "_=" + new Date().getTime() + "&debug=true";
+
+    fetch(url)
       .then(res => {
         if (!res.ok) {
           throw new Error(`HTTP error! Status: ${res.status}`);

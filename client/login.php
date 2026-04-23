@@ -240,9 +240,12 @@ if ($imgCount > 0) {
             <a href="mailto:reservations.jvandbtravel@gmail.com" class="font-medium hover:text-[#ffffff] transition">Send us an email</a>
           </div>
         </div>
+
         <!-- Testimonial card -->
         <?php include '../includes/testimonial-card.php'; ?>
       </div>
+      
+      
     </div>
 
     <!-- Login Form -->
@@ -765,6 +768,7 @@ if ($imgCount > 0) {
           Send us an email
         </a>
       </div>
+
     </div>
   </div>
 
@@ -1162,8 +1166,12 @@ if ($imgCount > 0) {
           <h3 class="text-xl font-bold">JV-B Travel & Tours</h3>
           <p class="text-gray-300 text-sm">Your trusted partner in creating unforgettable travel experiences.</p>
           <div class="pt-2">
-            <p class="text-xs text-gray-400 italic">DOT Accreditation No.</p>
-            <p class="text-sm text-[#2596be] font-semibold">DOT-R03-TRA-00839-2022</p>
+            <div class="flex items-center gap-4 mb-2">
+              <img src="../images/DOT_logo.png" alt="DOT Logo" class="w-20 h-auto">
+              <img src="../images/love_the_philippines.jpeg" alt="Love the Philippines" class="w-32 h-auto">
+            </div>
+            <p class="text-sm text-white italic">DOT Accreditation No.</p>
+            <p class="text-md text-[#ffffff] font-bold">DOT-R03-TRA-00839-2022</p>
           </div>
           <!-- Social Media -->
           <div class="pt-2">
